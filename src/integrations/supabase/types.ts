@@ -9,6 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      audio_labels: {
+        Row: {
+          created_at: string | null
+          id: string
+          label_name: string
+          timestamp_seconds: number
+          track_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          label_name: string
+          timestamp_seconds: number
+          track_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          label_name?: string
+          timestamp_seconds?: number
+          track_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_labels_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "audio_tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audio_tracks: {
         Row: {
           filename: string

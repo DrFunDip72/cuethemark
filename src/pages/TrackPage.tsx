@@ -1,14 +1,35 @@
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Play, Pause } from 'lucide-react';
+import { useTrackLabels } from '@/hooks/useTrackLabels';
+import { LabelList } from '@/components/LabelList';
 
 const TrackPage = () => {
+  const { id } = useParams<{ id: string }>();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [view, setView] = useState<'timeline' | 'list'>('timeline');
+  const [view, setView] = useState<'timeline' | 'list'>('list');
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const { labels, isLoading } = useTrackLabels(id || '');
+
+  const handlePlayFromTimestamp = (timestamp: number) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = timestamp;
+      audioRef.current.play();
+      setIsPlaying(true);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -52,21 +73,39 @@ const TrackPage = () => {
         <Card className="p-6">
           <div className="h-24 relative">
             <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-              Timeline view will be implemented after Supabase connection
+              Timeline view will be implemented soon
             </div>
           </div>
         </Card>
       ) : (
         <Card className="p-6">
-          <div className="text-center text-gray-500 py-8">
-            No labels added yet
-          </div>
+          {isLoading ? (
+            <div className="text-center py-4">Loading labels...</div>
+          ) : labels?.length ? (
+            <LabelList
+              labels={labels}
+              currentTime={currentTime}
+              onPlayFromTimestamp={handlePlayFromTimestamp}
+            />
+          ) : (
+            <div className="text-center text-gray-500 py-8">
+              No labels added yet
+            </div>
+          )}
         </Card>
       )}
 
       <Button className="fixed bottom-6 right-6" size="lg">
         Add Label
       </Button>
+
+      <audio
+        ref={audioRef}
+        onTimeUpdate={handleTimeUpdate}
+        onDurationChange={(e) => setDuration(e.currentTarget.duration)}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+      />
     </div>
   );
 };
