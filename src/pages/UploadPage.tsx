@@ -1,25 +1,26 @@
 
-import { useState } from 'react';
+import { useAudioUpload } from '@/hooks/useAudioUpload';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { TrackList } from '@/components/TrackList';
+import { Progress } from '@/components/ui/progress';
 
 const UploadPage = () => {
-  const [isDragging, setIsDragging] = useState(false);
-
+  const { uploadAudio, isUploading } = useAudioUpload();
+  
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragging(false);
-    // Will implement file upload after Supabase connection
+    const file = e.dataTransfer.files[0];
+    if (file) uploadAudio(file);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) uploadAudio(file);
   };
 
   return (
@@ -29,40 +30,43 @@ const UploadPage = () => {
       <Card className="w-full max-w-2xl mx-auto">
         <div
           onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`p-8 border-2 border-dashed rounded-lg text-center ${
-            isDragging ? 'border-primary bg-primary/5' : 'border-gray-300'
-          }`}
+          className="p-8 border-2 border-dashed rounded-lg text-center"
         >
-          <div className="mb-4">
-            <p className="text-lg mb-2">Drag and drop your audio file here</p>
-            <p className="text-sm text-gray-500">Supported formats: MP3, WAV</p>
-          </div>
-          
-          <Button
-            variant="outline"
-            onClick={() => document.getElementById('fileInput')?.click()}
-            className="mt-4"
-          >
-            Select File
-          </Button>
-          <input
-            type="file"
-            id="fileInput"
-            className="hidden"
-            accept=".mp3,.wav"
-          />
+          {isUploading ? (
+            <div className="space-y-4">
+              <p className="text-lg">Uploading...</p>
+              <Progress value={100} className="w-full" />
+            </div>
+          ) : (
+            <>
+              <div className="mb-4">
+                <p className="text-lg mb-2">Drag and drop your audio file here</p>
+                <p className="text-sm text-gray-500">Supported formats: MP3, WAV</p>
+              </div>
+              
+              <Button
+                variant="outline"
+                onClick={() => document.getElementById('fileInput')?.click()}
+                className="mt-4"
+              >
+                Select File
+              </Button>
+              <input
+                type="file"
+                id="fileInput"
+                className="hidden"
+                accept=".mp3,.wav"
+                onChange={handleFileSelect}
+              />
+            </>
+          )}
         </div>
       </Card>
 
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-4">Recent Uploads</h2>
-        <div className="grid gap-4">
-          <p className="text-gray-500 text-center py-8">
-            No tracks uploaded yet.
-          </p>
-        </div>
+        <TrackList />
       </div>
     </div>
   );
