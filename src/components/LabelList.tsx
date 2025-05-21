@@ -1,9 +1,9 @@
 
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Play } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { formatTime } from '@/lib/formatTime';
 
 type Label = {
   id: string;
@@ -16,12 +16,6 @@ type LabelListProps = {
   labels: Label[];
   currentTime: number;
   onPlayFromTimestamp: (timestamp: number) => void;
-};
-
-const formatTime = (seconds: number) => {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
 
 export const LabelList = ({ labels, currentTime, onPlayFromTimestamp }: LabelListProps) => {

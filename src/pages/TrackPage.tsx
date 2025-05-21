@@ -1,11 +1,14 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Play, Pause } from 'lucide-react';
+import { Play, Pause, Plus } from 'lucide-react';
 import { useTrackLabels } from '@/hooks/useTrackLabels';
 import { LabelList } from '@/components/LabelList';
+import { AddLabelDialog } from '@/components/AddLabelDialog';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const TrackPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -13,14 +16,81 @@ const TrackPage = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [view, setView] = useState<'timeline' | 'list'>('list');
+  const [trackUrl, setTrackUrl] = useState<string | null>(null);
+  const [addLabelOpen, setAddLabelOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { toast } = useToast();
 
-  const { labels, isLoading } = useTrackLabels(id || '');
+  const { labels, isLoading: labelsLoading } = useTrackLabels(id || '');
+
+  useEffect(() => {
+    const fetchTrackUrl = async () => {
+      if (!id) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('audio_tracks')
+          .select('url')
+          .eq('id', id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching track:', error);
+          toast({
+            title: "Error",
+            description: "Could not load audio track",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        setTrackUrl(data.url);
+      } catch (err) {
+        console.error('Unexpected error:', err);
+        toast({
+          title: "Error", 
+          description: "Could not load audio track",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTrackUrl();
+  }, [id, toast]);
+
+  const handlePlayPause = () => {
+    if (!audioRef.current) return;
+    
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(error => {
+        console.error('Playback failed:', error);
+        toast({
+          title: "Playback Error",
+          description: "Could not play audio track",
+          variant: "destructive"
+        });
+      });
+    }
+  };
 
   const handlePlayFromTimestamp = (timestamp: number) => {
     if (audioRef.current) {
-      audioRef.current.currentTime = timestamp;
-      audioRef.current.play();
+      // Start playing from 3 seconds before the timestamp or from the beginning if timestamp < 3
+      const startTime = Math.max(0, timestamp - 3);
+      audioRef.current.currentTime = startTime;
+      audioRef.current.play().catch(error => {
+        console.error('Playback failed:', error);
+        toast({
+          title: "Playback Error",
+          description: "Could not play audio track",
+          variant: "destructive"
+        });
+      });
       setIsPlaying(true);
     }
   };
@@ -38,7 +108,8 @@ const TrackPage = () => {
           <Button 
             size="icon" 
             variant="outline"
-            onClick={() => setIsPlaying(!isPlaying)}
+            onClick={handlePlayPause}
+            disabled={isLoading || !trackUrl}
           >
             {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </Button>
@@ -79,7 +150,7 @@ const TrackPage = () => {
         </Card>
       ) : (
         <Card className="p-6">
-          {isLoading ? (
+          {labelsLoading ? (
             <div className="text-center py-4">Loading labels...</div>
           ) : labels?.length ? (
             <LabelList
@@ -95,16 +166,31 @@ const TrackPage = () => {
         </Card>
       )}
 
-      <Button className="fixed bottom-6 right-6" size="lg">
-        Add Label
+      <Button 
+        className="fixed bottom-6 right-6" 
+        size="lg"
+        onClick={() => setAddLabelOpen(true)}
+      >
+        <Plus className="mr-2 h-4 w-4" /> Add Label
       </Button>
+
+      {trackId && (
+        <AddLabelDialog
+          open={addLabelOpen}
+          onOpenChange={setAddLabelOpen}
+          trackId={id || ''}
+          currentTime={currentTime}
+        />
+      )}
 
       <audio
         ref={audioRef}
+        src={trackUrl || undefined}
         onTimeUpdate={handleTimeUpdate}
         onDurationChange={(e) => setDuration(e.currentTarget.duration)}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
+        onEnded={() => setIsPlaying(false)}
       />
     </div>
   );
