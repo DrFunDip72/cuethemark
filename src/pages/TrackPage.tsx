@@ -163,6 +163,7 @@ const TrackPage = () => {
               labels={labels}
               currentTime={currentTime}
               onPlayFromTimestamp={handlePlayFromTimestamp}
+              trackId={id || ''}
             />
           ) : (
             <div className="text-center text-gray-500 py-8">
