@@ -52,26 +52,33 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
     // Get the target label
     const targetLabel = sortedLabels[targetIndex];
     
-    // Swap timestamps between current and target
-    const currentTimestamp = label.timestamp_seconds;
-    const targetTimestamp = targetLabel.timestamp_seconds;
-    
     try {
-      // Update the current label with the target timestamp
+      // Use a temporary timestamp that doesn't conflict with any existing timestamp
+      const tempTimestamp = -1; // This assumes negative timestamps aren't valid in your application
+      
+      // First update the current label to a temporary timestamp
       const { error: error1 } = await supabase
         .from('audio_labels')
-        .update({ timestamp_seconds: targetTimestamp })
+        .update({ timestamp_seconds: tempTimestamp })
         .eq('id', label.id);
         
       if (error1) throw error1;
       
-      // Update the target label with the current timestamp
+      // Then update the target label to the current label's original timestamp
       const { error: error2 } = await supabase
         .from('audio_labels')
-        .update({ timestamp_seconds: currentTimestamp })
+        .update({ timestamp_seconds: label.timestamp_seconds })
         .eq('id', targetLabel.id);
         
       if (error2) throw error2;
+      
+      // Finally, update the current label to the target label's original timestamp
+      const { error: error3 } = await supabase
+        .from('audio_labels')
+        .update({ timestamp_seconds: targetLabel.timestamp_seconds })
+        .eq('id', label.id);
+        
+      if (error3) throw error3;
       
       toast({
         title: "Success",

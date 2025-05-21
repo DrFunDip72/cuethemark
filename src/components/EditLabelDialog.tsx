@@ -5,7 +5,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter
+  DialogFooter,
+  DialogDescription
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -85,6 +86,9 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabe
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Edit Label</DialogTitle>
+            <DialogDescription>
+              Make changes to the label name and timestamp.
+            </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">

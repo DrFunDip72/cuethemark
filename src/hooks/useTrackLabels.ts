@@ -34,12 +34,14 @@ export const useTrackLabels = (trackId: string) => {
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: '*',  // Listen to all events (INSERT, UPDATE, DELETE)
           schema: 'public',
           table: 'audio_labels',
           filter: `track_id=eq.${trackId}`,
         },
-        () => {
+        (payload) => {
+          console.log('Real-time update received:', payload);
+          // Invalidate query to refresh data
           queryClient.invalidateQueries({ queryKey: ['track-labels', trackId] });
         }
       )
