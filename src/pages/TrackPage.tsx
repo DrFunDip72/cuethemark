@@ -9,6 +9,7 @@ import { LabelList } from '@/components/LabelList';
 import { AddLabelDialog } from '@/components/AddLabelDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { formatTime } from '@/lib/formatTime';
 
 const TrackPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -119,6 +120,11 @@ const TrackPage = () => {
               style={{ width: `${(currentTime / duration) * 100 || 0}%` }}
             />
           </div>
+        </div>
+        
+        {/* Display current time */}
+        <div className="text-center text-sm font-medium text-gray-600">
+          {formatTime(currentTime)} / {formatTime(duration)}
         </div>
       </Card>
 
