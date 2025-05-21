@@ -26,6 +26,8 @@ export const useTrackLabels = (trackId: string) => {
       if (error) throw error;
       return data as Label[];
     },
+    // Enable auto-refresh
+    refetchInterval: 3000,
   });
 
   useEffect(() => {

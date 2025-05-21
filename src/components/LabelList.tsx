@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Play, ArrowUp, ArrowDown, Pencil } from 'lucide-react';
+import { Play, ArrowUp, ArrowDown, Pencil, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatTime } from '@/lib/formatTime';
@@ -53,32 +53,45 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
     const targetLabel = sortedLabels[targetIndex];
     
     try {
-      // Use a temporary timestamp that doesn't conflict with any existing timestamp
-      const tempTimestamp = -1; // This assumes negative timestamps aren't valid in your application
+      // Simple approach: directly swap positions by
+      // giving each label a completely new timestamp
+      // that doesn't conflict with existing ones
       
-      // First update the current label to a temporary timestamp
+      // Get a timestamp that's outside the normal range
+      // and different for each label involved in the swap
+      const baseOffset = 1000000; // A large number unlikely to be used
+      const tempTimestamp1 = baseOffset + 1;
+      const tempTimestamp2 = baseOffset + 2;
+      
+      // First, move both labels to temporary timestamps to avoid conflicts
       const { error: error1 } = await supabase
         .from('audio_labels')
-        .update({ timestamp_seconds: tempTimestamp })
+        .update({ timestamp_seconds: tempTimestamp1 })
         .eq('id', label.id);
         
       if (error1) throw error1;
       
-      // Then update the target label to the current label's original timestamp
       const { error: error2 } = await supabase
         .from('audio_labels')
-        .update({ timestamp_seconds: label.timestamp_seconds })
+        .update({ timestamp_seconds: tempTimestamp2 })
         .eq('id', targetLabel.id);
         
       if (error2) throw error2;
       
-      // Finally, update the current label to the target label's original timestamp
+      // Then, update them to their final position values
       const { error: error3 } = await supabase
         .from('audio_labels')
         .update({ timestamp_seconds: targetLabel.timestamp_seconds })
         .eq('id', label.id);
         
       if (error3) throw error3;
+      
+      const { error: error4 } = await supabase
+        .from('audio_labels')
+        .update({ timestamp_seconds: label.timestamp_seconds })
+        .eq('id', targetLabel.id);
+        
+      if (error4) throw error4;
       
       toast({
         title: "Success",
@@ -89,6 +102,29 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
       toast({
         title: "Error",
         description: "Failed to update label position",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteLabel = async (labelId: string) => {
+    try {
+      const { error } = await supabase
+        .from('audio_labels')
+        .delete()
+        .eq('id', labelId);
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Label deleted successfully"
+      });
+    } catch (error) {
+      console.error('Error deleting label:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete label",
         variant: "destructive"
       });
     }
@@ -132,6 +168,14 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
               </Button>
               <Button size="icon" variant="ghost" onClick={() => handleMoveLabel(label, 'down')}>
                 <ArrowDown className="h-4 w-4" />
+              </Button>
+              <Button 
+                size="icon" 
+                variant="ghost" 
+                onClick={() => handleDeleteLabel(label.id)}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           </div>
