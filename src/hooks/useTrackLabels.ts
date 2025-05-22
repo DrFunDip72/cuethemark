@@ -9,6 +9,7 @@ type Label = {
   label_name: string;
   timestamp_seconds: number;
   created_at: string;
+  notes?: string;
 };
 
 export const useTrackLabels = (trackId: string) => {

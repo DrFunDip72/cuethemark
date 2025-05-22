@@ -14,6 +14,7 @@ export type Database = {
           created_at: string | null
           id: string
           label_name: string
+          notes: string | null
           timestamp_seconds: number
           track_id: string
         }
@@ -21,6 +22,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           label_name: string
+          notes?: string | null
           timestamp_seconds: number
           track_id: string
         }
@@ -28,6 +30,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           label_name?: string
+          notes?: string | null
           timestamp_seconds?: number
           track_id?: string
         }
