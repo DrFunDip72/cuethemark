@@ -10,6 +10,7 @@ import { AddLabelDialog } from '@/components/AddLabelDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatTime } from '@/lib/formatTime';
+import { Slider } from '@/components/ui/slider';
 
 const TrackPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -102,6 +103,15 @@ const TrackPage = () => {
     }
   };
 
+  // New function to handle slider change
+  const handleSliderChange = (value: number[]) => {
+    if (audioRef.current && value.length > 0) {
+      const newTime = (value[0] / 100) * (duration || 1);
+      audioRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <Card className="p-6 mb-6">
@@ -114,12 +124,17 @@ const TrackPage = () => {
           >
             {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </Button>
-          <div className="w-full h-2 bg-gray-200 rounded">
-            <div 
-              className="h-full bg-primary rounded" 
-              style={{ width: `${(currentTime / duration) * 100 || 0}%` }}
-            />
-          </div>
+          
+          {/* Replace progress bar with Slider component */}
+          <Slider 
+            className="w-full" 
+            value={[duration ? (currentTime / duration) * 100 : 0]} 
+            onValueChange={handleSliderChange}
+            min={0}
+            max={100}
+            step={0.1}
+            disabled={isLoading || !trackUrl}
+          />
         </div>
         
         {/* Display current time */}

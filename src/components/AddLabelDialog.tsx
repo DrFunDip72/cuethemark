@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -28,11 +28,18 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  // Update timestamp when dialog opens or current time changes
+  useEffect(() => {
+    if (open) {
+      setTimestamp(currentTime);
+    }
+  }, [open, currentTime]);
+
   // Reset form when dialog opens
   const handleOpenChange = (open: boolean) => {
     if (open) {
-      setTimestamp(currentTime);
       setLabelName('');
+      setTimestamp(currentTime);
     }
     onOpenChange(open);
   };

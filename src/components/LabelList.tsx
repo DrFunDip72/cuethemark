@@ -38,6 +38,9 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
   }, [currentTime, labels]);
 
   const handleMoveLabel = async (label: Label, direction: 'up' | 'down') => {
+    if (!labels || labels.length < 2) return;
+
+    // Sort labels by timestamp
     const sortedLabels = [...labels].sort((a, b) => a.timestamp_seconds - b.timestamp_seconds);
     const currentIndex = sortedLabels.findIndex(l => l.id === label.id);
     
@@ -53,45 +56,30 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
     const targetLabel = sortedLabels[targetIndex];
     
     try {
-      // Simple approach: directly swap positions by
-      // giving each label a completely new timestamp
-      // that doesn't conflict with existing ones
+      // Simpler approach: just swap the timestamps
+      const currentTimestamp = label.timestamp_seconds;
+      const targetTimestamp = targetLabel.timestamp_seconds;
       
-      // Get a timestamp that's outside the normal range
-      // and different for each label involved in the swap
-      const baseOffset = 1000000; // A large number unlikely to be used
-      const tempTimestamp1 = baseOffset + 1;
-      const tempTimestamp2 = baseOffset + 2;
+      // Calculate a small offset to avoid constraint conflicts
+      // This ensures timestamps are unique 
+      const offset = 0.001;
+      const adjustedCurrentTimestamp = currentTimestamp + (direction === 'up' ? -offset : offset);
+      const adjustedTargetTimestamp = targetTimestamp + (direction === 'up' ? offset : -offset);
       
-      // First, move both labels to temporary timestamps to avoid conflicts
+      // Update both labels with new timestamps
       const { error: error1 } = await supabase
         .from('audio_labels')
-        .update({ timestamp_seconds: tempTimestamp1 })
+        .update({ timestamp_seconds: adjustedTargetTimestamp })
         .eq('id', label.id);
         
       if (error1) throw error1;
       
       const { error: error2 } = await supabase
         .from('audio_labels')
-        .update({ timestamp_seconds: tempTimestamp2 })
+        .update({ timestamp_seconds: adjustedCurrentTimestamp })
         .eq('id', targetLabel.id);
         
       if (error2) throw error2;
-      
-      // Then, update them to their final position values
-      const { error: error3 } = await supabase
-        .from('audio_labels')
-        .update({ timestamp_seconds: targetLabel.timestamp_seconds })
-        .eq('id', label.id);
-        
-      if (error3) throw error3;
-      
-      const { error: error4 } = await supabase
-        .from('audio_labels')
-        .update({ timestamp_seconds: label.timestamp_seconds })
-        .eq('id', targetLabel.id);
-        
-      if (error4) throw error4;
       
       toast({
         title: "Success",
