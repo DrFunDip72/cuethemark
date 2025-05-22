@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatTime } from '@/lib/formatTime';
@@ -26,6 +27,7 @@ interface EditLabelDialogProps {
 export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabelDialogProps) {
   const [labelName, setLabelName] = useState(label.label_name);
   const [timestamp, setTimestamp] = useState(label.timestamp_seconds);
+  const [notes, setNotes] = useState(label.notes || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -48,7 +50,8 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabe
         .from('audio_labels')
         .update({
           label_name: labelName.trim(),
-          timestamp_seconds: parseFloat(timestamp.toFixed(3))
+          timestamp_seconds: parseFloat(timestamp.toFixed(3)),
+          notes: notes
         })
         .eq('id', label.id);
 
@@ -87,7 +90,7 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabe
           <DialogHeader>
             <DialogTitle>Edit Label</DialogTitle>
             <DialogDescription>
-              Make changes to the label name and timestamp.
+              Make changes to the label name, timestamp, and notes.
             </DialogDescription>
           </DialogHeader>
 
@@ -124,6 +127,19 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabe
                   {formatTime(timestamp)}
                 </span>
               </div>
+            </div>
+
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label htmlFor="edit-notes" className="text-right pt-2">
+                Notes
+              </Label>
+              <Textarea
+                id="edit-notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="col-span-3 min-h-[100px]"
+                placeholder="Add notes about this section..."
+              />
             </div>
           </div>
 

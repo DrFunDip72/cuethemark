@@ -1,13 +1,14 @@
 
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { Play, Pencil, Trash2 } from 'lucide-react';
+import { Play, Pencil, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatTime } from '@/lib/formatTime';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { EditLabelDialog } from './EditLabelDialog';
+import { Textarea } from '@/components/ui/textarea';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,11 +20,19 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
 export type Label = {
   id: string;
   label_name: string;
   timestamp_seconds: number;
   created_at: string;
+  notes?: string;
   order?: number;
 };
 
@@ -38,6 +47,8 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
   const [editingLabel, setEditingLabel] = useState<Label | null>(null);
   const [deletingLabel, setDeletingLabel] = useState<string | null>(null);
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [isNotesUpdating, setIsNotesUpdating] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
   // Find the active label based on current time
@@ -47,6 +58,15 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
       (currentTime < (labels.find(l => l.timestamp_seconds > label.timestamp_seconds)?.timestamp_seconds || Infinity))
     );
     setActiveLabel(currentLabel?.id || null);
+  });
+
+  // Initialize notes from labels
+  useState(() => {
+    const initialNotes: Record<string, string> = {};
+    labels.forEach(label => {
+      initialNotes[label.id] = label.notes || '';
+    });
+    setNotes(initialNotes);
   });
 
   const handleDeleteLabel = async (labelId: string) => {
@@ -71,6 +91,32 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
       });
     } finally {
       setDeletingLabel(null);
+    }
+  };
+
+  const handleSaveNotes = async (labelId: string) => {
+    setIsNotesUpdating({ ...isNotesUpdating, [labelId]: true });
+    try {
+      const { error } = await supabase
+        .from('audio_labels')
+        .update({ notes: notes[labelId] })
+        .eq('id', labelId);
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Notes updated successfully"
+      });
+    } catch (error) {
+      console.error('Error updating notes:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update notes",
+        variant: "destructive"
+      });
+    } finally {
+      setIsNotesUpdating({ ...isNotesUpdating, [labelId]: false });
     }
   };
 
@@ -117,6 +163,31 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
               </Button>
             </div>
           </div>
+
+          <Accordion type="single" collapsible className="w-full mt-2">
+            <AccordionItem value={`notes-${label.id}`} className="border-0">
+              <AccordionTrigger className="py-2 px-0">
+                <span className="text-sm text-gray-500">Notes</span>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="space-y-2">
+                  <Textarea 
+                    value={notes[label.id] || ''} 
+                    onChange={(e) => setNotes({ ...notes, [label.id]: e.target.value })}
+                    placeholder="Add notes about this section..."
+                    className="min-h-[100px] text-sm"
+                  />
+                  <Button 
+                    onClick={() => handleSaveNotes(label.id)} 
+                    size="sm"
+                    disabled={isNotesUpdating[label.id]}
+                  >
+                    {isNotesUpdating[label.id] ? 'Saving...' : 'Save Notes'}
+                  </Button>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </Card>
       ))}
       
