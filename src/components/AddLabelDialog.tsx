@@ -24,18 +24,18 @@ interface AddLabelDialogProps {
 
 export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: AddLabelDialogProps) {
   const [labelName, setLabelName] = useState('');
-  const [timestamp, setTimestamp] = useState(currentTime);
+  const [timestamp, setTimestamp] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  // Update timestamp when dialog opens or current time changes
+  // Capture the timestamp only when the dialog opens
   useEffect(() => {
     if (open) {
       // Round to nearest half
       const roundedTime = Math.round(currentTime * 2) / 2;
       setTimestamp(roundedTime);
     }
-  }, [open, currentTime]);
+  }, [open]); // Only depend on 'open', not on 'currentTime'
 
   // Reset form when dialog opens
   const handleOpenChange = (open: boolean) => {
