@@ -7,6 +7,16 @@ import { Button } from '@/components/ui/button';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { EditTrackDialog } from '@/components/EditTrackDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Track = {
   id: string;
@@ -17,6 +27,7 @@ type Track = {
 
 export const TrackList = () => {
   const [editingTrack, setEditingTrack] = useState<Track | null>(null);
+  const [deletingTrackId, setDeletingTrackId] = useState<string | null>(null);
   const { toast } = useToast();
   
   const { data: tracks, isLoading, error } = useQuery({
@@ -32,10 +43,7 @@ export const TrackList = () => {
     },
   });
 
-  const handleDeleteTrack = async (id: string, e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigation
-    e.stopPropagation(); // Stop event propagation
-    
+  const handleDeleteTrack = async (id: string) => {
     try {
       const { error } = await supabase
         .from('audio_tracks')
@@ -55,6 +63,8 @@ export const TrackList = () => {
         description: "Failed to delete track",
         variant: "destructive"
       });
+    } finally {
+      setDeletingTrackId(null);
     }
   };
 
@@ -102,7 +112,11 @@ export const TrackList = () => {
               <Button 
                 size="icon" 
                 variant="ghost" 
-                onClick={(e) => handleDeleteTrack(track.id, e)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setDeletingTrackId(track.id);
+                }}
                 className="text-destructive hover:text-destructive"
               >
                 <Trash2 className="h-4 w-4" />
@@ -119,6 +133,29 @@ export const TrackList = () => {
           track={editingTrack}
         />
       )}
+
+      <AlertDialog 
+        open={!!deletingTrackId} 
+        onOpenChange={(open) => !open && setDeletingTrackId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the track and all its associated labels.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => deletingTrackId && handleDeleteTrack(deletingTrackId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

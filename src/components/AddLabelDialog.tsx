@@ -31,7 +31,9 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
   // Update timestamp when dialog opens or current time changes
   useEffect(() => {
     if (open) {
-      setTimestamp(currentTime);
+      // Round to nearest half
+      const roundedTime = Math.round(currentTime * 2) / 2;
+      setTimestamp(roundedTime);
     }
   }, [open, currentTime]);
 
@@ -39,7 +41,9 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
   const handleOpenChange = (open: boolean) => {
     if (open) {
       setLabelName('');
-      setTimestamp(currentTime);
+      // Round to nearest half
+      const roundedTime = Math.round(currentTime * 2) / 2;
+      setTimestamp(roundedTime);
     }
     onOpenChange(open);
   };
@@ -64,7 +68,7 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
         .insert({
           track_id: trackId,
           label_name: labelName.trim(),
-          timestamp_seconds: parseFloat(timestamp.toFixed(3))
+          timestamp_seconds: parseFloat(timestamp.toFixed(1))  // Ensure only one decimal place
         });
 
       if (error) {
@@ -137,10 +141,15 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
                 <Input
                   id="timestamp"
                   type="number"
-                  step="0.01"
+                  step="0.5"
                   min="0"
                   value={timestamp}
-                  onChange={(e) => setTimestamp(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => {
+                    // Round to nearest half when user inputs a value
+                    const inputValue = parseFloat(e.target.value) || 0;
+                    const roundedValue = Math.round(inputValue * 2) / 2;
+                    setTimestamp(roundedValue);
+                  }}
                   className="flex-1"
                 />
                 <span className="text-sm text-gray-500 w-16">

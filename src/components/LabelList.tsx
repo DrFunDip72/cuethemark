@@ -1,13 +1,23 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { Play, ArrowUp, ArrowDown, Pencil, Trash2 } from 'lucide-react';
+import { Play, Pencil, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatTime } from '@/lib/formatTime';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { EditLabelDialog } from './EditLabelDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export type Label = {
   id: string;
@@ -27,73 +37,17 @@ type LabelListProps = {
 export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }: LabelListProps) => {
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
   const [editingLabel, setEditingLabel] = useState<Label | null>(null);
+  const [deletingLabel, setDeletingLabel] = useState<string | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
+  // Find the active label based on current time
+  useState(() => {
     const currentLabel = labels.find(
       (label) => currentTime >= label.timestamp_seconds && 
       (currentTime < (labels.find(l => l.timestamp_seconds > label.timestamp_seconds)?.timestamp_seconds || Infinity))
     );
     setActiveLabel(currentLabel?.id || null);
-  }, [currentTime, labels]);
-
-  const handleMoveLabel = async (label: Label, direction: 'up' | 'down') => {
-    if (!labels || labels.length < 2) return;
-
-    // Sort labels by timestamp
-    const sortedLabels = [...labels].sort((a, b) => a.timestamp_seconds - b.timestamp_seconds);
-    const currentIndex = sortedLabels.findIndex(l => l.id === label.id);
-    
-    // Determine target index based on direction
-    const targetIndex = direction === 'up' 
-      ? Math.max(0, currentIndex - 1)
-      : Math.min(sortedLabels.length - 1, currentIndex + 1);
-    
-    // Don't proceed if we're already at the first/last position
-    if (currentIndex === targetIndex) return;
-    
-    // Get the target label
-    const targetLabel = sortedLabels[targetIndex];
-    
-    try {
-      // Simpler approach: just swap the timestamps
-      const currentTimestamp = label.timestamp_seconds;
-      const targetTimestamp = targetLabel.timestamp_seconds;
-      
-      // Calculate a small offset to avoid constraint conflicts
-      // This ensures timestamps are unique 
-      const offset = 0.001;
-      const adjustedCurrentTimestamp = currentTimestamp + (direction === 'up' ? -offset : offset);
-      const adjustedTargetTimestamp = targetTimestamp + (direction === 'up' ? offset : -offset);
-      
-      // Update both labels with new timestamps
-      const { error: error1 } = await supabase
-        .from('audio_labels')
-        .update({ timestamp_seconds: adjustedTargetTimestamp })
-        .eq('id', label.id);
-        
-      if (error1) throw error1;
-      
-      const { error: error2 } = await supabase
-        .from('audio_labels')
-        .update({ timestamp_seconds: adjustedCurrentTimestamp })
-        .eq('id', targetLabel.id);
-        
-      if (error2) throw error2;
-      
-      toast({
-        title: "Success",
-        description: "Label position updated"
-      });
-    } catch (error) {
-      console.error('Error updating label position:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update label position",
-        variant: "destructive"
-      });
-    }
-  };
+  });
 
   const handleDeleteLabel = async (labelId: string) => {
     try {
@@ -115,6 +69,8 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
         description: "Failed to delete label",
         variant: "destructive"
       });
+    } finally {
+      setDeletingLabel(null);
     }
   };
 
@@ -151,16 +107,10 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
               <Button size="icon" variant="ghost" onClick={() => openEditDialog(label)}>
                 <Pencil className="h-4 w-4" />
               </Button>
-              <Button size="icon" variant="ghost" onClick={() => handleMoveLabel(label, 'up')}>
-                <ArrowUp className="h-4 w-4" />
-              </Button>
-              <Button size="icon" variant="ghost" onClick={() => handleMoveLabel(label, 'down')}>
-                <ArrowDown className="h-4 w-4" />
-              </Button>
               <Button 
                 size="icon" 
                 variant="ghost" 
-                onClick={() => handleDeleteLabel(label.id)}
+                onClick={() => setDeletingLabel(label.id)}
                 className="text-destructive hover:text-destructive"
               >
                 <Trash2 className="h-4 w-4" />
@@ -178,6 +128,26 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
           trackId={trackId}
         />
       )}
+
+      <AlertDialog open={!!deletingLabel} onOpenChange={(open) => !open && setDeletingLabel(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the label.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => deletingLabel && handleDeleteLabel(deletingLabel)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
