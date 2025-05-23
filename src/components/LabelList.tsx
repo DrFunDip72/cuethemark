@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { Play, Pencil, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Play, Pencil, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatTime } from '@/lib/formatTime';
@@ -34,6 +34,7 @@ export type Label = {
   created_at: string;
   notes?: string;
   order?: number;
+  playback_offset_seconds?: number;
 };
 
 type LabelListProps = {
@@ -124,6 +125,12 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
     setEditingLabel(label);
   };
 
+  const handlePlayFromLabel = (label: Label) => {
+    const offset = label.playback_offset_seconds || 3;
+    const startTime = Math.max(0, label.timestamp_seconds - offset);
+    onPlayFromTimestamp(startTime);
+  };
+
   return (
     <div className="space-y-3">
       {labels.map((label) => (
@@ -136,10 +143,7 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
           <div className="flex items-center justify-between">
             <div 
               className="flex items-center gap-3 cursor-pointer flex-1"
-              onClick={() => {
-                const startTime = Math.max(0, label.timestamp_seconds - 3);
-                onPlayFromTimestamp(startTime);
-              }}
+              onClick={() => handlePlayFromLabel(label)}
             >
               <Play className="h-4 w-4 text-primary" />
               <div>

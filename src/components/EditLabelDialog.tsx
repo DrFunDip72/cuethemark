@@ -28,6 +28,7 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabe
   const [labelName, setLabelName] = useState(label.label_name);
   const [timestamp, setTimestamp] = useState(label.timestamp_seconds);
   const [notes, setNotes] = useState(label.notes || '');
+  const [playbackOffset, setPlaybackOffset] = useState(label.playback_offset_seconds || 3);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -51,7 +52,8 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabe
         .update({
           label_name: labelName.trim(),
           timestamp_seconds: parseFloat(timestamp.toFixed(3)),
-          notes: notes
+          notes: notes,
+          playback_offset_seconds: playbackOffset
         })
         .eq('id', label.id);
 
@@ -90,7 +92,7 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabe
           <DialogHeader>
             <DialogTitle>Edit Label</DialogTitle>
             <DialogDescription>
-              Make changes to the label name, timestamp, and notes.
+              Make changes to the label name, timestamp, playback offset, and notes.
             </DialogDescription>
           </DialogHeader>
 
@@ -125,6 +127,27 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabe
                 />
                 <span className="text-sm text-gray-500 w-16">
                   {formatTime(timestamp)}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-playback-offset" className="text-right">
+                Start Offset (s)
+              </Label>
+              <div className="col-span-3 flex items-center gap-2">
+                <Input
+                  id="edit-playback-offset"
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  value={playbackOffset}
+                  onChange={(e) => setPlaybackOffset(parseFloat(e.target.value) || 0)}
+                  className="flex-1"
+                  placeholder="3"
+                />
+                <span className="text-sm text-gray-500 text-xs">
+                  seconds before
                 </span>
               </div>
             </div>

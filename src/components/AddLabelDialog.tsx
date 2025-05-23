@@ -25,27 +25,31 @@ interface AddLabelDialogProps {
 export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: AddLabelDialogProps) {
   const [labelName, setLabelName] = useState('');
   const [timestamp, setTimestamp] = useState(0);
+  const [playbackOffset, setPlaybackOffset] = useState(3);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  // Capture the timestamp only when the dialog opens
+  // Capture the timestamp only when the dialog opens and don't update it while open
   useEffect(() => {
     if (open) {
-      // Round to nearest half
+      // Round to nearest half and capture the timestamp at the moment dialog opens
       const roundedTime = Math.round(currentTime * 2) / 2;
       setTimestamp(roundedTime);
       // Clear label name when dialog opens
       setLabelName('');
+      // Reset playback offset to default
+      setPlaybackOffset(3);
     }
-  }, [open, currentTime]); // Include currentTime to get the latest value when opening
+  }, [open]); // Remove currentTime from dependencies to prevent updates while dialog is open
 
   // Reset form when dialog opens
   const handleOpenChange = (open: boolean) => {
     if (open) {
       setLabelName('');
-      // Round to nearest half
+      // Round to nearest half and capture timestamp at opening
       const roundedTime = Math.round(currentTime * 2) / 2;
       setTimestamp(roundedTime);
+      setPlaybackOffset(3);
     }
     onOpenChange(open);
   };
@@ -70,7 +74,8 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
         .insert({
           track_id: trackId,
           label_name: labelName.trim(),
-          timestamp_seconds: parseFloat(timestamp.toFixed(1))  // Ensure only one decimal place
+          timestamp_seconds: parseFloat(timestamp.toFixed(1)),
+          playback_offset_seconds: playbackOffset
         });
 
       if (error) {
@@ -158,6 +163,27 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
                 />
                 <span className="text-sm text-gray-500 w-16">
                   {formatTime(timestamp)}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="playback-offset" className="text-right">
+                Start Offset (s)
+              </Label>
+              <div className="col-span-3 flex items-center gap-2">
+                <Input
+                  id="playback-offset"
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  value={playbackOffset}
+                  onChange={(e) => setPlaybackOffset(parseFloat(e.target.value) || 0)}
+                  className="flex-1"
+                  placeholder="3"
+                />
+                <span className="text-sm text-gray-500 text-xs">
+                  seconds before
                 </span>
               </div>
             </div>
