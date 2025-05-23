@@ -10,6 +10,7 @@ type Label = {
   timestamp_seconds: number;
   created_at: string;
   notes?: string;
+  playback_offset_seconds?: number;
 };
 
 export const useTrackLabels = (trackId: string) => {

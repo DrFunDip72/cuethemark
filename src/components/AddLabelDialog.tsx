@@ -40,19 +40,7 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
       // Reset playback offset to default
       setPlaybackOffset(3);
     }
-  }, [open]); // Remove currentTime from dependencies to prevent updates while dialog is open
-
-  // Reset form when dialog opens
-  const handleOpenChange = (open: boolean) => {
-    if (open) {
-      setLabelName('');
-      // Round to nearest half and capture timestamp at opening
-      const roundedTime = Math.round(currentTime * 2) / 2;
-      setTimestamp(roundedTime);
-      setPlaybackOffset(3);
-    }
-    onOpenChange(open);
-  };
+  }, [open, currentTime]); // Keep currentTime in dependencies but only capture when dialog opens
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,7 +105,7 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>

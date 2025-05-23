@@ -15,6 +15,7 @@ export type Database = {
           id: string
           label_name: string
           notes: string | null
+          playback_offset_seconds: number
           timestamp_seconds: number
           track_id: string
         }
@@ -23,6 +24,7 @@ export type Database = {
           id?: string
           label_name: string
           notes?: string | null
+          playback_offset_seconds?: number
           timestamp_seconds: number
           track_id: string
         }
@@ -31,6 +33,7 @@ export type Database = {
           id?: string
           label_name?: string
           notes?: string | null
+          playback_offset_seconds?: number
           timestamp_seconds?: number
           track_id?: string
         }
