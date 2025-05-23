@@ -5,6 +5,7 @@ import { toast } from '@/hooks/use-toast';
 
 export const useAudioUpload = () => {
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const uploadAudio = async (file: File) => {
     if (!file) return;
@@ -21,12 +22,29 @@ export const useAudioUpload = () => {
     }
 
     setIsUploading(true);
+    setUploadProgress(0);
+    
     try {
-      // Upload to Supabase Storage
+      // Upload to Supabase Storage with progress tracking
       const filename = `${Date.now()}-${file.name}`;
+      
+      // Simulate progress for file upload since Supabase doesn't provide real progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 200);
+
       const { data: storageData, error: storageError } = await supabase.storage
         .from('tracks')
         .upload(filename, file);
+
+      clearInterval(progressInterval);
+      setUploadProgress(95);
 
       if (storageError) throw storageError;
 
@@ -45,6 +63,8 @@ export const useAudioUpload = () => {
 
       if (dbError) throw dbError;
 
+      setUploadProgress(100);
+      
       toast({
         title: 'Upload successful',
         description: 'Your audio track has been uploaded.',
@@ -58,8 +78,10 @@ export const useAudioUpload = () => {
       });
     } finally {
       setIsUploading(false);
+      // Reset progress after a short delay
+      setTimeout(() => setUploadProgress(0), 1000);
     }
   };
 
-  return { uploadAudio, isUploading };
+  return { uploadAudio, isUploading, uploadProgress };
 };

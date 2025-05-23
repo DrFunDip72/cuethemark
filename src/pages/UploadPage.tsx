@@ -6,7 +6,7 @@ import { TrackList } from '@/components/TrackList';
 import { Progress } from '@/components/ui/progress';
 
 const UploadPage = () => {
-  const { uploadAudio, isUploading } = useAudioUpload();
+  const { uploadAudio, isUploading, uploadProgress } = useAudioUpload();
   
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -36,7 +36,8 @@ const UploadPage = () => {
           {isUploading ? (
             <div className="space-y-4">
               <p className="text-lg">Uploading...</p>
-              <Progress value={100} className="w-full" />
+              <Progress value={uploadProgress} className="w-full" />
+              <p className="text-sm text-gray-500">{uploadProgress}% complete</p>
             </div>
           ) : (
             <>

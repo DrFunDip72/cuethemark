@@ -40,7 +40,7 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
       // Reset playback offset to default
       setPlaybackOffset(3);
     }
-  }, [open, currentTime]); // Keep currentTime in dependencies but only capture when dialog opens
+  }, [open]); // Only depend on 'open', not 'currentTime'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
