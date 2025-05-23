@@ -34,8 +34,10 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
       // Round to nearest half
       const roundedTime = Math.round(currentTime * 2) / 2;
       setTimestamp(roundedTime);
+      // Clear label name when dialog opens
+      setLabelName('');
     }
-  }, [open]); // Only depend on 'open', not on 'currentTime'
+  }, [open, currentTime]); // Include currentTime to get the latest value when opening
 
   // Reset form when dialog opens
   const handleOpenChange = (open: boolean) => {
@@ -94,6 +96,8 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
         description: "Label created successfully"
       });
       
+      // Clear label name after successful submission
+      setLabelName('');
       onOpenChange(false);
     } catch (err) {
       console.error('Unexpected error:', err);

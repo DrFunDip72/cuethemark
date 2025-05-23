@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Play, Pause, Plus } from 'lucide-react';
+import { Play, Pause, Plus, Pen } from 'lucide-react';
 import { useTrackLabels } from '@/hooks/useTrackLabels';
 import { LabelList } from '@/components/LabelList';
 import { AddLabelDialog } from '@/components/AddLabelDialog';
@@ -11,6 +11,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatTime } from '@/lib/formatTime';
 import { Slider } from '@/components/ui/slider';
+import { EditTrackDialog } from '@/components/EditTrackDialog';
+import { useQuery } from '@tanstack/react-query';
+
+type TrackData = {
+  id: string;
+  filename: string;
+  url: string;
+  uploaded_at: string;
+};
 
 const TrackPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,10 +30,27 @@ const TrackPage = () => {
   const [trackUrl, setTrackUrl] = useState<string | null>(null);
   const [addLabelOpen, setAddLabelOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [editTrackOpen, setEditTrackOpen] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
   const { labels, isLoading: labelsLoading } = useTrackLabels(id || '');
+
+  const { data: trackData } = useQuery({
+    queryKey: ['track', id],
+    queryFn: async () => {
+      if (!id) return null;
+      
+      const { data, error } = await supabase
+        .from('audio_tracks')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) throw error;
+      return data as TrackData;
+    }
+  });
 
   useEffect(() => {
     const fetchTrackUrl = async () => {
@@ -125,7 +151,6 @@ const TrackPage = () => {
             {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </Button>
           
-          {/* Replace progress bar with Slider component */}
           <Slider 
             className="w-full" 
             value={[duration ? (currentTime / duration) * 100 : 0]} 
@@ -137,14 +162,24 @@ const TrackPage = () => {
           />
         </div>
         
-        {/* Display current time */}
         <div className="text-center text-sm font-medium text-gray-600">
           {formatTime(currentTime)} / {formatTime(duration)}
         </div>
       </Card>
 
       <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Track Name</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold">
+            {trackData?.filename || "Track Name"}
+          </h1>
+          <Button 
+            size="icon" 
+            variant="ghost"
+            onClick={() => setEditTrackOpen(true)}
+          >
+            <Pen className="h-4 w-4" />
+          </Button>
+        </div>
         <div className="flex gap-2">
           <Button
             variant={view === 'timeline' ? 'default' : 'outline'}
@@ -202,6 +237,14 @@ const TrackPage = () => {
           onOpenChange={setAddLabelOpen}
           trackId={id}
           currentTime={currentTime}
+        />
+      )}
+
+      {trackData && (
+        <EditTrackDialog
+          open={editTrackOpen}
+          onOpenChange={setEditTrackOpen}
+          track={trackData}
         />
       )}
 

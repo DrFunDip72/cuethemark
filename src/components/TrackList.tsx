@@ -1,8 +1,8 @@
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -26,9 +26,10 @@ type Track = {
 };
 
 export const TrackList = () => {
-  const [editingTrack, setEditingTrack] = useState<Track | null>(null);
   const [deletingTrackId, setDeletingTrackId] = useState<string | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   
   const { data: tracks, isLoading, error } = useQuery({
     queryKey: ['tracks'],
@@ -52,6 +53,8 @@ export const TrackList = () => {
         
       if (error) throw error;
       
+      queryClient.invalidateQueries({ queryKey: ['tracks'] });
+      
       toast({
         title: "Success",
         description: "Track deleted successfully"
@@ -68,10 +71,10 @@ export const TrackList = () => {
     }
   };
 
-  const handleEditTrack = (track: Track, e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigation
-    e.stopPropagation(); // Stop event propagation
-    setEditingTrack(track);
+  const handleNavigateToTrack = (trackId: string, e: React.MouseEvent) => {
+    e.preventDefault(); 
+    e.stopPropagation();
+    navigate(`/tracks/${trackId}`);
   };
 
   if (isLoading) {
@@ -105,7 +108,7 @@ export const TrackList = () => {
               <Button 
                 size="icon" 
                 variant="ghost" 
-                onClick={(e) => handleEditTrack(track, e)}
+                onClick={(e) => handleNavigateToTrack(track.id, e)}
               >
                 <Pencil className="h-4 w-4" />
               </Button>
@@ -125,14 +128,6 @@ export const TrackList = () => {
           </div>
         </Link>
       ))}
-      
-      {editingTrack && (
-        <EditTrackDialog
-          open={!!editingTrack}
-          onOpenChange={(open) => !open && setEditingTrack(null)}
-          track={editingTrack}
-        />
-      )}
 
       <AlertDialog 
         open={!!deletingTrackId} 
