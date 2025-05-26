@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -20,12 +19,13 @@ interface AddLabelDialogProps {
   onOpenChange: (open: boolean) => void;
   trackId: string;
   currentTime: number;
+  defaultOffset?: number;
 }
 
-export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: AddLabelDialogProps) {
+export function AddLabelDialog({ open, onOpenChange, trackId, currentTime, defaultOffset = 3 }: AddLabelDialogProps) {
   const [labelName, setLabelName] = useState('');
   const [timestamp, setTimestamp] = useState(0);
-  const [playbackOffset, setPlaybackOffset] = useState(3);
+  const [playbackOffset, setPlaybackOffset] = useState(defaultOffset);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -37,10 +37,10 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
       setTimestamp(roundedTime);
       // Clear label name when dialog opens
       setLabelName('');
-      // Reset playback offset to default
-      setPlaybackOffset(3);
+      // Use the default offset from the track
+      setPlaybackOffset(defaultOffset);
     }
-  }, [open]); // Only depend on 'open', not 'currentTime'
+  }, [open, defaultOffset]); // Include defaultOffset in dependencies
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,7 +168,7 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
                   value={playbackOffset}
                   onChange={(e) => setPlaybackOffset(parseFloat(e.target.value) || 0)}
                   className="flex-1"
-                  placeholder="3"
+                  placeholder={defaultOffset.toString()}
                 />
                 <span className="text-sm text-gray-500 text-xs">
                   seconds before
