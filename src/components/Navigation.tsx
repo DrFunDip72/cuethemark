@@ -1,7 +1,33 @@
 
 import { Link } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { LogOut } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const Navigation = () => {
+  const { toast } = useToast();
+  const { user } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Logged out successfully"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <nav className="w-full bg-white border-b">
       <div className="container mx-auto px-4">
@@ -22,6 +48,18 @@ export const Navigation = () => {
             >
               My Tracks
             </Link>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-600">{user?.email}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="flex items-center gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>

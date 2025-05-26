@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatTime } from '@/lib/formatTime';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AddLabelDialogProps {
   open: boolean;
@@ -28,6 +29,7 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
   const [playbackOffset, setPlaybackOffset] = useState(3);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Capture the timestamp only when the dialog opens and don't update it while open
   useEffect(() => {
@@ -45,7 +47,7 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!labelName.trim()) {
+    if (!labelName.trim() || !user) {
       toast({
         title: "Error",
         description: "Label name is required",
@@ -63,7 +65,8 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
           track_id: trackId,
           label_name: labelName.trim(),
           timestamp_seconds: parseFloat(timestamp.toFixed(1)),
-          playback_offset_seconds: playbackOffset
+          playback_offset_seconds: playbackOffset,
+          user_id: user.id
         });
 
       if (error) {
