@@ -28,12 +28,11 @@ export const useTrackLabels = (trackId: string) => {
       if (error) throw error;
       return data as Label[];
     },
-    enabled: !!trackId,
+    // Enable auto-refresh
+    refetchInterval: 3000,
   });
 
   useEffect(() => {
-    if (!trackId) return;
-
     const channel = supabase
       .channel('schema-db-changes')
       .on(
@@ -48,20 +47,6 @@ export const useTrackLabels = (trackId: string) => {
           console.log('Real-time update received:', payload);
           // Invalidate query to refresh data
           queryClient.invalidateQueries({ queryKey: ['track-labels', trackId] });
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',  // Listen to track updates too
-          schema: 'public',
-          table: 'audio_tracks',
-          filter: `id=eq.${trackId}`,
-        },
-        (payload) => {
-          console.log('Track update received:', payload);
-          // Invalidate track query to refresh data
-          queryClient.invalidateQueries({ queryKey: ['track', trackId] });
         }
       )
       .subscribe();

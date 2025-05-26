@@ -1,9 +1,8 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Play, Pause, Plus, Pen } from 'lucide-react';
 import { useTrackLabels } from '@/hooks/useTrackLabels';
 import { LabelList } from '@/components/LabelList';
@@ -13,14 +12,13 @@ import { useToast } from '@/hooks/use-toast';
 import { formatTime } from '@/lib/formatTime';
 import { Slider } from '@/components/ui/slider';
 import { EditTrackDialog } from '@/components/EditTrackDialog';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 type TrackData = {
   id: string;
   filename: string;
   url: string;
   uploaded_at: string;
-  default_offset_seconds?: number;
 };
 
 const TrackPage = () => {
@@ -33,10 +31,8 @@ const TrackPage = () => {
   const [addLabelOpen, setAddLabelOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [editTrackOpen, setEditTrackOpen] = useState(false);
-  const [defaultOffset, setDefaultOffset] = useState(3);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const { labels, isLoading: labelsLoading } = useTrackLabels(id || '');
 
@@ -55,12 +51,6 @@ const TrackPage = () => {
       return data as TrackData;
     }
   });
-
-  useEffect(() => {
-    if (trackData?.default_offset_seconds !== undefined) {
-      setDefaultOffset(trackData.default_offset_seconds);
-    }
-  }, [trackData]);
 
   useEffect(() => {
     const fetchTrackUrl = async () => {
@@ -118,6 +108,7 @@ const TrackPage = () => {
 
   const handlePlayFromTimestamp = (timestamp: number) => {
     if (audioRef.current) {
+      // Start playing from 3 seconds before the timestamp or from the beginning if timestamp < 3
       const startTime = Math.max(0, timestamp);
       audioRef.current.currentTime = startTime;
       audioRef.current.play().catch(error => {
@@ -138,41 +129,12 @@ const TrackPage = () => {
     }
   };
 
+  // New function to handle slider change
   const handleSliderChange = (value: number[]) => {
     if (audioRef.current && value.length > 0) {
       const newTime = (value[0] / 100) * (duration || 1);
       audioRef.current.currentTime = newTime;
       setCurrentTime(newTime);
-    }
-  };
-
-  const handleDefaultOffsetChange = async (newOffset: number) => {
-    if (!id) return;
-
-    try {
-      const { error } = await supabase
-        .from('audio_tracks')
-        .update({ default_offset_seconds: newOffset })
-        .eq('id', id);
-
-      if (error) throw error;
-
-      setDefaultOffset(newOffset);
-      
-      // Invalidate the track query to refresh data
-      queryClient.invalidateQueries({ queryKey: ['track', id] });
-
-      toast({
-        title: "Success",
-        description: "Default offset updated successfully"
-      });
-    } catch (error) {
-      console.error('Error updating default offset:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update default offset",
-        variant: "destructive"
-      });
     }
   };
 
@@ -206,41 +168,18 @@ const TrackPage = () => {
       </Card>
 
       <div className="mb-6 flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">
-              {trackData?.filename || "Track Name"}
-            </h1>
-            <Button 
-              size="icon" 
-              variant="ghost"
-              onClick={() => setEditTrackOpen(true)}
-            >
-              <Pen className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Label htmlFor="default-offset" className="text-sm font-medium">
-              Default Start Offset:
-            </Label>
-            <Input
-              id="default-offset"
-              type="number"
-              step="0.5"
-              min="0"
-              value={defaultOffset}
-              onChange={(e) => {
-                const value = parseFloat(e.target.value) || 0;
-                const roundedValue = Math.round(value * 2) / 2;
-                handleDefaultOffsetChange(roundedValue);
-              }}
-              className="w-20"
-            />
-            <span className="text-sm text-gray-500">seconds</span>
-          </div>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold">
+            {trackData?.filename || "Track Name"}
+          </h1>
+          <Button 
+            size="icon" 
+            variant="ghost"
+            onClick={() => setEditTrackOpen(true)}
+          >
+            <Pen className="h-4 w-4" />
+          </Button>
         </div>
-        
         <div className="flex gap-2">
           <Button
             variant={view === 'timeline' ? 'default' : 'outline'}
@@ -298,7 +237,6 @@ const TrackPage = () => {
           onOpenChange={setAddLabelOpen}
           trackId={id}
           currentTime={currentTime}
-          defaultOffset={defaultOffset}
         />
       )}
 
