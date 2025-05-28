@@ -18,6 +18,7 @@ export type Database = {
           playback_offset_seconds: number
           timestamp_seconds: number
           track_id: string
+          user_id: string
         }
         Insert: {
           created_at?: string | null
@@ -27,6 +28,7 @@ export type Database = {
           playback_offset_seconds?: number
           timestamp_seconds: number
           track_id: string
+          user_id: string
         }
         Update: {
           created_at?: string | null
@@ -36,6 +38,7 @@ export type Database = {
           playback_offset_seconds?: number
           timestamp_seconds?: number
           track_id?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -53,18 +56,21 @@ export type Database = {
           id: string
           uploaded_at: string | null
           url: string
+          user_id: string
         }
         Insert: {
           filename: string
           id?: string
           uploaded_at?: string | null
           url: string
+          user_id: string
         }
         Update: {
           filename?: string
           id?: string
           uploaded_at?: string | null
           url?: string
+          user_id?: string
         }
         Relationships: []
       }

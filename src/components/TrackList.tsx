@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { EditTrackDialog } from '@/components/EditTrackDialog';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +24,7 @@ type Track = {
   filename: string;
   url: string;
   uploaded_at: string;
+  user_id: string;
 };
 
 export const TrackList = () => {
@@ -30,18 +32,23 @@ export const TrackList = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   
   const { data: tracks, isLoading, error } = useQuery({
     queryKey: ['tracks'],
     queryFn: async () => {
+      if (!user) return [];
+      
       const { data, error } = await supabase
         .from('audio_tracks')
         .select('*')
+        .eq('user_id', user.id)
         .order('uploaded_at', { ascending: false });
       
       if (error) throw error;
       return data as Track[];
     },
+    enabled: !!user,
   });
 
   const handleDeleteTrack = async (id: string) => {
@@ -76,6 +83,10 @@ export const TrackList = () => {
     e.stopPropagation();
     navigate(`/tracks/${trackId}`);
   };
+
+  if (!user) {
+    return <div className="text-center py-4 text-gray-500">Please log in to view your tracks</div>;
+  }
 
   if (isLoading) {
     return <div className="text-center py-4">Loading tracks...</div>;

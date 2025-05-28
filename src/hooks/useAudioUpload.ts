@@ -3,14 +3,25 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const useAudioUpload = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const uploadAudio = async (file: File) => {
-    if (!file || !user) return;
+    if (!file || !user) {
+      if (!user) {
+        toast({
+          title: 'Authentication required',
+          description: 'You must be logged in to upload files.',
+          variant: 'destructive',
+        });
+      }
+      return;
+    }
     
     // Validate file type
     const fileType = file.type;
@@ -73,7 +84,11 @@ export const useAudioUpload = () => {
         description: 'Your audio track has been uploaded.',
       });
 
+      // Refresh the track list
+      queryClient.invalidateQueries({ queryKey: ['tracks'] });
+
     } catch (error) {
+      console.error('Upload error:', error);
       toast({
         title: 'Upload failed',
         description: error instanceof Error ? error.message : 'An error occurred during upload',
