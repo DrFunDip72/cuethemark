@@ -5,10 +5,14 @@ import { LogOut } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAudioUpload } from '@/hooks/useAudioUpload';
+import { useRef } from 'react';
 
 export const Navigation = () => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { uploadAudio } = useAudioUpload();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleLogout = async () => {
     try {
@@ -28,6 +32,19 @@ export const Navigation = () => {
     }
   };
 
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      uploadAudio(file);
+      // Reset the input so the same file can be selected again
+      event.target.value = '';
+    }
+  };
+
   return (
     <nav className="w-full bg-white border-b">
       <div className="container mx-auto px-4">
@@ -36,12 +53,12 @@ export const Navigation = () => {
             Dance Track Marker
           </Link>
           <div className="flex items-center space-x-4">
-            <Link
-              to="/"
+            <button
+              onClick={handleUploadClick}
               className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
             >
               Upload
-            </Link>
+            </button>
             <Link
               to="/tracks"
               className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
@@ -49,7 +66,6 @@ export const Navigation = () => {
               My Tracks
             </Link>
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600">{user?.email}</span>
               <Button
                 variant="ghost"
                 size="sm"
@@ -63,6 +79,13 @@ export const Navigation = () => {
           </div>
         </div>
       </div>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="audio/mp3,audio/wav"
+        onChange={handleFileChange}
+        className="hidden"
+      />
     </nav>
   );
 };

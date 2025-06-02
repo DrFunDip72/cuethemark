@@ -26,6 +26,7 @@ interface AddLabelDialogProps {
 export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: AddLabelDialogProps) => {
   const [labelName, setLabelName] = useState('');
   const [notes, setNotes] = useState('');
+  const [playbackOffset, setPlaybackOffset] = useState(3);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -54,6 +55,7 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
           label_name: labelName.trim(),
           timestamp_seconds: currentTime,
           notes: notes.trim() || null,
+          playback_offset_seconds: playbackOffset,
         }]);
 
       if (error) {
@@ -77,6 +79,7 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
       // Reset form and close dialog
       setLabelName('');
       setNotes('');
+      setPlaybackOffset(3);
       onOpenChange(false);
     } catch (err) {
       console.error('Unexpected error:', err);
@@ -125,6 +128,27 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
                 placeholder="Optional notes about this section"
                 rows={3}
               />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="playback-offset" className="text-right">
+                Start Offset (s)
+              </Label>
+              <div className="col-span-3 flex items-center gap-2">
+                <Input
+                  id="playback-offset"
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  value={playbackOffset}
+                  onChange={(e) => setPlaybackOffset(parseFloat(e.target.value) || 0)}
+                  className="flex-1"
+                  placeholder="3"
+                />
+                <span className="text-sm text-gray-500 text-xs">
+                  seconds before
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
