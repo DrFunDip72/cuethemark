@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -27,10 +26,18 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
   const [labelName, setLabelName] = useState('');
   const [notes, setNotes] = useState('');
   const [playbackOffset, setPlaybackOffset] = useState(3);
+  const [capturedTime, setCapturedTime] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+
+  // Capture the current time when the dialog opens
+  useEffect(() => {
+    if (open) {
+      setCapturedTime(currentTime);
+    }
+  }, [open, currentTime]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +60,7 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
           track_id: trackId,
           user_id: user.id,
           label_name: labelName.trim(),
-          timestamp_seconds: currentTime,
+          timestamp_seconds: capturedTime,
           notes: notes.trim() || null,
           playback_offset_seconds: playbackOffset,
         }]);
@@ -80,6 +87,7 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
       setLabelName('');
       setNotes('');
       setPlaybackOffset(3);
+      setCapturedTime(0);
       onOpenChange(false);
     } catch (err) {
       console.error('Unexpected error:', err);
@@ -154,7 +162,7 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right">Time</Label>
               <span className="col-span-3 text-sm text-gray-600">
-                {Math.floor(currentTime / 60)}:{Math.floor(currentTime % 60).toString().padStart(2, '0')}
+                {Math.floor(capturedTime / 60)}:{Math.floor(capturedTime % 60).toString().padStart(2, '0')}
               </span>
             </div>
           </div>
