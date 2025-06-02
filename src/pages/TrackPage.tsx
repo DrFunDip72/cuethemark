@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -138,6 +137,15 @@ const TrackPage = () => {
     }
   };
 
+  // New function to handle opening Add Label dialog
+  const handleAddLabelClick = () => {
+    // Pause the audio when opening the Add Label dialog
+    if (audioRef.current && isPlaying) {
+      audioRef.current.pause();
+    }
+    setAddLabelOpen(true);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <Card className="p-6 mb-6">
@@ -226,7 +234,7 @@ const TrackPage = () => {
       <Button 
         className="fixed bottom-6 right-6" 
         size="lg"
-        onClick={() => setAddLabelOpen(true)}
+        onClick={handleAddLabelClick}
       >
         <Plus className="mr-2 h-4 w-4" /> Add Label
       </Button>
