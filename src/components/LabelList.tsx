@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Play, Pencil, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -49,11 +48,11 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
   const [editingLabel, setEditingLabel] = useState<Label | null>(null);
   const [deletingLabel, setDeletingLabel] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
-  const [isNotesUpdating, setIsNotesUpdating] = useState<Record<string, boolean>>({});
+  const [saveTimeouts, setSaveTimeouts] = useState<Record<string, NodeJS.Timeout>>({});
   const { toast } = useToast();
 
   // Find the active label based on current time
-  useState(() => {
+  useEffect(() => {
     const currentLabel = labels.find(
       (label) => currentTime >= label.timestamp_seconds && 
       (currentTime < (labels.find(l => l.timestamp_seconds > label.timestamp_seconds)?.timestamp_seconds || Infinity))
@@ -62,13 +61,58 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
   });
 
   // Initialize notes from labels
-  useState(() => {
+  useEffect(() => {
     const initialNotes: Record<string, string> = {};
     labels.forEach(label => {
       initialNotes[label.id] = label.notes || '';
     });
     setNotes(initialNotes);
-  });
+  }, [labels]);
+
+  // Auto-save notes with debouncing
+  const handleNotesChange = (labelId: string, value: string) => {
+    setNotes(prev => ({ ...prev, [labelId]: value }));
+    
+    // Clear existing timeout for this label
+    if (saveTimeouts[labelId]) {
+      clearTimeout(saveTimeouts[labelId]);
+    }
+    
+    // Set new timeout to save after 1 second of no typing
+    const timeoutId = setTimeout(async () => {
+      try {
+        const { error } = await supabase
+          .from('audio_labels')
+          .update({ notes: value })
+          .eq('id', labelId);
+          
+        if (error) throw error;
+        
+        // Remove the timeout from state after successful save
+        setSaveTimeouts(prev => {
+          const newTimeouts = { ...prev };
+          delete newTimeouts[labelId];
+          return newTimeouts;
+        });
+      } catch (error) {
+        console.error('Error auto-saving notes:', error);
+        toast({
+          title: "Auto-save failed",
+          description: "Could not save notes automatically",
+          variant: "destructive"
+        });
+      }
+    }, 1000);
+    
+    setSaveTimeouts(prev => ({ ...prev, [labelId]: timeoutId }));
+  };
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(saveTimeouts).forEach(timeout => clearTimeout(timeout));
+    };
+  }, [saveTimeouts]);
 
   const handleDeleteLabel = async (labelId: string) => {
     try {
@@ -177,17 +221,13 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
                 <div className="space-y-2">
                   <Textarea 
                     value={notes[label.id] || ''} 
-                    onChange={(e) => setNotes({ ...notes, [label.id]: e.target.value })}
-                    placeholder="Add notes about this section..."
+                    onChange={(e) => handleNotesChange(label.id, e.target.value)}
+                    placeholder="Add notes about this section... (auto-saves)"
                     className="min-h-[100px] text-sm"
                   />
-                  <Button 
-                    onClick={() => handleSaveNotes(label.id)} 
-                    size="sm"
-                    disabled={isNotesUpdating[label.id]}
-                  >
-                    {isNotesUpdating[label.id] ? 'Saving...' : 'Save Notes'}
-                  </Button>
+                  <div className="text-xs text-gray-500">
+                    {saveTimeouts[label.id] ? '⏳ Saving...' : '✓ Auto-saved'}
+                  </div>
                 </div>
               </AccordionContent>
             </AccordionItem>

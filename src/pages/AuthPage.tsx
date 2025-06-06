@@ -40,8 +40,8 @@ const AuthPage = () => {
         if (error) throw error;
         
         toast({
-          title: "Success",
-          description: "Logged in successfully"
+          title: "Welcome back!",
+          description: "You've been logged in successfully"
         });
         navigate('/');
       } else {
@@ -53,8 +53,8 @@ const AuthPage = () => {
         if (error) throw error;
         
         toast({
-          title: "Success",
-          description: "Account created successfully"
+          title: "Welcome to Dance Track Marker!",
+          description: "Your account has been created successfully"
         });
         navigate('/');
       }
@@ -74,9 +74,22 @@ const AuthPage = () => {
       <Card className="w-full max-w-md p-8">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold">Dance Track Marker</h1>
-          <p className="text-gray-600 mt-2">
-            {isLogin ? 'Sign in to your account' : 'Create a new account'}
-          </p>
+          
+          {isLogin ? (
+            <div className="mt-4">
+              <h2 className="text-xl font-semibold text-primary mb-2">Welcome Back!</h2>
+              <p className="text-gray-600">
+                Sign in to continue marking your dance tracks
+              </p>
+            </div>
+          ) : (
+            <div className="mt-4">
+              <h2 className="text-xl font-semibold text-green-600 mb-2">Join Us!</h2>
+              <p className="text-gray-600">
+                Create your account to start marking dance tracks and organizing your music
+              </p>
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -105,8 +118,12 @@ const AuthPage = () => {
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Sign Up')}
+          <Button 
+            type="submit" 
+            className={`w-full ${isLogin ? 'bg-primary' : 'bg-green-600 hover:bg-green-700'}`}
+            disabled={loading}
+          >
+            {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
           </Button>
         </form>
 
@@ -116,7 +133,7 @@ const AuthPage = () => {
             onClick={() => setIsLogin(!isLogin)}
             className="text-primary hover:underline"
           >
-            {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+            {isLogin ? "New here? Create an account" : "Already have an account? Sign in"}
           </button>
         </div>
       </Card>

@@ -35,6 +35,25 @@ const TrackPage = () => {
 
   const { labels, isLoading: labelsLoading } = useTrackLabels(id || '');
 
+  // Load saved timestamp when component mounts
+  useEffect(() => {
+    if (id && audioRef.current) {
+      const savedTime = localStorage.getItem(`track-${id}-timestamp`);
+      if (savedTime) {
+        const time = parseFloat(savedTime);
+        audioRef.current.currentTime = time;
+        setCurrentTime(time);
+      }
+    }
+  }, [id, trackUrl]);
+
+  // Save timestamp when it changes
+  useEffect(() => {
+    if (id && currentTime > 0) {
+      localStorage.setItem(`track-${id}-timestamp`, currentTime.toString());
+    }
+  }, [id, currentTime]);
+
   const { data: trackData } = useQuery({
     queryKey: ['track', id],
     queryFn: async () => {
