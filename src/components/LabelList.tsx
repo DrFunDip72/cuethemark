@@ -172,8 +172,26 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
 
   const handlePlayFromLabel = (label: Label) => {
     const offset = label.playback_offset_seconds || 3;
-    const startTime = Math.max(0, label.timestamp_seconds - offset);
-    onPlayFromTimestamp(startTime);
+    const startTime = label.timestamp_seconds - offset;
+    
+    // Check if the start time would be before 0:00
+    if (startTime < 0) {
+      const delaySeconds = Math.abs(startTime);
+      
+      // Show countdown toast
+      toast({
+        title: `Starting in ${delaySeconds} seconds...`,
+        description: "Get ready!"
+      });
+      
+      // Wait for the delay, then start playback from the timestamp
+      setTimeout(() => {
+        onPlayFromTimestamp(label.timestamp_seconds);
+      }, delaySeconds * 1000);
+    } else {
+      // Normal playback with offset
+      onPlayFromTimestamp(startTime);
+    }
   };
 
   return (
