@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -139,6 +140,22 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="timestamp" className="text-right">
+                Timestamp (s)
+              </Label>
+              <Input
+                id="timestamp"
+                type="number"
+                step="0.1"
+                min="0"
+                value={capturedTime}
+                onChange={(e) => setCapturedTime(parseFloat(e.target.value) || 0)}
+                className="col-span-3"
+                placeholder="0"
+              />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="playback-offset" className="text-right">
                 Start Offset (s)
               </Label>
@@ -157,13 +174,6 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
                   seconds before
                 </span>
               </div>
-            </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Time</Label>
-              <span className="col-span-3 text-sm text-gray-600">
-                {Math.floor(capturedTime / 60)}:{Math.floor(capturedTime % 60).toString().padStart(2, '0')}
-              </span>
             </div>
           </div>
 

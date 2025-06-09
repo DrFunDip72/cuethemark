@@ -126,9 +126,8 @@ const TrackPage = () => {
 
   const handlePlayFromTimestamp = (timestamp: number) => {
     if (audioRef.current) {
-      // Start playing from 3 seconds before the timestamp or from the beginning if timestamp < 3
-      const startTime = Math.max(0, timestamp);
-      audioRef.current.currentTime = startTime;
+      // Start playing from the exact timestamp (no offset calculation here)
+      audioRef.current.currentTime = timestamp;
       audioRef.current.play().catch(error => {
         console.error('Playback failed:', error);
         toast({

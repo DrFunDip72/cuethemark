@@ -49,6 +49,7 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
   const [deletingLabel, setDeletingLabel] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [saveTimeouts, setSaveTimeouts] = useState<Record<string, NodeJS.Timeout>>({});
+  const [isNotesUpdating, setIsNotesUpdating] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
   // Find the active label based on current time
