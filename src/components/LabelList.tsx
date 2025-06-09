@@ -184,9 +184,9 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
         description: "Get ready!"
       });
       
-      // Wait for the delay, then start playback from the timestamp
+      // Wait for the delay, then start playback from 0:00
       setTimeout(() => {
-        onPlayFromTimestamp(label.timestamp_seconds);
+        onPlayFromTimestamp(0);
       }, delaySeconds * 1000);
     } else {
       // Normal playback with offset
