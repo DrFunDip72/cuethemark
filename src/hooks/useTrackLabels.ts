@@ -11,7 +11,6 @@ type Label = {
   created_at: string;
   notes?: string;
   playback_offset_seconds?: number;
-  order?: number;
 };
 
 export const useTrackLabels = (trackId: string) => {
@@ -24,7 +23,6 @@ export const useTrackLabels = (trackId: string) => {
         .from('audio_labels')
         .select('*')
         .eq('track_id', trackId)
-        .order('order', { ascending: true, nullsFirst: false })
         .order('timestamp_seconds', { ascending: true });
 
       if (error) throw error;
