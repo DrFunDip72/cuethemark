@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Play, Pencil, Trash2 } from 'lucide-react';
+import { Play, Pencil, Trash2, GripVertical } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatTime } from '@/lib/formatTime';
@@ -50,6 +50,8 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [saveTimeouts, setSaveTimeouts] = useState<Record<string, NodeJS.Timeout>>({});
   const [isNotesUpdating, setIsNotesUpdating] = useState<Record<string, boolean>>({});
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const { toast } = useToast();
 
   // Find the active label based on current time
@@ -114,6 +116,68 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
       Object.values(saveTimeouts).forEach(timeout => clearTimeout(timeout));
     };
   }, [saveTimeouts]);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIndex(index);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    
+    if (draggedIndex === null || draggedIndex === dropIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    try {
+      // Reorder labels array
+      const reorderedLabels = [...labels];
+      const [draggedLabel] = reorderedLabels.splice(draggedIndex, 1);
+      reorderedLabels.splice(dropIndex, 0, draggedLabel);
+
+      // Update order in database
+      const updates = reorderedLabels.map((label, index) => ({
+        id: label.id,
+        order: index
+      }));
+
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('audio_labels')
+          .update({ order: update.order })
+          .eq('id', update.id);
+          
+        if (error) throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Labels reordered successfully"
+      });
+    } catch (error) {
+      console.error('Error reordering labels:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reorder labels",
+        variant: "destructive"
+      });
+    } finally {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+    }
+  };
 
   const handleDeleteLabel = async (labelId: string) => {
     try {
@@ -196,24 +260,32 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
 
   return (
     <div className="space-y-3">
-      {labels.map((label) => (
+      {labels.map((label, index) => (
         <Card
           key={label.id}
           className={`p-4 hover:bg-accent transition-colors ${
             activeLabel === label.id ? 'border-primary' : ''
-          }`}
+          } ${dragOverIndex === index ? 'border-blue-500 border-2' : ''}`}
+          draggable
+          onDragStart={(e) => handleDragStart(e, index)}
+          onDragOver={(e) => handleDragOver(e, index)}
+          onDragLeave={handleDragLeave}
+          onDrop={(e) => handleDrop(e, index)}
         >
           <div className="flex items-center justify-between">
-            <div 
-              className="flex items-center gap-3 cursor-pointer flex-1"
-              onClick={() => handlePlayFromLabel(label)}
-            >
-              <Play className="h-4 w-4 text-primary" />
-              <div>
-                <h3 className="font-medium">{label.label_name}</h3>
-                <Badge variant="secondary">
-                  {formatTime(label.timestamp_seconds)}
-                </Badge>
+            <div className="flex items-center gap-3">
+              <GripVertical className="h-4 w-4 text-gray-400 cursor-grab" />
+              <div 
+                className="flex items-center gap-3 cursor-pointer flex-1"
+                onClick={() => handlePlayFromLabel(label)}
+              >
+                <Play className="h-4 w-4 text-primary" />
+                <div>
+                  <h3 className="font-medium">{label.label_name}</h3>
+                  <Badge variant="secondary">
+                    {formatTime(label.timestamp_seconds)}
+                  </Badge>
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
