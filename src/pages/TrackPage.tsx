@@ -12,6 +12,13 @@ import { formatTime } from '@/lib/formatTime';
 import { Slider } from '@/components/ui/slider';
 import { EditTrackDialog } from '@/components/EditTrackDialog';
 import { useQuery } from '@tanstack/react-query';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type TrackData = {
   id: string;
@@ -30,10 +37,18 @@ const TrackPage = () => {
   const [addLabelOpen, setAddLabelOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [editTrackOpen, setEditTrackOpen] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
   const { labels, isLoading: labelsLoading } = useTrackLabels(id || '');
+
+  // Apply playback rate when it changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = playbackRate;
+    }
+  }, [playbackRate]);
 
   // Load saved timestamp when component mounts
   useEffect(() => {
@@ -164,6 +179,10 @@ const TrackPage = () => {
     setAddLabelOpen(true);
   };
 
+  const handleSpeedChange = (value: string) => {
+    setPlaybackRate(parseFloat(value));
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <Card className="p-6 mb-6">
@@ -186,6 +205,23 @@ const TrackPage = () => {
             step={0.1}
             disabled={isLoading || !trackUrl}
           />
+
+          <div className="flex items-center gap-2 min-w-fit">
+            <span className="text-sm text-muted-foreground">Speed:</span>
+            <Select value={playbackRate.toString()} onValueChange={handleSpeedChange}>
+              <SelectTrigger className="w-20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0.5">0.5x</SelectItem>
+                <SelectItem value="0.75">0.75x</SelectItem>
+                <SelectItem value="1">1x</SelectItem>
+                <SelectItem value="1.25">1.25x</SelectItem>
+                <SelectItem value="1.5">1.5x</SelectItem>
+                <SelectItem value="2">2x</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         
         <div className="text-center text-sm font-medium text-gray-600">
