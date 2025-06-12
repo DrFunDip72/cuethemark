@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
+import { roundToOneDecimal } from '@/lib/formatTime';
 
 interface AddLabelDialogProps {
   open: boolean;
@@ -33,10 +34,10 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  // Capture the current time when the dialog opens
+  // Capture the current time when the dialog opens, rounded to 1 decimal
   useEffect(() => {
     if (open) {
-      setCapturedTime(currentTime);
+      setCapturedTime(roundToOneDecimal(currentTime));
     }
   }, [open, currentTime]);
 
@@ -61,9 +62,9 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
           track_id: trackId,
           user_id: user.id,
           label_name: labelName.trim(),
-          timestamp_seconds: capturedTime,
+          timestamp_seconds: roundToOneDecimal(capturedTime),
           notes: notes.trim() || null,
-          playback_offset_seconds: playbackOffset,
+          playback_offset_seconds: roundToOneDecimal(playbackOffset),
         }]);
 
       if (error) {
@@ -100,6 +101,16 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleTimestampChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setCapturedTime(roundToOneDecimal(value));
+  };
+
+  const handleOffsetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setPlaybackOffset(roundToOneDecimal(value));
   };
 
   return (
@@ -148,10 +159,10 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
                 type="number"
                 step="0.1"
                 min="0"
-                value={capturedTime}
-                onChange={(e) => setCapturedTime(parseFloat(e.target.value) || 0)}
+                value={capturedTime.toFixed(1)}
+                onChange={handleTimestampChange}
                 className="col-span-3"
-                placeholder="0"
+                placeholder="0.0"
               />
             </div>
 
@@ -163,12 +174,12 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
                 <Input
                   id="playback-offset"
                   type="number"
-                  step="0.5"
+                  step="0.1"
                   min="0"
-                  value={playbackOffset}
-                  onChange={(e) => setPlaybackOffset(parseFloat(e.target.value) || 0)}
+                  value={playbackOffset.toFixed(1)}
+                  onChange={handleOffsetChange}
                   className="flex-1"
-                  placeholder="3"
+                  placeholder="3.0"
                 />
                 <span className="text-sm text-gray-500 text-xs">
                   seconds before

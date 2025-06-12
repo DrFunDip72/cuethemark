@@ -8,7 +8,7 @@ import { LabelList } from '@/components/LabelList';
 import { AddLabelDialog } from '@/components/AddLabelDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { formatTime } from '@/lib/formatTime';
+import { formatTime, roundToOneDecimal } from '@/lib/formatTime';
 import { Slider } from '@/components/ui/slider';
 import { EditTrackDialog } from '@/components/EditTrackDialog';
 import { useQuery } from '@tanstack/react-query';
@@ -55,17 +55,18 @@ const TrackPage = () => {
     if (id && audioRef.current) {
       const savedTime = localStorage.getItem(`track-${id}-timestamp`);
       if (savedTime) {
-        const time = parseFloat(savedTime);
+        const time = roundToOneDecimal(parseFloat(savedTime));
         audioRef.current.currentTime = time;
         setCurrentTime(time);
       }
     }
   }, [id, trackUrl]);
 
-  // Save timestamp when it changes
+  // Save timestamp when it changes (rounded to 1 decimal)
   useEffect(() => {
     if (id && currentTime > 0) {
-      localStorage.setItem(`track-${id}-timestamp`, currentTime.toString());
+      const roundedTime = roundToOneDecimal(currentTime);
+      localStorage.setItem(`track-${id}-timestamp`, roundedTime.toString());
     }
   }, [id, currentTime]);
 
@@ -141,8 +142,8 @@ const TrackPage = () => {
 
   const handlePlayFromTimestamp = (timestamp: number) => {
     if (audioRef.current) {
-      // Start playing from the exact timestamp (no offset calculation here)
-      audioRef.current.currentTime = timestamp;
+      const roundedTimestamp = roundToOneDecimal(timestamp);
+      audioRef.current.currentTime = roundedTimestamp;
       audioRef.current.play().catch(error => {
         console.error('Playback failed:', error);
         toast({
@@ -157,14 +158,14 @@ const TrackPage = () => {
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
+      setCurrentTime(roundToOneDecimal(audioRef.current.currentTime));
     }
   };
 
   // New function to handle slider change
   const handleSliderChange = (value: number[]) => {
     if (audioRef.current && value.length > 0) {
-      const newTime = (value[0] / 100) * (duration || 1);
+      const newTime = roundToOneDecimal((value[0] / 100) * (duration || 1));
       audioRef.current.currentTime = newTime;
       setCurrentTime(newTime);
     }
@@ -314,7 +315,7 @@ const TrackPage = () => {
         ref={audioRef}
         src={trackUrl || undefined}
         onTimeUpdate={handleTimeUpdate}
-        onDurationChange={(e) => setDuration(e.currentTarget.duration)}
+        onDurationChange={(e) => setDuration(roundToOneDecimal(e.currentTarget.duration))}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
