@@ -14,7 +14,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { formatTime } from '@/lib/formatTime';
+import { formatTime, roundToOneDecimal } from '@/lib/formatTime';
+import { useQueryClient } from '@tanstack/react-query';
 import type { Label as LabelType } from './LabelList';
 
 interface EditLabelDialogProps {
@@ -26,11 +27,12 @@ interface EditLabelDialogProps {
 
 export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabelDialogProps) {
   const [labelName, setLabelName] = useState(label.label_name);
-  const [timestamp, setTimestamp] = useState(label.timestamp_seconds);
+  const [timestamp, setTimestamp] = useState(label.timestamp_seconds.toString());
   const [notes, setNotes] = useState(label.notes || '');
-  const [playbackOffset, setPlaybackOffset] = useState(label.playback_offset_seconds || 3);
+  const [playbackOffset, setPlaybackOffset] = useState((label.playback_offset_seconds || 3).toString());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +46,9 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabe
       return;
     }
 
+    const timestampValue = parseFloat(timestamp) || 0;
+    const offsetValue = parseFloat(playbackOffset) || 3;
+
     setIsSubmitting(true);
 
     try {
@@ -51,9 +56,9 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabe
         .from('audio_labels')
         .update({
           label_name: labelName.trim(),
-          timestamp_seconds: parseFloat(timestamp.toFixed(3)),
+          timestamp_seconds: roundToOneDecimal(timestampValue),
           notes: notes,
-          playback_offset_seconds: playbackOffset
+          playback_offset_seconds: roundToOneDecimal(offsetValue)
         })
         .eq('id', label.id);
 
@@ -71,6 +76,9 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabe
         title: "Success",
         description: "Label updated successfully"
       });
+      
+      // Invalidate queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['track-labels', trackId] });
       
       onOpenChange(false);
     } catch (err) {
@@ -118,20 +126,13 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabe
               <div className="col-span-3 flex items-center gap-2">
                 <Input
                   id="edit-timestamp"
-                  type="number"
-                  step="1"
-                  min="0"
-                  value={timestamp.toFixed(1)}
-                  onChange={(e) => {
-                    const value = parseFloat(e.target.value);
-                    if (!isNaN(value)) {
-                      setTimestamp(value);
-                    }
-                  }}
+                  type="text"
+                  value={timestamp}
+                  onChange={(e) => setTimestamp(e.target.value)}
                   className="flex-1"
                 />
                 <span className="text-sm text-gray-500 w-16">
-                  {formatTime(timestamp)}
+                  {formatTime(parseFloat(timestamp) || 0)}
                 </span>
               </div>
             </div>
@@ -143,16 +144,9 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabe
               <div className="col-span-3 flex items-center gap-2">
                 <Input
                   id="edit-playback-offset"
-                  type="number"
-                  step="1"
-                  min="0"
-                  value={playbackOffset.toFixed(1)}
-                  onChange={(e) => {
-                    const value = parseFloat(e.target.value);
-                    if (!isNaN(value)) {
-                      setPlaybackOffset(value);
-                    }
-                  }}
+                  type="text"
+                  value={playbackOffset}
+                  onChange={(e) => setPlaybackOffset(e.target.value)}
                   className="flex-1"
                   placeholder="3"
                 />

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -12,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface Track {
   id: string;
@@ -30,6 +32,7 @@ export function EditTrackDialog({ open, onOpenChange, track }: EditTrackDialogPr
   const [filename, setFilename] = useState(track.filename);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Update filename when track prop changes
   useEffect(() => {
@@ -72,6 +75,9 @@ export function EditTrackDialog({ open, onOpenChange, track }: EditTrackDialogPr
         title: "Success",
         description: "Track name updated successfully"
       });
+      
+      // Invalidate queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['track', track.id] });
       
       onOpenChange(false);
     } catch (err) {

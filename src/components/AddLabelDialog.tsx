@@ -27,8 +27,8 @@ interface AddLabelDialogProps {
 export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: AddLabelDialogProps) => {
   const [labelName, setLabelName] = useState('');
   const [notes, setNotes] = useState('');
-  const [playbackOffset, setPlaybackOffset] = useState(3);
-  const [capturedTime, setCapturedTime] = useState(0);
+  const [playbackOffset, setPlaybackOffset] = useState('3');
+  const [capturedTime, setCapturedTime] = useState('0');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -37,7 +37,7 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
   // Capture the current time when the dialog opens, rounded to 1 decimal
   useEffect(() => {
     if (open) {
-      setCapturedTime(roundToOneDecimal(currentTime));
+      setCapturedTime(roundToOneDecimal(currentTime).toString());
     }
   }, [open, currentTime]);
 
@@ -53,6 +53,9 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
       return;
     }
 
+    const timestampValue = parseFloat(capturedTime) || 0;
+    const offsetValue = parseFloat(playbackOffset) || 3;
+
     setIsSubmitting(true);
 
     try {
@@ -62,9 +65,9 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
           track_id: trackId,
           user_id: user.id,
           label_name: labelName.trim(),
-          timestamp_seconds: roundToOneDecimal(capturedTime),
+          timestamp_seconds: roundToOneDecimal(timestampValue),
           notes: notes.trim() || null,
-          playback_offset_seconds: roundToOneDecimal(playbackOffset),
+          playback_offset_seconds: roundToOneDecimal(offsetValue),
         }]);
 
       if (error) {
@@ -88,8 +91,8 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
       // Reset form and close dialog
       setLabelName('');
       setNotes('');
-      setPlaybackOffset(3);
-      setCapturedTime(0);
+      setPlaybackOffset('3');
+      setCapturedTime('0');
       onOpenChange(false);
     } catch (err) {
       console.error('Unexpected error:', err);
@@ -104,17 +107,11 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
   };
 
   const handleTimestampChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    if (!isNaN(value)) {
-      setCapturedTime(roundToOneDecimal(value));
-    }
+    setCapturedTime(e.target.value);
   };
 
   const handleOffsetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    if (!isNaN(value)) {
-      setPlaybackOffset(roundToOneDecimal(value));
-    }
+    setPlaybackOffset(e.target.value);
   };
 
   return (
@@ -160,13 +157,11 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
               </Label>
               <Input
                 id="timestamp"
-                type="number"
-                step="1"
-                min="0"
-                value={capturedTime.toFixed(1)}
+                type="text"
+                value={capturedTime}
                 onChange={handleTimestampChange}
                 className="col-span-3"
-                placeholder="0.0"
+                placeholder="0"
               />
             </div>
 
@@ -177,13 +172,11 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
               <div className="col-span-3 flex items-center gap-2">
                 <Input
                   id="playback-offset"
-                  type="number"
-                  step="1"
-                  min="0"
-                  value={playbackOffset.toFixed(1)}
+                  type="text"
+                  value={playbackOffset}
                   onChange={handleOffsetChange}
                   className="flex-1"
-                  placeholder="3.0"
+                  placeholder="3"
                 />
                 <span className="text-sm text-gray-500 text-xs">
                   seconds before
