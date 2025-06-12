@@ -119,10 +119,15 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabe
                 <Input
                   id="edit-timestamp"
                   type="number"
-                  step="0.01"
+                  step="1"
                   min="0"
-                  value={timestamp}
-                  onChange={(e) => setTimestamp(parseFloat(e.target.value) || 0)}
+                  value={timestamp.toFixed(1)}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+                    if (!isNaN(value)) {
+                      setTimestamp(value);
+                    }
+                  }}
                   className="flex-1"
                 />
                 <span className="text-sm text-gray-500 w-16">
@@ -139,10 +144,15 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabe
                 <Input
                   id="edit-playback-offset"
                   type="number"
-                  step="0.5"
+                  step="1"
                   min="0"
-                  value={playbackOffset}
-                  onChange={(e) => setPlaybackOffset(parseFloat(e.target.value) || 0)}
+                  value={playbackOffset.toFixed(1)}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+                    if (!isNaN(value)) {
+                      setPlaybackOffset(value);
+                    }
+                  }}
                   className="flex-1"
                   placeholder="3"
                 />

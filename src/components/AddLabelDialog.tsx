@@ -104,13 +104,17 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
   };
 
   const handleTimestampChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value) || 0;
-    setCapturedTime(roundToOneDecimal(value));
+    const value = parseFloat(e.target.value);
+    if (!isNaN(value)) {
+      setCapturedTime(roundToOneDecimal(value));
+    }
   };
 
   const handleOffsetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value) || 0;
-    setPlaybackOffset(roundToOneDecimal(value));
+    const value = parseFloat(e.target.value);
+    if (!isNaN(value)) {
+      setPlaybackOffset(roundToOneDecimal(value));
+    }
   };
 
   return (
@@ -157,7 +161,7 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
               <Input
                 id="timestamp"
                 type="number"
-                step="0.1"
+                step="1"
                 min="0"
                 value={capturedTime.toFixed(1)}
                 onChange={handleTimestampChange}
@@ -174,7 +178,7 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
                 <Input
                   id="playback-offset"
                   type="number"
-                  step="0.1"
+                  step="1"
                   min="0"
                   value={playbackOffset.toFixed(1)}
                   onChange={handleOffsetChange}

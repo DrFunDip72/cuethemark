@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -31,6 +30,11 @@ export function EditTrackDialog({ open, onOpenChange, track }: EditTrackDialogPr
   const [filename, setFilename] = useState(track.filename);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+
+  // Update filename when track prop changes
+  useEffect(() => {
+    setFilename(track.filename);
+  }, [track.filename]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

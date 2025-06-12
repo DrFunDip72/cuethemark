@@ -8,7 +8,7 @@ import { LabelList } from '@/components/LabelList';
 import { AddLabelDialog } from '@/components/AddLabelDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { formatTime, roundToOneDecimal } from '@/lib/formatTime';
+import { formatTime, roundToOneDecimal, formatTimeForDisplay } from '@/lib/formatTime';
 import { Slider } from '@/components/ui/slider';
 import { EditTrackDialog } from '@/components/EditTrackDialog';
 import { useQuery } from '@tanstack/react-query';
@@ -226,7 +226,7 @@ const TrackPage = () => {
         </div>
         
         <div className="text-center text-sm font-medium text-gray-600">
-          {formatTime(currentTime)} / {formatTime(duration)}
+          {formatTimeForDisplay(currentTime)} / {formatTimeForDisplay(duration)}
         </div>
       </Card>
 
