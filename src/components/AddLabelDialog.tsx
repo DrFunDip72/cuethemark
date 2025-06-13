@@ -1,21 +1,20 @@
-
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { formatTime, roundToOneDecimal } from '@/lib/formatTime';
 import { useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/contexts/AuthContext';
-import { roundToOneDecimal } from '@/lib/formatTime';
 
 interface AddLabelDialogProps {
   open: boolean;
@@ -24,60 +23,103 @@ interface AddLabelDialogProps {
   currentTime: number;
 }
 
-export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: AddLabelDialogProps) => {
+export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: AddLabelDialogProps) {
   const [labelName, setLabelName] = useState('');
+  const [timestamp, setTimestamp] = useState(currentTime.toString());
   const [notes, setNotes] = useState('');
   const [playbackOffset, setPlaybackOffset] = useState('3');
-  const [capturedTime, setCapturedTime] = useState('0');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
 
   // Capture the current time when the dialog opens, rounded to 1 decimal
   useEffect(() => {
     if (open) {
-      setCapturedTime(roundToOneDecimal(currentTime).toString());
+      setTimestamp(roundToOneDecimal(currentTime).toString());
     }
   }, [open, currentTime]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!labelName.trim() || !user) {
+    if (!labelName.trim()) {
       toast({
         title: "Error",
-        description: !user ? "You must be logged in to add labels" : "Label name is required",
+        description: "Label name is required",
         variant: "destructive"
       });
       return;
     }
 
-    const timestampValue = parseFloat(capturedTime) || 0;
+    const timestampValue = parseFloat(timestamp) || 0;
     const offsetValue = parseFloat(playbackOffset) || 3;
 
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to add labels",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Get all labels for this track to determine proper order
+      const { data: existingLabels, error: fetchError } = await supabase
         .from('audio_labels')
-        .insert([{
+        .select('timestamp_seconds, order')
+        .eq('track_id', trackId)
+        .order('timestamp_seconds', { ascending: true });
+
+      if (fetchError) throw fetchError;
+
+      // Find where this new label should be inserted based on timestamp
+      let newOrder = existingLabels.length + 1;
+      for (let i = 0; i < existingLabels.length; i++) {
+        if (timestampValue < existingLabels[i].timestamp_seconds) {
+          newOrder = i + 1;
+          break;
+        }
+      }
+
+      // Insert the new label
+      const { error: insertError } = await supabase
+        .from('audio_labels')
+        .insert({
           track_id: trackId,
           user_id: user.id,
           label_name: labelName.trim(),
           timestamp_seconds: roundToOneDecimal(timestampValue),
-          notes: notes.trim() || null,
+          notes: notes || null,
           playback_offset_seconds: roundToOneDecimal(offsetValue),
-        }]);
-
-      if (error) {
-        console.error('Error creating label:', error);
-        toast({
-          title: "Error",
-          description: error.message || "Failed to create label",
-          variant: "destructive"
+          order: newOrder
         });
-        return;
+
+      if (insertError) throw insertError;
+
+      // Update order for all labels that should come after this new one
+      if (newOrder <= existingLabels.length) {
+        const { data: allLabels, error: getAllError } = await supabase
+          .from('audio_labels')
+          .select('id, timestamp_seconds')
+          .eq('track_id', trackId)
+          .order('timestamp_seconds', { ascending: true });
+
+        if (getAllError) throw getAllError;
+
+        // Update order for all labels
+        for (let i = 0; i < allLabels.length; i++) {
+          const { error: orderError } = await supabase
+            .from('audio_labels')
+            .update({ order: i + 1 })
+            .eq('id', allLabels[i].id);
+            
+          if (orderError) throw orderError;
+        }
       }
 
       toast({
@@ -85,14 +127,15 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
         description: "Label added successfully"
       });
       
+      // Reset form
+      setLabelName('');
+      setTimestamp(currentTime.toString());
+      setNotes('');
+      setPlaybackOffset('3');
+      
       // Invalidate queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ['track-labels', trackId] });
       
-      // Reset form and close dialog
-      setLabelName('');
-      setNotes('');
-      setPlaybackOffset('3');
-      setCapturedTime('0');
       onOpenChange(false);
     } catch (err) {
       console.error('Unexpected error:', err);
@@ -107,7 +150,7 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
   };
 
   const handleTimestampChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCapturedTime(e.target.value);
+    setTimestamp(e.target.value);
   };
 
   const handleOffsetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,7 +162,10 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Add Label</DialogTitle>
+            <DialogTitle>Add New Label</DialogTitle>
+            <DialogDescription>
+              Create a new label at the current playback position or specify a custom time.
+            </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
@@ -158,7 +204,7 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
               <Input
                 id="timestamp"
                 type="text"
-                value={capturedTime}
+                value={timestamp}
                 onChange={handleTimestampChange}
                 className="col-span-3"
                 placeholder="0"
@@ -197,4 +243,4 @@ export const AddLabelDialog = ({ open, onOpenChange, trackId, currentTime }: Add
       </DialogContent>
     </Dialog>
   );
-};
+}

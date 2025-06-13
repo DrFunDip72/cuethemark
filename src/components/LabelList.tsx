@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Play, Pencil, Trash2 } from 'lucide-react';
+import { Play, Pencil, Trash2, GripVertical } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatTime } from '@/lib/formatTime';
@@ -8,6 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { EditLabelDialog } from './EditLabelDialog';
 import { Textarea } from '@/components/ui/textarea';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,6 +53,7 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
   const [saveTimeouts, setSaveTimeouts] = useState<Record<string, NodeJS.Timeout>>({});
   const [isNotesUpdating, setIsNotesUpdating] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Find the active label based on current time
   useEffect(() => {
@@ -114,6 +117,57 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
       Object.values(saveTimeouts).forEach(timeout => clearTimeout(timeout));
     };
   }, [saveTimeouts]);
+
+  const handleDragEnd = async (result: DropResult) => {
+    if (!result.destination) {
+      return;
+    }
+
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
+
+    if (sourceIndex === destinationIndex) {
+      return;
+    }
+
+    // Create a new array with reordered items
+    const reorderedLabels = Array.from(labels);
+    const [removed] = reorderedLabels.splice(sourceIndex, 1);
+    reorderedLabels.splice(destinationIndex, 0, removed);
+
+    // Update the order values for all affected labels
+    const updates = reorderedLabels.map((label, index) => ({
+      id: label.id,
+      order: index + 1
+    }));
+
+    try {
+      // Update all labels with new order
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('audio_labels')
+          .update({ order: update.order })
+          .eq('id', update.id);
+        
+        if (error) throw error;
+      }
+
+      // Refresh the labels list
+      queryClient.invalidateQueries({ queryKey: ['track-labels', trackId] });
+      
+      toast({
+        title: "Success",
+        description: "Labels reordered successfully"
+      });
+    } catch (error) {
+      console.error('Error reordering labels:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reorder labels",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleDeleteLabel = async (labelId: string) => {
     try {
@@ -195,64 +249,88 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
   };
 
   return (
-    <div className="space-y-3">
-      {labels.map((label) => (
-        <Card
-          key={label.id}
-          className={`p-4 hover:bg-accent transition-colors ${
-            activeLabel === label.id ? 'border-primary' : ''
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <div 
-              className="flex items-center gap-3 cursor-pointer flex-1"
-              onClick={() => handlePlayFromLabel(label)}
-            >
-              <Play className="h-4 w-4 text-primary" />
-              <div>
-                <h3 className="font-medium">{label.label_name}</h3>
-                <Badge variant="secondary">
-                  {formatTime(label.timestamp_seconds)}
-                </Badge>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button size="icon" variant="ghost" onClick={() => openEditDialog(label)}>
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button 
-                size="icon" 
-                variant="ghost" 
-                onClick={() => setDeletingLabel(label.id)}
-                className="text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <Droppable droppableId="labels">
+        {(provided) => (
+          <div
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+            className="space-y-3"
+          >
+            {labels.map((label, index) => (
+              <Draggable key={label.id} draggableId={label.id} index={index}>
+                {(provided, snapshot) => (
+                  <Card
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    className={`p-4 hover:bg-accent transition-colors ${
+                      activeLabel === label.id ? 'border-primary' : ''
+                    } ${
+                      snapshot.isDragging ? 'shadow-lg rotate-1' : ''
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div 
+                        className="flex items-center gap-3 cursor-pointer flex-1"
+                        onClick={() => handlePlayFromLabel(label)}
+                      >
+                        <Play className="h-4 w-4 text-primary" />
+                        <div>
+                          <h3 className="font-medium">{label.label_name}</h3>
+                          <Badge variant="secondary">
+                            {formatTime(label.timestamp_seconds)}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button size="icon" variant="ghost" onClick={() => openEditDialog(label)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          onClick={() => setDeletingLabel(label.id)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                        <div
+                          {...provided.dragHandleProps}
+                          className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
+                        >
+                          <GripVertical className="h-4 w-4 text-gray-400" />
+                        </div>
+                      </div>
+                    </div>
 
-          <Accordion type="single" collapsible className="w-full mt-2">
-            <AccordionItem value={`notes-${label.id}`} className="border-0">
-              <AccordionTrigger className="py-2 px-0">
-                <span className="text-sm text-gray-500">Notes</span>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-2">
-                  <Textarea 
-                    value={notes[label.id] || ''} 
-                    onChange={(e) => handleNotesChange(label.id, e.target.value)}
-                    placeholder="Add notes about this section... (auto-saves)"
-                    className="min-h-[100px] text-sm"
-                  />
-                  <div className="text-xs text-gray-500">
-                    {saveTimeouts[label.id] ? '⏳ Saving...' : '✓ Auto-saved'}
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </Card>
-      ))}
+                    <Accordion type="single" collapsible className="w-full mt-2">
+                      <AccordionItem value={`notes-${label.id}`} className="border-0">
+                        <AccordionTrigger className="py-2 px-0">
+                          <span className="text-sm text-gray-500">Notes</span>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-2">
+                            <Textarea 
+                              value={notes[label.id] || ''} 
+                              onChange={(e) => handleNotesChange(label.id, e.target.value)}
+                              placeholder="Add notes about this section... (auto-saves)"
+                              className="min-h-[100px] text-sm"
+                            />
+                            <div className="text-xs text-gray-500">
+                              {saveTimeouts[label.id] ? '⏳ Saving...' : '✓ Auto-saved'}
+                            </div>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </Card>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
       
       {editingLabel && (
         <EditLabelDialog 
@@ -282,6 +360,6 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </DragDropContext>
   );
 };

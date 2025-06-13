@@ -48,33 +48,73 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId }: EditLabe
 
     const timestampValue = parseFloat(timestamp) || 0;
     const offsetValue = parseFloat(playbackOffset) || 3;
+    const originalTimestamp = label.timestamp_seconds;
 
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
-        .from('audio_labels')
-        .update({
-          label_name: labelName.trim(),
-          timestamp_seconds: roundToOneDecimal(timestampValue),
-          notes: notes,
-          playback_offset_seconds: roundToOneDecimal(offsetValue)
-        })
-        .eq('id', label.id);
+      // Check if timestamp changed - if so, we need to reorder
+      const timestampChanged = timestampValue !== originalTimestamp;
+      
+      if (timestampChanged) {
+        // Get all labels for this track to determine new order
+        const { data: allLabels, error: fetchError } = await supabase
+          .from('audio_labels')
+          .select('id, timestamp_seconds, order')
+          .eq('track_id', trackId)
+          .order('timestamp_seconds', { ascending: true });
 
-      if (error) {
-        console.error('Error updating label:', error);
-        toast({
-          title: "Error",
-          description: error.message || "Failed to update label",
-          variant: "destructive"
-        });
-        return;
+        if (fetchError) throw fetchError;
+
+        // Update the current label first
+        const { error: updateError } = await supabase
+          .from('audio_labels')
+          .update({
+            label_name: labelName.trim(),
+            timestamp_seconds: roundToOneDecimal(timestampValue),
+            notes: notes,
+            playback_offset_seconds: roundToOneDecimal(offsetValue)
+          })
+          .eq('id', label.id);
+
+        if (updateError) throw updateError;
+
+        // Create new ordering based on timestamp
+        const updatedLabels = allLabels.map(l => 
+          l.id === label.id 
+            ? { ...l, timestamp_seconds: timestampValue }
+            : l
+        ).sort((a, b) => a.timestamp_seconds - b.timestamp_seconds);
+
+        // Update order for all labels
+        for (let i = 0; i < updatedLabels.length; i++) {
+          const { error: orderError } = await supabase
+            .from('audio_labels')
+            .update({ order: i + 1 })
+            .eq('id', updatedLabels[i].id);
+            
+          if (orderError) throw orderError;
+        }
+      } else {
+        // Just update the label without reordering
+        const { error } = await supabase
+          .from('audio_labels')
+          .update({
+            label_name: labelName.trim(),
+            timestamp_seconds: roundToOneDecimal(timestampValue),
+            notes: notes,
+            playback_offset_seconds: roundToOneDecimal(offsetValue)
+          })
+          .eq('id', label.id);
+
+        if (error) throw error;
       }
 
       toast({
         title: "Success",
-        description: "Label updated successfully"
+        description: timestampChanged 
+          ? "Label updated and reordered by timestamp" 
+          : "Label updated successfully"
       });
       
       // Invalidate queries to refresh the data
