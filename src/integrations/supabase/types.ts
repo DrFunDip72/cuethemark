@@ -57,6 +57,7 @@ export type Database = {
         Row: {
           filename: string
           id: string
+          notes: string | null
           uploaded_at: string | null
           url: string
           user_id: string
@@ -64,6 +65,7 @@ export type Database = {
         Insert: {
           filename: string
           id?: string
+          notes?: string | null
           uploaded_at?: string | null
           url: string
           user_id: string
@@ -71,6 +73,7 @@ export type Database = {
         Update: {
           filename?: string
           id?: string
+          notes?: string | null
           uploaded_at?: string | null
           url?: string
           user_id?: string

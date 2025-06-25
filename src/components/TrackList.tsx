@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
@@ -8,6 +8,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { EditTrackDialog } from '@/components/EditTrackDialog';
 import { useAuth } from '@/contexts/AuthContext';
+import { Textarea } from '@/components/ui/textarea';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,16 +20,26 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
 type Track = {
   id: string;
   filename: string;
   url: string;
   uploaded_at: string;
   user_id: string;
+  notes?: string;
 };
 
 export const TrackList = () => {
   const [deletingTrackId, setDeletingTrackId] = useState<string | null>(null);
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [saveTimeouts, setSaveTimeouts] = useState<Record<string, NodeJS.Timeout>>({});
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -50,6 +61,62 @@ export const TrackList = () => {
     },
     enabled: !!user,
   });
+
+  // Initialize notes from tracks
+  useEffect(() => {
+    if (tracks) {
+      const initialNotes: Record<string, string> = {};
+      tracks.forEach(track => {
+        initialNotes[track.id] = track.notes || '';
+      });
+      setNotes(initialNotes);
+    }
+  }, [tracks]);
+
+  // Auto-save notes with debouncing
+  const handleNotesChange = (trackId: string, value: string) => {
+    setNotes(prev => ({ ...prev, [trackId]: value }));
+    
+    // Clear existing timeout for this track
+    if (saveTimeouts[trackId]) {
+      clearTimeout(saveTimeouts[trackId]);
+    }
+    
+    // Set new timeout to save after 1 second of no typing
+    const timeoutId = setTimeout(async () => {
+      try {
+        const { error } = await supabase
+          .from('audio_tracks')
+          .update({ notes: value })
+          .eq('id', trackId);
+          
+        if (error) throw error;
+        
+        // Remove the timeout from state after successful save
+        setSaveTimeouts(prev => {
+          const newTimeouts = { ...prev };
+          delete newTimeouts[trackId];
+          return newTimeouts;
+        });
+      } catch (error) {
+        console.error('Error auto-saving notes:', error);
+        toast({
+          title: "Auto-save failed",
+          description: "Could not save notes automatically",
+          variant: "destructive"
+        });
+      }
+    }, 1000);
+    
+    setSaveTimeouts(prev => ({ ...prev, [trackId]: timeoutId }));
+  };
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(saveTimeouts).forEach(timeout => clearTimeout(timeout));
+    };
+  }, [saveTimeouts]);
 
   const handleDeleteTrack = async (id: string) => {
     try {
@@ -103,41 +170,66 @@ export const TrackList = () => {
   return (
     <div className="grid gap-4">
       {tracks.map((track) => (
-        <Link
+        <div
           key={track.id}
-          to={`/tracks/${track.id}`}
-          className="p-4 rounded-lg border border-gray-200 hover:border-primary transition-colors block"
+          className="p-4 rounded-lg border border-gray-200 hover:border-primary transition-colors"
         >
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="font-medium">{track.filename}</h3>
-              <p className="text-sm text-gray-500">
-                {new Date(track.uploaded_at).toLocaleDateString()}
-              </p>
+          <Link
+            to={`/tracks/${track.id}`}
+            className="block"
+          >
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="font-medium">{track.filename}</h3>
+                <p className="text-sm text-gray-500">
+                  {new Date(track.uploaded_at).toLocaleDateString()}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  size="icon" 
+                  variant="ghost" 
+                  onClick={(e) => handleNavigateToTrack(track.id, e)}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button 
+                  size="icon" 
+                  variant="ghost" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setDeletingTrackId(track.id);
+                  }}
+                  className="text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button 
-                size="icon" 
-                variant="ghost" 
-                onClick={(e) => handleNavigateToTrack(track.id, e)}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button 
-                size="icon" 
-                variant="ghost" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setDeletingTrackId(track.id);
-                }}
-                className="text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </Link>
+          </Link>
+
+          <Accordion type="single" collapsible className="w-full mt-2">
+            <AccordionItem value={`notes-${track.id}`} className="border-0">
+              <AccordionTrigger className="py-2 px-0">
+                <span className="text-sm text-gray-500">Notes</span>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="space-y-2">
+                  <Textarea 
+                    value={notes[track.id] || ''} 
+                    onChange={(e) => handleNotesChange(track.id, e.target.value)}
+                    placeholder="Add notes about this track... (auto-saves)"
+                    className="min-h-[100px] text-sm"
+                  />
+                  <div className="text-xs text-gray-500">
+                    {saveTimeouts[track.id] ? '⏳ Saving...' : '✓ Auto-saved'}
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
       ))}
 
       <AlertDialog 
