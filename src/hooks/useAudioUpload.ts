@@ -66,13 +66,26 @@ export const useAudioUpload = () => {
         .from('tracks')
         .getPublicUrl(filename);
 
-      // Create database record with user_id
+      // Get the next order value for this user
+      const { data: maxOrderData } = await supabase
+        .from('audio_tracks')
+        .select('order')
+        .eq('user_id', user.id)
+        .order('order', { ascending: false })
+        .limit(1);
+
+      const nextOrder = maxOrderData && maxOrderData.length > 0 
+        ? (maxOrderData[0].order || 0) + 1 
+        : 1;
+
+      // Create database record with user_id and order
       const { error: dbError } = await supabase
         .from('audio_tracks')
         .insert([{
           filename: file.name,
           url: publicUrl,
           user_id: user.id,
+          order: nextOrder,
         }]);
 
       if (dbError) throw dbError;

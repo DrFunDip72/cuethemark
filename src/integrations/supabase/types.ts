@@ -58,6 +58,7 @@ export type Database = {
           filename: string
           id: string
           notes: string | null
+          order: number | null
           uploaded_at: string | null
           url: string
           user_id: string
@@ -66,6 +67,7 @@ export type Database = {
           filename: string
           id?: string
           notes?: string | null
+          order?: number | null
           uploaded_at?: string | null
           url: string
           user_id: string
@@ -74,6 +76,7 @@ export type Database = {
           filename?: string
           id?: string
           notes?: string | null
+          order?: number | null
           uploaded_at?: string | null
           url?: string
           user_id?: string
