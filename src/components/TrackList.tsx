@@ -4,11 +4,28 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, GripVertical } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { EditTrackDialog } from '@/components/EditTrackDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,18 +51,120 @@ type Track = {
   uploaded_at: string;
   user_id: string;
   notes?: string;
+  order?: number;
+};
+
+const SortableTrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onDelete }: {
+  track: Track;
+  notes: Record<string, string>;
+  saveTimeouts: Record<string, NodeJS.Timeout>;
+  onNotesChange: (trackId: string, value: string) => void;
+  onNavigate: (trackId: string, e: React.MouseEvent) => void;
+  onDelete: (trackId: string, e: React.MouseEvent) => void;
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: track.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="p-4 rounded-lg border border-gray-200 hover:border-primary transition-colors bg-white"
+    >
+      <Link
+        to={`/tracks/${track.id}`}
+        className="block"
+      >
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div
+              {...attributes}
+              {...listeners}
+              className="cursor-grab hover:cursor-grabbing p-1 hover:bg-gray-100 rounded"
+            >
+              <GripVertical className="h-4 w-4 text-gray-400" />
+            </div>
+            <div>
+              <h3 className="font-medium">{track.filename}</h3>
+              <p className="text-sm text-gray-500">
+                {new Date(track.uploaded_at).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              onClick={(e) => onNavigate(track.id, e)}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              onClick={(e) => onDelete(track.id, e)}
+              className="text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </Link>
+
+      <Accordion type="single" collapsible className="w-full mt-2">
+        <AccordionItem value={`notes-${track.id}`} className="border-0">
+          <AccordionTrigger className="py-2 px-0">
+            <span className="text-sm text-gray-500">Notes</span>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-2">
+              <Textarea 
+                value={notes[track.id] || ''} 
+                onChange={(e) => onNotesChange(track.id, e.target.value)}
+                placeholder="Add notes about this track... (auto-saves)"
+                className="min-h-[100px] text-sm"
+              />
+              <div className="text-xs text-gray-500">
+                {saveTimeouts[track.id] ? '⏳ Saving...' : '✓ Auto-saved'}
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </div>
+  );
 };
 
 export const TrackList = () => {
   const [deletingTrackId, setDeletingTrackId] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [saveTimeouts, setSaveTimeouts] = useState<Record<string, NodeJS.Timeout>>({});
+  const [tracks, setTracks] = useState<Track[]>([]);
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
   
-  const { data: tracks, isLoading, error } = useQuery({
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const { data: tracksData, isLoading, error } = useQuery({
     queryKey: ['tracks'],
     queryFn: async () => {
       if (!user) return [];
@@ -54,13 +173,20 @@ export const TrackList = () => {
         .from('audio_tracks')
         .select('*')
         .eq('user_id', user.id)
-        .order('uploaded_at', { ascending: false });
+        .order('order', { ascending: true });
       
       if (error) throw error;
       return data as Track[];
     },
     enabled: !!user,
   });
+
+  // Update local tracks state when data changes
+  useEffect(() => {
+    if (tracksData) {
+      setTracks(tracksData);
+    }
+  }, [tracksData]);
 
   // Initialize notes from tracks
   useEffect(() => {
@@ -118,6 +244,44 @@ export const TrackList = () => {
     };
   }, [saveTimeouts]);
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = tracks.findIndex(track => track.id === active.id);
+      const newIndex = tracks.findIndex(track => track.id === over.id);
+
+      const newTracks = arrayMove(tracks, oldIndex, newIndex);
+      setTracks(newTracks);
+
+      // Update the order in the database
+      try {
+        const updates = newTracks.map((track, index) => ({
+          id: track.id,
+          order: index + 1,
+        }));
+
+        for (const update of updates) {
+          await supabase
+            .from('audio_tracks')
+            .update({ order: update.order })
+            .eq('id', update.id);
+        }
+
+        queryClient.invalidateQueries({ queryKey: ['tracks'] });
+      } catch (error) {
+        console.error('Error updating track order:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update track order",
+          variant: "destructive"
+        });
+        // Revert the local state if the database update fails
+        setTracks(tracksData || []);
+      }
+    }
+  };
+
   const handleDeleteTrack = async (id: string) => {
     try {
       const { error } = await supabase
@@ -151,6 +315,12 @@ export const TrackList = () => {
     navigate(`/tracks/${trackId}`);
   };
 
+  const handleDeleteClick = (trackId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDeletingTrackId(trackId);
+  };
+
   if (!user) {
     return <div className="text-center py-4 text-gray-500">Please log in to view your tracks</div>;
   }
@@ -169,68 +339,25 @@ export const TrackList = () => {
 
   return (
     <div className="grid gap-4">
-      {tracks.map((track) => (
-        <div
-          key={track.id}
-          className="p-4 rounded-lg border border-gray-200 hover:border-primary transition-colors"
-        >
-          <Link
-            to={`/tracks/${track.id}`}
-            className="block"
-          >
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">{track.filename}</h3>
-                <p className="text-sm text-gray-500">
-                  {new Date(track.uploaded_at).toLocaleDateString()}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Button 
-                  size="icon" 
-                  variant="ghost" 
-                  onClick={(e) => handleNavigateToTrack(track.id, e)}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button 
-                  size="icon" 
-                  variant="ghost" 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setDeletingTrackId(track.id);
-                  }}
-                  className="text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </Link>
-
-          <Accordion type="single" collapsible className="w-full mt-2">
-            <AccordionItem value={`notes-${track.id}`} className="border-0">
-              <AccordionTrigger className="py-2 px-0">
-                <span className="text-sm text-gray-500">Notes</span>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-2">
-                  <Textarea 
-                    value={notes[track.id] || ''} 
-                    onChange={(e) => handleNotesChange(track.id, e.target.value)}
-                    placeholder="Add notes about this track... (auto-saves)"
-                    className="min-h-[100px] text-sm"
-                  />
-                  <div className="text-xs text-gray-500">
-                    {saveTimeouts[track.id] ? '⏳ Saving...' : '✓ Auto-saved'}
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
-      ))}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={tracks.map(track => track.id)} strategy={verticalListSortingStrategy}>
+          {tracks.map((track) => (
+            <SortableTrackItem
+              key={track.id}
+              track={track}
+              notes={notes}
+              saveTimeouts={saveTimeouts}
+              onNotesChange={handleNotesChange}
+              onNavigate={handleNavigateToTrack}
+              onDelete={handleDeleteClick}
+            />
+          ))}
+        </SortableContext>
+      </DndContext>
 
       <AlertDialog 
         open={!!deletingTrackId} 
