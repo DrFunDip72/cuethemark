@@ -1,23 +1,13 @@
 
 import { useAudioUpload } from '@/hooks/useAudioUpload';
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrackList } from '@/components/TrackList';
 import { Progress } from '@/components/ui/progress';
+import { Upload } from 'lucide-react';
 
 const UploadPage = () => {
   const { uploadAudio, isUploading, uploadProgress } = useAudioUpload();
   
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file) uploadAudio(file);
-  };
-
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) uploadAudio(file);
@@ -25,50 +15,34 @@ const UploadPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Upload Audio Track</h1>
-      
-      <Card className="w-full max-w-2xl mx-auto">
-        <div
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          className="p-8 border-2 border-dashed rounded-lg text-center"
-        >
-          {isUploading ? (
-            <div className="space-y-4">
-              <p className="text-lg">Uploading...</p>
-              <Progress value={uploadProgress} className="w-full" />
-              <p className="text-sm text-gray-500">{uploadProgress}% complete</p>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">My Tracks</h1>
+        <div className="flex items-center gap-4">
+          {isUploading && (
+            <div className="flex items-center gap-2">
+              <Progress value={uploadProgress} className="w-24" />
+              <span className="text-sm text-gray-500">{uploadProgress}%</span>
             </div>
-          ) : (
-            <>
-              <div className="mb-4">
-                <p className="text-lg mb-2">Drag and drop your audio file here</p>
-                <p className="text-sm text-gray-500">Supported formats: MP3, WAV</p>
-              </div>
-              
-              <Button
-                variant="outline"
-                onClick={() => document.getElementById('fileInput')?.click()}
-                className="mt-4"
-              >
-                Select File
-              </Button>
-              <input
-                type="file"
-                id="fileInput"
-                className="hidden"
-                accept=".mp3,.wav"
-                onChange={handleFileSelect}
-              />
-            </>
           )}
+          <Button
+            onClick={() => document.getElementById('fileInput')?.click()}
+            disabled={isUploading}
+            className="flex items-center gap-2"
+          >
+            <Upload className="h-4 w-4" />
+            Upload Track
+          </Button>
+          <input
+            type="file"
+            id="fileInput"
+            className="hidden"
+            accept=".mp3,.wav"
+            onChange={handleFileSelect}
+          />
         </div>
-      </Card>
-
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">Recent Uploads</h2>
-        <TrackList />
       </div>
+
+      <TrackList />
     </div>
   );
 };
