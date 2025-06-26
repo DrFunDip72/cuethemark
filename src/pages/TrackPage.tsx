@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Play, Pause, Plus, Pen } from 'lucide-react';
 import { useTrackLabels } from '@/hooks/useTrackLabels';
 import { LabelList } from '@/components/LabelList';
+import { Timeline } from '@/components/Timeline';
 import { AddLabelDialog } from '@/components/AddLabelDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -156,6 +158,15 @@ const TrackPage = () => {
     }
   };
 
+  // New function to handle seeking from timeline
+  const handleSeek = (time: number) => {
+    if (audioRef.current) {
+      const roundedTime = roundToOneDecimal(time);
+      audioRef.current.currentTime = roundedTime;
+      setCurrentTime(roundedTime);
+    }
+  };
+
   const handleTimeUpdate = () => {
     if (audioRef.current) {
       setCurrentTime(roundToOneDecimal(audioRef.current.currentTime));
@@ -260,13 +271,13 @@ const TrackPage = () => {
       </div>
 
       {view === 'timeline' ? (
-        <Card className="p-6">
-          <div className="h-24 relative">
-            <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-              Timeline view will be implemented soon
-            </div>
-          </div>
-        </Card>
+        <Timeline
+          labels={labels || []}
+          currentTime={currentTime}
+          duration={duration}
+          onSeek={handleSeek}
+          onPlayFromTimestamp={handlePlayFromTimestamp}
+        />
       ) : (
         <Card className="p-6">
           {labelsLoading ? (
