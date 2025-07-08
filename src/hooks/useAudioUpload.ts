@@ -53,7 +53,7 @@ export const useAudioUpload = () => {
       }, 200);
 
       const { data: storageData, error: storageError } = await supabase.storage
-        .from('tracks')
+        .from('audio-files')
         .upload(filename, file);
 
       clearInterval(progressInterval);
@@ -63,7 +63,7 @@ export const useAudioUpload = () => {
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('tracks')
+        .from('audio-files')
         .getPublicUrl(filename);
 
       // Get the next order value for this user
