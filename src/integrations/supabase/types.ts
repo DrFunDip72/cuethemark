@@ -14,6 +14,89 @@ export type Database = {
   }
   public: {
     Tables: {
+      audio_labels: {
+        Row: {
+          created_at: string
+          id: string
+          label_name: string
+          notes: string | null
+          order: number | null
+          playback_offset_seconds: number | null
+          timestamp_seconds: number
+          track_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label_name: string
+          notes?: string | null
+          order?: number | null
+          playback_offset_seconds?: number | null
+          timestamp_seconds: number
+          track_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label_name?: string
+          notes?: string | null
+          order?: number | null
+          playback_offset_seconds?: number | null
+          timestamp_seconds?: number
+          track_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_labels_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "audio_tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audio_tracks: {
+        Row: {
+          created_at: string
+          filename: string
+          id: string
+          notes: string | null
+          order: number | null
+          updated_at: string
+          uploaded_at: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          filename: string
+          id?: string
+          notes?: string | null
+          order?: number | null
+          updated_at?: string
+          uploaded_at?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          filename?: string
+          id?: string
+          notes?: string | null
+          order?: number | null
+          updated_at?: string
+          uploaded_at?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       table_1: {
         Row: {
           created_at: string
