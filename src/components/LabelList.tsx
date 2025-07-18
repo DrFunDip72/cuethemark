@@ -172,6 +172,7 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
   // Local state for immediate drag-and-drop updates (optimistic UI)
   const [localLabels, setLocalLabels] = useState<Label[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
   const [editingLabel, setEditingLabel] = useState<Label | null>(null);
@@ -182,12 +183,12 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Sync local state with props when not dragging
+  // Sync local state with props when not dragging or updating
   useEffect(() => {
-    if (!isDragging && labels) {
+    if (!isDragging && !isUpdating && labels) {
       setLocalLabels([...labels]);
     }
-  }, [labels, isDragging]);
+  }, [labels, isDragging, isUpdating]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -284,6 +285,7 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
       order: index + 1
     }));
 
+    setIsUpdating(true);
     try {
       // Update all labels with new order
       for (const update of updates) {
@@ -310,6 +312,8 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
         description: "Failed to reorder labels",
         variant: "destructive"
       });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
