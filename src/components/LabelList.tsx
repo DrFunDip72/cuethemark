@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Play, Pencil, Trash2, GripVertical } from 'lucide-react';
@@ -62,7 +63,6 @@ type LabelListProps = {
   currentTime: number;
   onPlayFromTimestamp: (timestamp: number) => void;
   trackId: string;
-  onDragStateChange?: (isDragging: boolean) => void;
 };
 
 type SortableLabelItemProps = {
@@ -169,11 +169,7 @@ const SortableLabelItem = ({
   );
 };
 
-export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, onDragStateChange }: LabelListProps) => {
-  // Local state for immediate drag-and-drop updates (optimistic UI)
-  const [localLabels, setLocalLabels] = useState<Label[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
-  
+export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }: LabelListProps) => {
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
   const [editingLabel, setEditingLabel] = useState<Label | null>(null);
   const [deletingLabel, setDeletingLabel] = useState<string | null>(null);
@@ -182,13 +178,6 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
   const [isNotesUpdating, setIsNotesUpdating] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  // Sync local state with props when not dragging
-  useEffect(() => {
-    if (!isDragging && labels) {
-      setLocalLabels([...labels]);
-    }
-  }, [labels, isDragging]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -199,21 +188,21 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
 
   // Find the active label based on current time
   useEffect(() => {
-    const currentLabel = localLabels.find(
+    const currentLabel = labels.find(
       (label) => currentTime >= label.timestamp_seconds && 
-      (currentTime < (localLabels.find(l => l.timestamp_seconds > label.timestamp_seconds)?.timestamp_seconds || Infinity))
+      (currentTime < (labels.find(l => l.timestamp_seconds > label.timestamp_seconds)?.timestamp_seconds || Infinity))
     );
     setActiveLabel(currentLabel?.id || null);
-  }, [currentTime, localLabels]);
+  });
 
   // Initialize notes from labels
   useEffect(() => {
     const initialNotes: Record<string, string> = {};
-    localLabels.forEach(label => {
+    labels.forEach(label => {
       initialNotes[label.id] = label.notes || '';
     });
     setNotes(initialNotes);
-  }, [localLabels]);
+  }, [labels]);
 
   // Auto-save notes with debouncing
   const handleNotesChange = (labelId: string, value: string) => {
@@ -260,26 +249,17 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
     };
   }, [saveTimeouts]);
 
-  const handleDragStart = () => {
-    setIsDragging(true);
-    onDragStateChange?.(true);
-  };
-
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-    setIsDragging(false);
-    onDragStateChange?.(false);
 
     if (!over || active.id === over.id) {
       return;
     }
 
-    const oldIndex = localLabels.findIndex(label => label.id === active.id);
-    const newIndex = localLabels.findIndex(label => label.id === over.id);
+    const oldIndex = labels.findIndex(label => label.id === active.id);
+    const newIndex = labels.findIndex(label => label.id === over.id);
 
-    // Optimistic update: immediately update local state
-    const reorderedLabels = arrayMove(localLabels, oldIndex, newIndex);
-    setLocalLabels(reorderedLabels);
+    const reorderedLabels = arrayMove(labels, oldIndex, newIndex);
 
     // Update the order values for all affected labels
     const updates = reorderedLabels.map((label, index) => ({
@@ -298,16 +278,15 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
         if (error) throw error;
       }
 
+      // Refresh the labels list
+      queryClient.invalidateQueries({ queryKey: ['track-labels', trackId] });
+      
       toast({
         title: "Success",
         description: "Labels reordered successfully"
       });
     } catch (error) {
       console.error('Error reordering labels:', error);
-      
-      // Revert optimistic update on error
-      setLocalLabels([...labels]);
-      
       toast({
         title: "Error",
         description: "Failed to reorder labels",
@@ -399,12 +378,11 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
-      onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <SortableContext items={localLabels.map(l => l.id)} strategy={verticalListSortingStrategy}>
+      <SortableContext items={labels.map(l => l.id)} strategy={verticalListSortingStrategy}>
         <div className="space-y-3">
-          {localLabels.map((label) => (
+          {labels.map((label) => (
             <SortableLabelItem
               key={label.id}
               label={label}

@@ -14,7 +14,7 @@ type Label = {
   order?: number;
 };
 
-export const useTrackLabels = (trackId: string, skipRealtime = false) => {
+export const useTrackLabels = (trackId: string) => {
   const queryClient = useQueryClient();
 
   const { data: labels, isLoading, error } = useQuery({
@@ -29,12 +29,11 @@ export const useTrackLabels = (trackId: string, skipRealtime = false) => {
       if (error) throw error;
       return data as Label[];
     },
-    // Remove the aggressive auto-refresh to prevent conflicts during drag operations
+    // Enable auto-refresh
+    refetchInterval: 3000,
   });
 
   useEffect(() => {
-    if (skipRealtime) return;
-    
     const channel = supabase
       .channel('schema-db-changes')
       .on(
@@ -56,7 +55,7 @@ export const useTrackLabels = (trackId: string, skipRealtime = false) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [trackId, queryClient, skipRealtime]);
+  }, [trackId, queryClient]);
 
   return { labels, isLoading, error };
 };
