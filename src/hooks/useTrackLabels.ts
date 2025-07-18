@@ -14,7 +14,7 @@ type Label = {
   order?: number;
 };
 
-export const useTrackLabels = (trackId: string) => {
+export const useTrackLabels = (trackId: string, skipRealtime = false) => {
   const queryClient = useQueryClient();
 
   const { data: labels, isLoading, error } = useQuery({
@@ -33,6 +33,8 @@ export const useTrackLabels = (trackId: string) => {
   });
 
   useEffect(() => {
+    if (skipRealtime) return;
+    
     const channel = supabase
       .channel('schema-db-changes')
       .on(
@@ -54,7 +56,7 @@ export const useTrackLabels = (trackId: string) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [trackId, queryClient]);
+  }, [trackId, queryClient, skipRealtime]);
 
   return { labels, isLoading, error };
 };

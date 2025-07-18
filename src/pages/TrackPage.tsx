@@ -40,10 +40,11 @@ const TrackPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [editTrackOpen, setEditTrackOpen] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
+  const [isDraggingLabels, setIsDraggingLabels] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
-  const { labels, isLoading: labelsLoading } = useTrackLabels(id || '');
+  const { labels, isLoading: labelsLoading } = useTrackLabels(id || '', isDraggingLabels);
 
   // Apply playback rate when it changes
   useEffect(() => {
@@ -288,6 +289,7 @@ const TrackPage = () => {
               currentTime={currentTime}
               onPlayFromTimestamp={handlePlayFromTimestamp}
               trackId={id || ''}
+              onDragStateChange={setIsDraggingLabels}
             />
           ) : (
             <div className="text-center text-gray-500 py-8">

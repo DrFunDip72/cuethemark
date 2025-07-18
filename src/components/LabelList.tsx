@@ -62,6 +62,7 @@ type LabelListProps = {
   currentTime: number;
   onPlayFromTimestamp: (timestamp: number) => void;
   trackId: string;
+  onDragStateChange?: (isDragging: boolean) => void;
 };
 
 type SortableLabelItemProps = {
@@ -168,11 +169,10 @@ const SortableLabelItem = ({
   );
 };
 
-export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }: LabelListProps) => {
+export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, onDragStateChange }: LabelListProps) => {
   // Local state for immediate drag-and-drop updates (optimistic UI)
   const [localLabels, setLocalLabels] = useState<Label[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
   
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
   const [editingLabel, setEditingLabel] = useState<Label | null>(null);
@@ -183,12 +183,12 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Sync local state with props when not dragging or updating
+  // Sync local state with props when not dragging
   useEffect(() => {
-    if (!isDragging && !isUpdating && labels) {
+    if (!isDragging && labels) {
       setLocalLabels([...labels]);
     }
-  }, [labels, isDragging, isUpdating]);
+  }, [labels, isDragging]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -262,11 +262,13 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
 
   const handleDragStart = () => {
     setIsDragging(true);
+    onDragStateChange?.(true);
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setIsDragging(false);
+    onDragStateChange?.(false);
 
     if (!over || active.id === over.id) {
       return;
@@ -285,7 +287,6 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
       order: index + 1
     }));
 
-    setIsUpdating(true);
     try {
       // Update all labels with new order
       for (const update of updates) {
@@ -301,11 +302,6 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
         title: "Success",
         description: "Labels reordered successfully"
       });
-      
-      // Wait a bit for database propagation before allowing real-time sync
-      setTimeout(() => {
-        setIsUpdating(false);
-      }, 1000);
     } catch (error) {
       console.error('Error reordering labels:', error);
       
@@ -317,7 +313,6 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
         description: "Failed to reorder labels",
         variant: "destructive"
       });
-      setIsUpdating(false);
     }
   };
 
