@@ -29,8 +29,7 @@ export const useTrackLabels = (trackId: string) => {
       if (error) throw error;
       return data as Label[];
     },
-    // Enable auto-refresh
-    refetchInterval: 3000,
+    // Remove the aggressive auto-refresh to prevent conflicts during drag operations
   });
 
   useEffect(() => {
