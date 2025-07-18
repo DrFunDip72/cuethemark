@@ -301,6 +301,11 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
         title: "Success",
         description: "Labels reordered successfully"
       });
+      
+      // Wait a bit for database propagation before allowing real-time sync
+      setTimeout(() => {
+        setIsUpdating(false);
+      }, 1000);
     } catch (error) {
       console.error('Error reordering labels:', error);
       
@@ -312,7 +317,6 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
         description: "Failed to reorder labels",
         variant: "destructive"
       });
-    } finally {
       setIsUpdating(false);
     }
   };
