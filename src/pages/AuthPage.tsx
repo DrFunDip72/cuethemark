@@ -53,7 +53,7 @@ const AuthPage = () => {
         if (error) throw error;
         
         toast({
-          title: "Welcome to Dance Track Marker!",
+          title: "Welcome to Dacker!",
           description: "Your account has been created successfully"
         });
         navigate('/');
@@ -73,7 +73,7 @@ const AuthPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold">Dance Track Marker</h1>
+          <h1 className="text-2xl font-bold">Dacker</h1>
           
           {isLogin ? (
             <div className="mt-4">

@@ -50,7 +50,7 @@ export const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="h-16 flex items-center justify-between">
           <Link to="/" className="text-xl font-semibold text-primary">
-            Dance Track Marker
+            Dacker
           </Link>
           <div className="flex items-center space-x-4">
             <button
