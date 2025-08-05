@@ -6,10 +6,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { SubscriptionGate } from "./components/SubscriptionGate";
 import { Navigation } from "./components/Navigation";
 import UploadPage from "./pages/UploadPage";
 import TrackPage from "./pages/TrackPage";
 import AuthPage from "./pages/AuthPage";
+import ProfilePage from "./pages/ProfilePage";
+import SuccessPage from "./pages/SuccessPage";
+import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,17 +28,26 @@ const App = () => (
           <div className="min-h-screen flex flex-col">
             <Routes>
               <Route path="/auth" element={<AuthPage />} />
+              <Route path="/success" element={
+                <ProtectedRoute>
+                  <SuccessPage />
+                </ProtectedRoute>
+              } />
               <Route path="/*" element={
                 <ProtectedRoute>
-                  <Navigation />
-                  <main className="flex-1 bg-gray-50">
-                    <Routes>
-                      <Route path="/" element={<UploadPage />} />
-                      <Route path="/tracks" element={<UploadPage />} />
-                      <Route path="/tracks/:id" element={<TrackPage />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </main>
+                  <SubscriptionGate>
+                    <Navigation />
+                    <main className="flex-1 bg-gray-50">
+                      <Routes>
+                        <Route path="/" element={<UploadPage />} />
+                        <Route path="/tracks" element={<UploadPage />} />
+                        <Route path="/tracks/:id" element={<TrackPage />} />
+                        <Route path="/profile" element={<ProfilePage />} />
+                        <Route path="/admin" element={<AdminPage />} />
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </main>
+                  </SubscriptionGate>
                 </ProtectedRoute>
               } />
             </Routes>
