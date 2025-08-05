@@ -43,20 +43,111 @@ const AuthPage = () => {
           title: "Welcome back!",
           description: "You've been logged in successfully"
         });
-        navigate('/');
+        
+        // Check if user is admin and redirect accordingly
+        if (email === 'justinsmaxwell722@gmail.com') {
+          navigate('/admin');
+        } else {
+          navigate('/');
+        }
       } else {
-        const { error } = await supabase.auth.signUp({
+        // Regular signup - create account and redirect to Stripe
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`
+          }
         });
         
         if (error) throw error;
         
-        toast({
-          title: "Welcome to Dacker!",
-          description: "Your account has been created successfully"
+        if (data.session) {
+          // User is immediately signed in, redirect to checkout
+          const { data: checkout, error: checkoutError } = await supabase.functions.invoke('create-checkout', {
+            headers: {
+              Authorization: `Bearer ${data.session.access_token}`,
+            },
+          });
+
+          if (checkoutError) {
+            console.error('Checkout error:', checkoutError);
+            toast({
+              title: "Payment Setup Failed",
+              description: "Account created but payment setup failed. Please try again from your profile.",
+              variant: "destructive"
+            });
+            navigate('/');
+            return;
+          }
+
+          if (checkout.url) {
+            window.open(checkout.url, '_blank');
+            toast({
+              title: "Account Created!",
+              description: "Complete your subscription setup in the new tab.",
+            });
+            navigate('/');
+          }
+        } else {
+          toast({
+            title: "Welcome to Dacker!",
+            description: "Please check your email to confirm your account, then sign in.",
+          });
+        }
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoSignup = async () => {
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (error) throw error;
+      
+      if (data.session) {
+        // Create demo subscription
+        const { error: demoError } = await supabase.functions.invoke('create-demo-subscription', {
+          headers: {
+            Authorization: `Bearer ${data.session.access_token}`,
+          },
         });
+
+        if (demoError) {
+          console.error('Demo creation error:', demoError);
+          toast({
+            title: "Demo Setup Failed",
+            description: "Account created but demo setup failed. Please contact support.",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Demo Account Created!",
+            description: "You have 1 day of free access. Upgrade anytime from your profile.",
+          });
+        }
         navigate('/');
+      } else {
+        toast({
+          title: "Demo Account Created!",
+          description: "Please check your email to confirm your account, then sign in for your 1-day demo.",
+        });
       }
     } catch (error: any) {
       toast({
@@ -118,13 +209,35 @@ const AuthPage = () => {
             />
           </div>
 
-          <Button 
-            type="submit" 
-            className={`w-full ${isLogin ? 'bg-primary' : 'bg-green-600 hover:bg-green-700'}`}
-            disabled={loading}
-          >
-            {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
-          </Button>
+          {isLogin ? (
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={loading}
+            >
+              {loading ? 'Please wait...' : 'Sign In'}
+            </Button>
+          ) : (
+            <div className="space-y-3">
+              <Button 
+                type="submit" 
+                className="w-full bg-primary hover:bg-primary/90"
+                disabled={loading}
+              >
+                {loading ? 'Please wait...' : 'Sign Up & Pay ($1.99/month)'}
+              </Button>
+              
+              <Button 
+                type="button"
+                variant="outline"
+                className="w-full"
+                disabled={loading}
+                onClick={handleDemoSignup}
+              >
+                Demo for a Day (Free)
+              </Button>
+            </div>
+          )}
         </form>
 
         <div className="text-center mt-6">

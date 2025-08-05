@@ -15,6 +15,7 @@ interface AuthContextType {
   loading: boolean;
   subscription: SubscriptionData | null;
   checkSubscription: () => Promise<void>;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -23,6 +24,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   subscription: null,
   checkSubscription: async () => {},
+  isAdmin: false,
 });
 
 export const useAuth = () => {
@@ -38,6 +40,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const checkSubscription = async () => {
     if (!session) return;
@@ -49,29 +52,56 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         },
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error checking subscription:', error);
+        setSubscription(null);
+        return;
+      }
+      
       setSubscription(data);
     } catch (error) {
       console.error('Error checking subscription:', error);
+      setSubscription(null);
+    }
+  };
+
+  const checkAdminStatus = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+        return;
+      }
+
+      setIsAdmin(data?.is_admin || false);
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      setIsAdmin(false);
     }
   };
 
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        setLoading(false);
-        
-        // Check subscription status when user logs in
         if (session?.user) {
           setTimeout(() => {
             checkSubscription();
+            checkAdminStatus(session.user.id);
           }, 0);
         } else {
           setSubscription(null);
+          setIsAdmin(false);
         }
+        setLoading(false);
       }
     );
 
@@ -79,21 +109,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
-      
-      // Check subscription for existing session
       if (session?.user) {
-        setTimeout(() => {
-          checkSubscription();
-        }, 0);
+        checkSubscription();
+        checkAdminStatus(session.user.id);
       }
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, subscription, checkSubscription }}>
+    <AuthContext.Provider 
+      value={{
+        user,
+        session,
+        loading,
+        subscription,
+        checkSubscription,
+        isAdmin,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

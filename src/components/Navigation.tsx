@@ -1,7 +1,7 @@
 
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,7 +10,7 @@ import { useRef } from 'react';
 
 export const Navigation = () => {
   const { toast } = useToast();
-  const { user, subscription } = useAuth();
+  const { user, subscription, isAdmin } = useAuth();
   const { uploadAudio } = useAudioUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -65,6 +65,15 @@ export const Navigation = () => {
             >
               My Tracks
             </Link>
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="text-sm font-medium text-gray-600 hover:text-primary transition-colors flex items-center gap-1"
+              >
+                <Shield className="h-4 w-4" />
+                Admin
+              </Link>
+            )}
             <div className="flex items-center space-x-2">
               <Link to="/profile">
                 <Button

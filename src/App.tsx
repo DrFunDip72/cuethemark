@@ -14,6 +14,7 @@ import AuthPage from "./pages/AuthPage";
 import ProfilePage from "./pages/ProfilePage";
 import SuccessPage from "./pages/SuccessPage";
 import AdminPage from "./pages/AdminPage";
+import { AdminRoute } from "./components/AdminRoute";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,9 +43,13 @@ const App = () => (
                         <Route path="/" element={<UploadPage />} />
                         <Route path="/tracks" element={<UploadPage />} />
                         <Route path="/tracks/:id" element={<TrackPage />} />
-                        <Route path="/profile" element={<ProfilePage />} />
-                        <Route path="/admin" element={<AdminPage />} />
-                        <Route path="*" element={<NotFound />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/admin" element={
+                      <AdminRoute>
+                        <AdminPage />
+                      </AdminRoute>
+                    } />
+                    <Route path="*" element={<NotFound />} />
                       </Routes>
                     </main>
                   </SubscriptionGate>
