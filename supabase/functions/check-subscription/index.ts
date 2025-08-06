@@ -45,7 +45,38 @@ serve(async (req) => {
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
     if (customers.data.length === 0) {
-      logStep("No Stripe customer found, checking for lifetime access");
+      logStep("No Stripe customer found, checking existing subscription");
+      
+      // Check existing subscription record first (including demo subscriptions)
+      const { data: existingSubscription } = await supabaseClient
+        .from("subscribers")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (existingSubscription) {
+        logStep("Found existing subscription record", existingSubscription);
+        
+        // Check if it's a demo that hasn't expired
+        if (existingSubscription.subscription_tier === "Demo" && existingSubscription.subscription_end) {
+          const endDate = new Date(existingSubscription.subscription_end);
+          const now = new Date();
+          
+          if (endDate > now) {
+            logStep("Found valid demo subscription");
+            return new Response(JSON.stringify({
+              subscribed: true,
+              subscription_tier: "Demo",
+              subscription_end: existingSubscription.subscription_end
+            }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 200,
+            });
+          } else {
+            logStep("Demo subscription expired");
+          }
+        }
+      }
       
       // Check for lifetime access from promo codes
       const { data: lifetimeUsage } = await supabaseClient
