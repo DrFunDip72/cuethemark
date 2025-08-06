@@ -10,7 +10,7 @@ import { SubscriptionGate } from "./components/SubscriptionGate";
 import { Navigation } from "./components/Navigation";
 import UploadPage from "./pages/UploadPage";
 import TrackPage from "./pages/TrackPage";
-import AuthPage from "./pages/AuthPage";
+
 import ProfilePage from "./pages/ProfilePage";
 import SuccessPage from "./pages/SuccessPage";
 import AdminPage from "./pages/AdminPage";
@@ -28,7 +28,6 @@ const App = () => (
         <BrowserRouter>
           <div className="min-h-screen flex flex-col">
             <Routes>
-              <Route path="/auth" element={<AuthPage />} />
               <Route path="/success" element={
                 <ProtectedRoute>
                   <SuccessPage />

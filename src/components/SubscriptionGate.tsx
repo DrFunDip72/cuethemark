@@ -1,7 +1,12 @@
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { PromoGate } from './PromoGate';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface SubscriptionGateProps {
   children: React.ReactNode;
@@ -9,6 +14,11 @@ interface SubscriptionGateProps {
 
 export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
   const { user, subscription, loading, checkSubscription } = useAuth();
+  const [isLogin, setIsLogin] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const { toast } = useToast();
 
   if (loading) {
     return (
@@ -21,8 +31,247 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
     );
   }
 
+  const handleSignUp = async () => {
+    if (!email || !password) {
+      toast({
+        title: "Error",
+        description: "Please enter email and password",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setAuthLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (error) throw error;
+      
+      if (data.session) {
+        const { data: checkout, error: checkoutError } = await supabase.functions.invoke('create-checkout', {
+          headers: {
+            Authorization: `Bearer ${data.session.access_token}`,
+          },
+        });
+
+        if (checkoutError) {
+          console.error('Checkout error:', checkoutError);
+          toast({
+            title: "Payment Setup Failed",
+            description: "Account created but payment setup failed. Please try again from your profile.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        if (checkout.url) {
+          window.open(checkout.url, '_blank');
+          toast({
+            title: "Account Created!",
+            description: "Complete your subscription setup in the new tab.",
+          });
+        }
+      } else {
+        toast({
+          title: "Welcome to Dacker!",
+          description: "Please check your email to confirm your account, then sign in.",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleDemoSignup = async () => {
+    if (!email || !password) {
+      toast({
+        title: "Error", 
+        description: "Please enter email and password",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setAuthLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (error) throw error;
+      
+      if (data.session) {
+        const { error: demoError } = await supabase.functions.invoke('create-demo-subscription', {
+          headers: {
+            Authorization: `Bearer ${data.session.access_token}`,
+          },
+        });
+
+        if (demoError) {
+          console.error('Demo creation error:', demoError);
+          toast({
+            title: "Demo Setup Failed",
+            description: "Account created but demo setup failed. Please contact support.",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Demo Account Created!",
+            description: "You have 1 day of free access. Upgrade anytime from your profile.",
+          });
+        }
+      } else {
+        toast({
+          title: "Demo Account Created!",
+          description: "Please check your email to confirm your account, then sign in for your 1-day demo.",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      toast({
+        title: "Error",
+        description: "Please enter email and password", 
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setAuthLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Welcome back!",
+        description: "You've been logged in successfully"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
   if (!user) {
-    return null; // This should be handled by ProtectedRoute
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle>
+              {isLogin ? 'Welcome Back to Dacker!' : 'Welcome to Dacker'}
+            </CardTitle>
+            <CardDescription>
+              {isLogin 
+                ? 'Sign in to continue using the application'
+                : 'Choose your access option to get started'
+              }
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                disabled={authLoading}
+              />
+            </div>
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                disabled={authLoading}
+                minLength={6}
+              />
+            </div>
+            
+            {isLogin ? (
+              <Button 
+                onClick={handleLogin}
+                className="w-full"
+                disabled={authLoading}
+              >
+                {authLoading ? 'Signing in...' : 'Sign In'}
+              </Button>
+            ) : (
+              <>
+                <Button 
+                  onClick={handleSignUp}
+                  className="w-full"
+                  disabled={authLoading}
+                >
+                  {authLoading ? 'Creating account...' : 'Sign Up & Pay ($1.99/month)'}
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={handleDemoSignup}
+                  className="w-full"
+                  disabled={authLoading}
+                >
+                  {authLoading ? 'Creating demo...' : 'Demo for a Day (Free)'}
+                </Button>
+              </>
+            )}
+            
+            <div className="text-center">
+              <Button 
+                variant="link"
+                onClick={() => setIsLogin(!isLogin)}
+                className="text-lg font-medium"
+                disabled={authLoading}
+              >
+                {isLogin 
+                  ? 'New here? Create an account' 
+                  : 'Already have an account? Sign in'
+                }
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   // Show signup/payment options if not subscribed
@@ -33,32 +282,32 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
           <CardHeader className="text-center">
             <CardTitle>Welcome to Dacker</CardTitle>
             <CardDescription>
-              Choose your access option to get started
+              You need an active subscription to access the application
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button 
-              onClick={() => window.location.href = '/auth'} 
+              onClick={handleSignUp}
               className="w-full"
+              disabled={authLoading}
             >
-              Sign Up & Pay ($1.99/month)
+              {authLoading ? 'Creating account...' : 'Sign Up & Pay ($1.99/month)'}
             </Button>
             <Button 
               variant="outline"
-              onClick={() => window.location.href = '/auth'} 
+              onClick={handleDemoSignup}
+              className="w-full"
+              disabled={authLoading}
+            >
+              {authLoading ? 'Creating demo...' : 'Demo for a Day (Free)'}
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={checkSubscription}
               className="w-full"
             >
-              Demo for a Day (Free)
+              Refresh Status
             </Button>
-            <div className="text-center">
-              <Button 
-                variant="link"
-                onClick={() => window.location.href = '/auth'} 
-                className="text-sm"
-              >
-                Already have an account? Sign in
-              </Button>
-            </div>
           </CardContent>
         </Card>
       </div>
