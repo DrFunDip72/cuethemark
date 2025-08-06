@@ -13,7 +13,7 @@ interface SubscriptionGateProps {
 }
 
 export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
-  const { user, subscription, loading, checkSubscription } = useAuth();
+  const { user, session, subscription, loading, checkSubscription } = useAuth();
   const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -274,7 +274,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
     );
   }
 
-  // Show signup/payment options if not subscribed
+  // Show subscription options for authenticated users without subscription
   if (!subscription?.subscribed) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -287,19 +287,86 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
           </CardHeader>
           <CardContent className="space-y-4">
             <Button 
-              onClick={handleSignUp}
+              onClick={async () => {
+                setAuthLoading(true);
+                try {
+                  const { data: checkout, error: checkoutError } = await supabase.functions.invoke('create-checkout', {
+                    headers: {
+                      Authorization: `Bearer ${session?.access_token}`,
+                    },
+                  });
+
+                  if (checkoutError) {
+                    console.error('Checkout error:', checkoutError);
+                    toast({
+                      title: "Payment Setup Failed",
+                      description: "Failed to setup payment. Please try again.",
+                      variant: "destructive"
+                    });
+                    return;
+                  }
+
+                  if (checkout.url) {
+                    window.open(checkout.url, '_blank');
+                    toast({
+                      title: "Redirecting to Payment",
+                      description: "Complete your subscription setup in the new tab.",
+                    });
+                  }
+                } catch (error: any) {
+                  toast({
+                    title: "Error",
+                    description: error.message,
+                    variant: "destructive"
+                  });
+                } finally {
+                  setAuthLoading(false);
+                }
+              }}
               className="w-full"
               disabled={authLoading}
             >
-              {authLoading ? 'Creating account...' : 'Sign Up & Pay ($1.99/month)'}
+              {authLoading ? 'Setting up payment...' : 'Sign Up & Pay ($1.99/month)'}
             </Button>
             <Button 
               variant="outline"
-              onClick={handleDemoSignup}
+              onClick={async () => {
+                setAuthLoading(true);
+                try {
+                  const { error: demoError } = await supabase.functions.invoke('create-demo-subscription', {
+                    headers: {
+                      Authorization: `Bearer ${session?.access_token}`,
+                    },
+                  });
+
+                  if (demoError) {
+                    console.error('Demo creation error:', demoError);
+                    toast({
+                      title: "Demo Setup Failed",
+                      description: "Failed to setup demo. Please contact support.",
+                      variant: "destructive"
+                    });
+                  } else {
+                    toast({
+                      title: "Demo Account Activated!",
+                      description: "You now have 1 day of free access. Upgrade anytime from your profile.",
+                    });
+                    checkSubscription(); // Refresh the subscription status
+                  }
+                } catch (error: any) {
+                  toast({
+                    title: "Error",
+                    description: error.message,
+                    variant: "destructive"
+                  });
+                } finally {
+                  setAuthLoading(false);
+                }
+              }}
               className="w-full"
               disabled={authLoading}
             >
-              {authLoading ? 'Creating demo...' : 'Demo for a Day (Free)'}
+              {authLoading ? 'Setting up demo...' : 'Demo for a Day (Free)'}
             </Button>
             <Button 
               variant="outline"
