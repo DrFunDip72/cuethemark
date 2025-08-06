@@ -55,7 +55,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
       if (error) throw error;
       
       if (data.session) {
-        const { data: checkout, error: checkoutError } = await supabase.functions.invoke('create-checkout', {
+        const { data: checkout, error: checkoutError } = await supabase.functions.invoke('create-subscription-checkout', {
           headers: {
             Authorization: `Bearer ${data.session.access_token}`,
           },
@@ -300,7 +300,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
               onClick={async () => {
                 setAuthLoading(true);
                 try {
-                  const { data: checkout, error: checkoutError } = await supabase.functions.invoke('create-checkout', {
+                  const { data: checkout, error: checkoutError } = await supabase.functions.invoke('create-subscription-checkout', {
                     headers: {
                       Authorization: `Bearer ${session?.access_token}`,
                     },
