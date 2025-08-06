@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { LogOut, User } from 'lucide-react';
 
 interface SubscriptionGateProps {
   children: React.ReactNode;
@@ -280,10 +281,14 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle>Welcome to Dacker</CardTitle>
+            <CardTitle>Subscription Required</CardTitle>
             <CardDescription>
-              You need an active subscription to access the application
+              Choose your subscription to access Dacker
             </CardDescription>
+            <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground">
+              <User className="h-4 w-4" />
+              <span>Logged in as: {user?.email}</span>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button 
@@ -326,7 +331,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
               className="w-full"
               disabled={authLoading}
             >
-              {authLoading ? 'Setting up payment...' : 'Sign Up & Pay ($1.99/month)'}
+              {authLoading ? 'Setting up payment...' : 'Subscribe ($1.99/month)'}
             </Button>
             <Button 
               variant="outline"
@@ -366,15 +371,32 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
               className="w-full"
               disabled={authLoading}
             >
-              {authLoading ? 'Setting up demo...' : 'Demo for a Day (Free)'}
+              {authLoading ? 'Setting up demo...' : 'Try Demo (Free for 1 Day)'}
             </Button>
-            <Button 
-              variant="outline"
-              onClick={checkSubscription}
-              className="w-full"
-            >
-              Refresh Status
-            </Button>
+            
+            <div className="flex gap-2">
+              <Button 
+                variant="outline"
+                onClick={checkSubscription}
+                className="flex-1"
+              >
+                Refresh Status
+              </Button>
+              <Button 
+                variant="ghost"
+                size="icon"
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  toast({
+                    title: "Logged out",
+                    description: "You've been logged out successfully."
+                  });
+                }}
+                className="shrink-0"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
