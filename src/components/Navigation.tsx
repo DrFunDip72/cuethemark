@@ -83,6 +83,11 @@ export const Navigation = () => {
                 >
                   <User className="h-4 w-4" />
                   Profile
+                  {isAdmin && (
+                    <span className="text-xs bg-orange-500 text-white px-1 rounded">
+                      ADMIN
+                    </span>
+                  )}
                   {subscription?.subscription_tier === 'lifetime' && (
                     <span className="text-xs bg-primary text-primary-foreground px-1 rounded">
                       LIFETIME

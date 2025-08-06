@@ -14,7 +14,7 @@ interface SubscriptionGateProps {
 }
 
 export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
-  const { user, session, subscription, loading, checkSubscription } = useAuth();
+  const { user, session, subscription, loading, checkSubscription, isAdmin } = useAuth();
   const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -275,6 +275,11 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
     );
   }
 
+  // Admin users bypass subscription requirements
+  if (isAdmin) {
+    return <>{children}</>;
+  }
+
   // Show subscription options for authenticated users without subscription
   if (!subscription?.subscribed) {
     return (
@@ -403,8 +408,8 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
     );
   }
 
-  // Check if subscription has ended
-  if (subscription && subscription.subscription_end) {
+  // Check if subscription has ended (admins bypass this too)
+  if (subscription && subscription.subscription_end && !isAdmin) {
     const endDate = new Date(subscription.subscription_end);
     const now = new Date();
     
