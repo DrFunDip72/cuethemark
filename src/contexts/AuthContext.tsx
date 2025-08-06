@@ -65,17 +65,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const checkAdminStatus = async (userId: string) => {
+  const checkAdminStatus = async (userId: string, userEmail: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('is_admin')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error checking admin status:', error);
         setIsAdmin(false);
+        return;
+      }
+
+      // If no profile exists, create one
+      if (!data) {
+        const isAdminUser = userEmail === 'justinsmaxwell722@gmail.com';
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: userId,
+            email: userEmail,
+            is_admin: isAdminUser
+          });
+
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+          setIsAdmin(false);
+          return;
+        }
+
+        setIsAdmin(isAdminUser);
         return;
       }
 
@@ -95,7 +116,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (session?.user) {
           setTimeout(() => {
             checkSubscription();
-            checkAdminStatus(session.user.id);
+            checkAdminStatus(session.user.id, session.user.email || '');
           }, 0);
         } else {
           setSubscription(null);
@@ -111,7 +132,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         checkSubscription();
-        checkAdminStatus(session.user.id);
+        checkAdminStatus(session.user.id, session.user.email || '');
       }
       setLoading(false);
     });
