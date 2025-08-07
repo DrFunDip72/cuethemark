@@ -80,7 +80,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
         }
       } else {
         toast({
-          title: "Welcome to Dacker!",
+          title: "Welcome to MarkTapDance!",
           description: "Please check your email to confirm your account, then sign in.",
         });
       }
@@ -194,7 +194,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle>
-              {isLogin ? 'Welcome Back to Dacker!' : 'Welcome to Dacker'}
+              {isLogin ? 'Welcome Back to MarkTapDance!' : 'Welcome to MarkTapDance'}
             </CardTitle>
             <CardDescription>
               {isLogin 
@@ -288,7 +288,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
           <CardHeader className="text-center">
             <CardTitle>Subscription Required</CardTitle>
             <CardDescription>
-              Choose your subscription to access Dacker
+              Choose your subscription to access MarkTapDance
             </CardDescription>
             <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground">
               <User className="h-4 w-4" />
