@@ -41,5 +41,9 @@
   }
   body {
     @apply bg-background text-foreground overflow-x-hidden;
+    min-height: 100svh;
+    -webkit-text-size-adjust: 100%;
+    overscroll-behavior-x: none;
+    touch-action: manipulation;
   }
 }

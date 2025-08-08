@@ -1,5 +1,6 @@
 
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -43,8 +44,10 @@ const TrackPage = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
-  const { labels, isLoading: labelsLoading } = useTrackLabels(id || '');
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
+  const { labels, isLoading: labelsLoading } = useTrackLabels(id || '');
   // Apply playback rate when it changes
   useEffect(() => {
     if (audioRef.current) {
@@ -297,13 +300,18 @@ const TrackPage = () => {
         </Card>
       )}
 
-      <Button 
-        className="fixed z-50 left-4 right-4 md:left-auto md:right-6 bottom-[calc(env(safe-area-inset-bottom,0px)+1rem)] md:bottom-6" 
-        size="lg"
-        onClick={handleAddLabelClick}
-      >
-        <Plus className="mr-2 h-4 w-4" /> Add Label
-      </Button>
+      {mounted && createPortal(
+        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] md:pb-6">
+          <Button
+            className="pointer-events-auto w-full md:w-auto md:ml-auto md:float-right"
+            size="lg"
+            onClick={handleAddLabelClick}
+          >
+            <Plus className="mr-2 h-4 w-4" /> Add Label
+          </Button>
+        </div>,
+        document.body
+      )}
 
       {id && (
         <AddLabelDialog
