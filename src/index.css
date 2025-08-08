@@ -24,6 +24,13 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 255 67% 56%;
+
+    /* Hero gradient tokens */
+    --gradient-hero-start: 230 92% 58%; /* royal blue */
+    --gradient-hero-mid: 278 87% 60%;   /* purple */
+    --gradient-hero-end: 330 85% 60%;   /* pink */
+    --hero-foreground: 0 0% 100%;       /* on-hero text */
+
     --radius: 0.5rem;
   }
 }
