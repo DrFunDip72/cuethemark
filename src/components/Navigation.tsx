@@ -1,6 +1,7 @@
 
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { LogOut, User, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -71,45 +72,46 @@ export const Navigation = () => {
             >
               My Tracks
             </Link>
-            {isAdmin && (
-              <Link
-                to="/app/admin"
-                className="text-sm font-medium text-gray-600 hover:text-primary transition-colors flex items-center gap-1"
-              >
-                <Shield className="h-4 w-4" />
-                Admin
-              </Link>
-            )}
             <div className="flex items-center space-x-2">
-              <Link to="/app/profile">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <User className="h-4 w-4" />
-                  Profile
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <User className="h-4 w-4" />
+                    Profile
+                    {isAdmin && (
+                      <span className="text-xs bg-orange-500 text-white px-1 rounded">
+                        ADMIN
+                      </span>
+                    )}
+                    {subscription?.subscription_tier === 'lifetime' && (
+                      <span className="text-xs bg-primary text-primary-foreground px-1 rounded">
+                        LIFETIME
+                      </span>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onSelect={() => navigate('/app/profile')}>
+                    <User className="h-4 w-4 mr-2" />
+                    My Account
+                  </DropdownMenuItem>
                   {isAdmin && (
-                    <span className="text-xs bg-orange-500 text-white px-1 rounded">
-                      ADMIN
-                    </span>
+                    <DropdownMenuItem onSelect={() => navigate('/app/admin')}>
+                      <Shield className="h-4 w-4 mr-2" />
+                      Admin
+                    </DropdownMenuItem>
                   )}
-                  {subscription?.subscription_tier === 'lifetime' && (
-                    <span className="text-xs bg-primary text-primary-foreground px-1 rounded">
-                      LIFETIME
-                    </span>
-                  )}
-                </Button>
-              </Link>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="flex items-center gap-2"
-              >
-                <LogOut className="h-4 w-4" />
-                Logout
-              </Button>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={handleLogout}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
