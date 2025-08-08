@@ -107,16 +107,23 @@ export default function SignupPage() {
 
       if (demoResp?.alreadyExists) {
         toast({ title: "Account exists", description: "You already have a demo account. Please log in.", variant: "default" });
-        navigate("/login");
+        navigate(`/login?email=${encodeURIComponent(email)}&demoExists=1`);
         return;
       }
 
-      // Sign in with the password the user chose
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (signInError) throw signInError;
+      // Sign in with the password the user chose (handle eventual consistency with retry)
+      const attemptSignIn = async (retries = 3) => {
+        let lastError: any = null;
+        for (let i = 0; i < retries; i++) {
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          if (!error && data?.session) return data;
+          lastError = error;
+          await new Promise((r) => setTimeout(r, 500 + i * 300));
+        }
+        if (lastError) throw lastError;
+        throw new Error("Unable to sign in to the new demo account");
+      };
+      const signInData = await attemptSignIn();
 
       const token = signInData.session?.access_token;
       if (!token) throw new Error("Missing session after demo login");

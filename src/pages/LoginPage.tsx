@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,14 @@ export default function LoginPage() {
       document.head.appendChild(link);
     }
     link.setAttribute("href", window.location.href);
+
+    // Prefill email and inform user when coming from demo flow
+    const params = new URLSearchParams(window.location.search);
+    const prefill = params.get("email");
+    if (prefill) setEmail(prefill);
+    if (params.get("demoExists")) {
+      toast({ title: "Account exists", description: "Please sign in with your password.", variant: "default" });
+    }
   }, []);
 
   const handleLogin = async () => {
