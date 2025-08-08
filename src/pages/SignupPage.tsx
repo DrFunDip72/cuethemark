@@ -131,39 +131,52 @@ export default function SignupPage() {
   return (
     <AuthLayout>
       <h1 className="sr-only">Create your MarkTapDance account</h1>
-      <Card className="w-full max-w-md animate-enter shadow-lg">
-        <CardHeader className="text-center">
-          <CardTitle>Join MarkTapDance</CardTitle>
-          <CardDescription>
-            Kickstart focused practice and hit your performance goals faster.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
-          </div>
-          <div>
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Minimum 6 characters" />
-          </div>
-          <div>
-            <Label htmlFor="promo">Promo code (optional)</Label>
-            <Input id="promo" value={promo} onChange={(e) => setPromo(e.target.value)} placeholder="e.g. LAUNCH" />
-          </div>
-          <div className="space-y-2">
-            <Button className="w-full" disabled={loading} onClick={handlePaidSignup}>
-              {loading ? "Processing..." : "Sign Up & Pay"}
-            </Button>
-            <Button className="w-full" variant="outline" disabled={loading} onClick={handleDemo}>
-              {loading ? "Setting up demo..." : "Demo for a Day (Free)"}
-            </Button>
-            <Button className="w-full" variant="ghost" onClick={() => navigate("/login")}>
-              Already have an account? Log in
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="w-full max-w-md animate-enter">
+        <div
+          className="rounded-2xl p-[1.5px] shadow-xl"
+          style={{
+            backgroundImage:
+              "linear-gradient(135deg, hsl(var(--gradient-hero-start)), hsl(var(--gradient-hero-mid)) 40%, hsl(var(--gradient-hero-end)))",
+          }}
+        >
+          <Card className="rounded-2xl bg-card/80 backdrop-blur-md border border-border/40">
+            <CardHeader className="text-center">
+              <CardTitle>Join MarkTapDance</CardTitle>
+              <CardDescription>
+                Kickstart focused practice and hit your performance goals faster.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+              </div>
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Minimum 6 characters" />
+              </div>
+              <div>
+                <Label htmlFor="promo">Promo code (optional)</Label>
+                <Input id="promo" value={promo} onChange={(e) => setPromo(e.target.value)} placeholder="e.g. LAUNCH" />
+              </div>
+              <div className="space-y-2">
+                <Button className="w-full" disabled={loading} onClick={handlePaidSignup}>
+                  {loading ? "Processing..." : "Sign Up & Pay"}
+                </Button>
+                <Button className="w-full" variant="outline" disabled={loading} onClick={handleDemo}>
+                  {loading ? "Setting up demo..." : "Demo for a Day (Free)"}
+                </Button>
+                <Button className="w-full" variant="ghost" onClick={() => navigate("/login")}>
+                  Already have an account? Log in
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="mt-4 flex justify-center">
+          <Button variant="ghost" onClick={() => navigate('/')}>Return Home</Button>
+        </div>
+      </div>
     </AuthLayout>
   );
 }

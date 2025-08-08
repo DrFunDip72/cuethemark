@@ -56,30 +56,43 @@ export default function LoginPage() {
   return (
     <AuthLayout>
       <h1 className="sr-only">Login to MarkTapDance</h1>
-      <Card className="w-full max-w-md animate-enter shadow-lg">
-        <CardHeader className="text-center">
-          <CardTitle className="text-foreground">Welcome back</CardTitle>
-          <CardDescription>
-            Ready to level up your practice and perform with confidence?
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
-          </div>
-          <div>
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" />
-          </div>
-          <div className="space-y-2">
-            <Button className="w-full" disabled={loading} onClick={handleLogin}>
-              {loading ? "Signing in..." : "Login"}
-            </Button>
-            <Button className="w-full" variant="ghost" onClick={() => navigate("/signup")}>Need an account? Sign up</Button>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="w-full max-w-md animate-enter">
+        <div
+          className="rounded-2xl p-[1.5px] shadow-xl"
+          style={{
+            backgroundImage:
+              "linear-gradient(135deg, hsl(var(--gradient-hero-start)), hsl(var(--gradient-hero-mid)) 40%, hsl(var(--gradient-hero-end)))",
+          }}
+        >
+          <Card className="rounded-2xl bg-card/80 backdrop-blur-md border border-border/40">
+            <CardHeader className="text-center">
+              <CardTitle className="text-foreground">Welcome back</CardTitle>
+              <CardDescription>
+                Ready to level up your practice and perform with confidence?
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+              </div>
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" />
+              </div>
+              <div className="space-y-2">
+                <Button className="w-full" disabled={loading} onClick={handleLogin}>
+                  {loading ? "Signing in..." : "Login"}
+                </Button>
+                <Button className="w-full" variant="ghost" onClick={() => navigate("/signup")}>Need an account? Sign up</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="mt-4 flex justify-center">
+          <Button variant="ghost" onClick={() => navigate('/')}>Return Home</Button>
+        </div>
+      </div>
     </AuthLayout>
   );
 }
