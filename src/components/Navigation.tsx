@@ -1,5 +1,5 @@
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { LogOut, User, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,7 +13,7 @@ export const Navigation = () => {
   const { user, subscription, isAdmin } = useAuth();
   const { uploadAudio } = useAudioUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  const navigate = useNavigate();
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -23,6 +23,8 @@ export const Navigation = () => {
         title: "Success",
         description: "Logged out successfully"
       });
+
+      navigate("/");
     } catch (error: any) {
       toast({
         title: "Error",

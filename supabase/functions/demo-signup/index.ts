@@ -29,13 +29,31 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    // Try to find existing user
-    const { data: existing } = await admin.auth.admin.getUserByEmail(email);
+    // Find existing user via pagination
+    let existingUser: any | null = null;
+    let page = 1;
+    const perPage = 1000;
+
+    while (true) {
+      const { data, error } = await admin.auth.admin.listUsers({ page, perPage });
+      if (error) throw error;
+
+      const users = data?.users ?? [];
+      const found = users.find((u: any) => (u.email?.toLowerCase() ?? "") === email.toLowerCase());
+      if (found) {
+        existingUser = found;
+        break;
+      }
+
+      if (users.length < perPage) break; // no more pages
+      page += 1;
+    }
+
     const tempPassword = randomPassword();
 
-    if (existing?.user) {
+    if (existingUser) {
       // Ensure they can log in immediately by setting a password and confirming
-      await admin.auth.admin.updateUserById(existing.user.id, {
+      await admin.auth.admin.updateUserById(existingUser.id, {
         password: tempPassword,
         email_confirm: true,
       });
