@@ -36,12 +36,12 @@ export const Navigation = () => {
       }
 
       toast({ title: 'Success', description: 'Logged out successfully' });
-      navigate('/login', { replace: true });
+      navigate('/', { replace: true });
     } catch (err: any) {
       // Any unexpected failure -> ensure local signout so user is never stuck
       await forceLocalSignOut();
       toast({ title: 'Signed out locally', description: 'Your session was cleared on this device.', });
-      navigate('/login', { replace: true });
+      navigate('/', { replace: true });
     }
   };
   const handleUploadClick = () => {
