@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import AuthLayout from "@/components/AuthLayout";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -16,6 +17,22 @@ export default function LoginPage() {
 
   useEffect(() => {
     document.title = "Login – MarkTapDance";
+    const desc = "Log in to MarkTapDance to practice smarter and perform your best.";
+    let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "description");
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute("content", desc);
+
+    let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement("link");
+      link.setAttribute("rel", "canonical");
+      document.head.appendChild(link);
+    }
+    link.setAttribute("href", window.location.href);
   }, []);
 
   const handleLogin = async () => {
@@ -37,11 +54,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md animate-enter">
+    <AuthLayout>
+      <h1 className="sr-only">Login to MarkTapDance</h1>
+      <Card className="w-full max-w-md animate-enter shadow-lg">
         <CardHeader className="text-center">
-          <CardTitle>Log in to MarkTapDance</CardTitle>
-          <CardDescription>Enter your credentials to continue</CardDescription>
+          <CardTitle className="text-foreground">Welcome back</CardTitle>
+          <CardDescription>
+            Ready to level up your practice and perform with confidence?
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -60,6 +80,6 @@ export default function LoginPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </AuthLayout>
   );
 }

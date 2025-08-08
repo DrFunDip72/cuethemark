@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import AuthLayout from "@/components/AuthLayout";
 
 export default function SignupPage() {
   const [search] = useSearchParams();
@@ -20,6 +21,22 @@ export default function SignupPage() {
 
   useEffect(() => {
     document.title = "Sign Up – MarkTapDance";
+    const desc = "Create your MarkTapDance account — start practicing smarter today.";
+    let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "description");
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute("content", desc);
+
+    let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement("link");
+      link.setAttribute("rel", "canonical");
+      document.head.appendChild(link);
+    }
+    link.setAttribute("href", window.location.href);
   }, []);
 
   const handlePaidSignup = async () => {
@@ -112,11 +129,14 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md animate-enter">
+    <AuthLayout>
+      <h1 className="sr-only">Create your MarkTapDance account</h1>
+      <Card className="w-full max-w-md animate-enter shadow-lg">
         <CardHeader className="text-center">
-          <CardTitle>Create your account</CardTitle>
-          <CardDescription>Choose your path: paid or 1-day demo</CardDescription>
+          <CardTitle>Join MarkTapDance</CardTitle>
+          <CardDescription>
+            Kickstart focused practice and hit your performance goals faster.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -144,6 +164,6 @@ export default function SignupPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </AuthLayout>
   );
 }
