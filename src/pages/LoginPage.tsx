@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,14 +33,6 @@ export default function LoginPage() {
       document.head.appendChild(link);
     }
     link.setAttribute("href", window.location.href);
-
-    // Prefill email and inform user when coming from demo flow
-    const params = new URLSearchParams(window.location.search);
-    const prefill = params.get("email");
-    if (prefill) setEmail(prefill);
-    if (params.get("demoExists")) {
-      toast({ title: "Account exists", description: "Please sign in with your password.", variant: "default" });
-    }
   }, []);
 
   const handleLogin = async () => {
@@ -93,10 +85,12 @@ export default function LoginPage() {
                   {loading ? "Signing in..." : "Login"}
                 </Button>
                 <Button className="w-full" variant="ghost" onClick={() => navigate("/signup")}>Need an account? Sign up</Button>
-                <Button className="w-full" variant="link" onClick={() => navigate("/")}>Return Home</Button>
               </div>
             </CardContent>
           </Card>
+        </div>
+        <div className="mt-4 flex justify-center">
+          <Button variant="ghost" onClick={() => navigate('/')}>Return Home</Button>
         </div>
       </div>
     </AuthLayout>
