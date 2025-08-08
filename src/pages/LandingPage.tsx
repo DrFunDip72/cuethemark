@@ -33,8 +33,8 @@ export default function LandingPage() {
             ) : (
               <>
                 <Button size="lg" className="rounded-full" variant="secondary" onClick={() => navigate("/signup?mode=demo")}>Demo for a Day (Free)</Button>
-                <Button size="lg" className="rounded-full" onClick={() => navigate("/signup")}>Sign Up & Pay</Button>
-                <Button size="lg" className="rounded-full" variant="outline" onClick={() => navigate("/login")}>Login</Button>
+                <Button size="lg" className="rounded-full" variant="green" onClick={() => navigate("/signup")}>Sign Up & Pay</Button>
+                <Button size="lg" className="rounded-full" variant="purple" onClick={() => navigate("/login")}>Login</Button>
               </>
             )}
           </div>
