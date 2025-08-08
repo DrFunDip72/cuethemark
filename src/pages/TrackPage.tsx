@@ -196,7 +196,7 @@ const TrackPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 pb-28">
       <Card className="p-6 mb-6">
         <div className="flex items-center gap-4 mb-4">
           <Button 
@@ -298,9 +298,10 @@ const TrackPage = () => {
       )}
 
       <Button 
-        className="fixed bottom-6 right-6" 
+        className="fixed z-50 left-1/2 -translate-x-1/2 bottom-4 w-[min(520px,calc(100vw-2rem))] md:right-6 md:left-auto md:translate-x-0 md:w-auto md:bottom-6" 
         size="lg"
         onClick={handleAddLabelClick}
+        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}
       >
         <Plus className="mr-2 h-4 w-4" /> Add Label
       </Button>

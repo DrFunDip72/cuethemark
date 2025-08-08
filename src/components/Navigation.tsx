@@ -1,18 +1,15 @@
 
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { LogOut, User, Shield } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAudioUpload } from '@/hooks/useAudioUpload';
-import { useRef } from 'react';
+import logo from '@/assets/logo-marktapdance.svg';
 
 export const Navigation = () => {
   const { toast } = useToast();
-  const { user, subscription, isAdmin } = useAuth();
-  const { uploadAudio } = useAudioUpload();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
   const navigate = useNavigate();
   const homePath = user ? "/app/tracks" : "/";
   const handleLogout = async () => {
@@ -35,48 +32,22 @@ export const Navigation = () => {
     }
   };
 
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      uploadAudio(file);
-      // Reset the input so the same file can be selected again
-      event.target.value = '';
-    }
-  };
 
   return (
     <nav className="w-full bg-white border-b">
       <div className="container mx-auto px-4">
         <div className="h-16 flex items-center justify-between">
-          <Link to={homePath} className="text-xl font-semibold text-primary">
-            MarkTapDance
+          <Link to={homePath} className="flex items-center">
+            <img src={logo} alt="MarkTapDance logo" className="h-7 w-7" />
           </Link>
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={handleUploadClick}
-              className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
-            >
-              Upload
-            </button>
+          <div className="flex items-center space-x-4 overflow-hidden">
             <Link
               to="/app/tracks"
               className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
             >
               My Tracks
             </Link>
-            {isAdmin && (
-              <Link
-                to="/app/admin"
-                className="text-sm font-medium text-gray-600 hover:text-primary transition-colors flex items-center gap-1"
-              >
-                <Shield className="h-4 w-4" />
-                Admin
-              </Link>
-            )}
             <div className="flex items-center space-x-2">
               <Link to="/app/profile">
                 <Button
@@ -111,13 +82,6 @@ export const Navigation = () => {
           </div>
         </div>
       </div>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="audio/mp3,audio/wav"
-        onChange={handleFileChange}
-        className="hidden"
-      />
     </nav>
   );
 };
