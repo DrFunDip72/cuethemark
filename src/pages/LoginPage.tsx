@@ -1,0 +1,65 @@
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+export default function LoginPage() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    document.title = "Login – MarkTapDance";
+  }, []);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      toast({ title: "Missing info", description: "Email and password are required", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      toast({ title: "Welcome back!" });
+      navigate("/app");
+    } catch (e: any) {
+      toast({ title: "Login failed", description: e.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <Card className="w-full max-w-md animate-enter">
+        <CardHeader className="text-center">
+          <CardTitle>Log in to MarkTapDance</CardTitle>
+          <CardDescription>Enter your credentials to continue</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+          </div>
+          <div>
+            <Label htmlFor="password">Password</Label>
+            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" />
+          </div>
+          <div className="space-y-2">
+            <Button className="w-full" disabled={loading} onClick={handleLogin}>
+              {loading ? "Signing in..." : "Login"}
+            </Button>
+            <Button className="w-full" variant="ghost" onClick={() => navigate("/signup")}>Need an account? Sign up</Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

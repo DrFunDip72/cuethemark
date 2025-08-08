@@ -60,14 +60,14 @@ export const Navigation = () => {
               Upload
             </button>
             <Link
-              to="/tracks"
+              to="/app/tracks"
               className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
             >
               My Tracks
             </Link>
             {isAdmin && (
               <Link
-                to="/admin"
+                to="/app/admin"
                 className="text-sm font-medium text-gray-600 hover:text-primary transition-colors flex items-center gap-1"
               >
                 <Shield className="h-4 w-4" />
@@ -75,7 +75,7 @@ export const Navigation = () => {
               </Link>
             )}
             <div className="flex items-center space-x-2">
-              <Link to="/profile">
+              <Link to="/app/profile">
                 <Button
                   variant="ghost"
                   size="sm"
