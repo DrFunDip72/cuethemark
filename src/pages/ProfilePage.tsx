@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ const ProfilePage = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [newPassword, setNewPassword] = useState('');
+  const [subscriber, setSubscriber] = useState<{ stripe_customer_id: string | null; subscription_end: string | null; subscription_tier: string | null } | null>(null);
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,17 +69,41 @@ const ProfilePage = () => {
     } finally {
       setLoading(false);
     }
+  }; 
+
+  useEffect(() => {
+    const fetchSubscriber = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('subscribers')
+        .select('stripe_customer_id, subscription_end, subscription_tier')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      setSubscriber(data);
+    };
+    fetchSubscriber();
+  }, [user?.id]);
+
+  const isDemo = () => {
+    if (!subscription?.subscribed) return false;
+    const endStr = subscriber?.subscription_end || subscription?.subscription_end;
+    if (!endStr) return false;
+    const hoursLeft = (new Date(endStr).getTime() - Date.now()) / 36e5;
+    const noStripe = !subscriber?.stripe_customer_id;
+    return subscription.subscription_tier === 'monthly' && noStripe && hoursLeft <= 48;
   };
 
   const getSubscriptionBadgeVariant = () => {
     if (!subscription?.subscribed) return "destructive";
     if (subscription.subscription_tier === "lifetime") return "default";
+    if (isDemo()) return "secondary";
     return "secondary";
   };
 
   const getSubscriptionStatus = () => {
     if (!subscription?.subscribed) return "Inactive";
     if (subscription.subscription_tier === "lifetime") return "Lifetime Access";
+    if (isDemo()) return "Active Demo";
     return "Active Monthly";
   };
 
@@ -130,7 +155,7 @@ const ProfilePage = () => {
               <div>
                 <Label>Plan</Label>
                 <Input 
-                  value={subscription.subscription_tier === 'lifetime' ? 'Lifetime Access' : 'Monthly ($1.99/month)'} 
+                  value={subscription.subscription_tier === 'lifetime' ? 'Lifetime Access' : (isDemo() ? 'Demo (1 day trial)' : 'Monthly ($1.99/month)')} 
                   disabled 
                 />
               </div>
@@ -138,7 +163,7 @@ const ProfilePage = () => {
             
             {subscription?.subscription_end && subscription.subscription_tier !== 'lifetime' && (
               <div>
-                <Label>Next Billing Date</Label>
+                <Label>{isDemo() ? 'Demo ends on' : 'Next Billing Date'}</Label>
                 <Input 
                   value={format(new Date(subscription.subscription_end), 'PPP')} 
                   disabled 
@@ -156,7 +181,7 @@ const ProfilePage = () => {
                 Refresh Status
               </Button>
               
-              {subscription?.subscribed && subscription.subscription_tier !== 'lifetime' && (
+              {subscription?.subscribed && subscription.subscription_tier !== 'lifetime' && !isDemo() && (
                 <Button 
                   onClick={handleManageBilling}
                   disabled={loading}

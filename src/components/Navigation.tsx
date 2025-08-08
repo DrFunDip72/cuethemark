@@ -14,6 +14,7 @@ export const Navigation = () => {
   const { uploadAudio } = useAudioUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const homePath = user ? "/app/tracks" : "/";
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -51,7 +52,7 @@ export const Navigation = () => {
     <nav className="w-full bg-white border-b">
       <div className="container mx-auto px-4">
         <div className="h-16 flex items-center justify-between">
-          <Link to="/" className="text-xl font-semibold text-primary">
+          <Link to={homePath} className="text-xl font-semibold text-primary">
             MarkTapDance
           </Link>
           <div className="flex items-center space-x-4">

@@ -84,7 +84,7 @@ const SortableTrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNaviga
       className="p-4 rounded-lg border border-gray-200 hover:border-primary transition-colors bg-white"
     >
       <Link
-        to={`/tracks/${track.id}`}
+        to={`/app/tracks/${track.id}`}
         className="block"
       >
         <div className="flex justify-between items-center">
@@ -312,7 +312,7 @@ export const TrackList = () => {
   const handleNavigateToTrack = (trackId: string, e: React.MouseEvent) => {
     e.preventDefault(); 
     e.stopPropagation();
-    navigate(`/tracks/${trackId}`);
+    navigate(`/app/tracks/${trackId}`);
   };
 
   const handleDeleteClick = (trackId: string, e: React.MouseEvent) => {

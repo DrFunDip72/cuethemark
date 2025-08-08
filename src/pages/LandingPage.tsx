@@ -1,10 +1,11 @@
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LandingPage() {
   const navigate = useNavigate();
-
+  const { user } = useAuth();
   useEffect(() => {
     document.title = "MarkTapDance – Practice smarter, hit your cue";
     const meta = document.querySelector('meta[name="description"]');
@@ -28,8 +29,14 @@ export default function LandingPage() {
       <header className="px-6 py-5 flex items-center justify-between max-w-6xl mx-auto">
         <Link to="/" className="text-lg font-semibold tracking-tight">MarkTapDance</Link>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" onClick={() => navigate("/login")}>Login</Button>
-          <Button onClick={() => navigate("/signup")}>Sign Up & Pay</Button>
+          {user ? (
+            <Button onClick={() => navigate("/app/tracks")}>Go to App</Button>
+          ) : (
+            <>
+              <Button variant="ghost" onClick={() => navigate("/login")}>Login</Button>
+              <Button onClick={() => navigate("/signup")}>Sign Up & Pay</Button>
+            </>
+          )}
         </div>
       </header>
 

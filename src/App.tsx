@@ -51,6 +51,7 @@ const App = () => (
                 <Route path="/app" element={<UploadPage />} />
                 <Route path="/app/tracks" element={<UploadPage />} />
                 <Route path="/app/tracks/:id" element={<TrackPage />} />
+                <Route path="/tracks/:id" element={<TrackPage />} />
                 <Route path="/app/profile" element={<ProfilePage />} />
                 <Route
                   path="/app/admin"
