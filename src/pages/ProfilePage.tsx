@@ -8,10 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { Link } from 'react-router-dom';
 
 const ProfilePage = () => {
-  const { user, session, subscription, checkSubscription, isAdmin } = useAuth();
+  const { user, session, subscription, checkSubscription } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [newPassword, setNewPassword] = useState('');
@@ -232,11 +231,6 @@ const ProfilePage = () => {
             <CardDescription>Manage your account preferences</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {isAdmin && (
-              <Button asChild className="w-full">
-                <Link to="/app/admin">Open Admin Panel</Link>
-              </Button>
-            )}
             <Button 
               onClick={() => supabase.auth.signOut()} 
               variant="outline"
@@ -244,6 +238,7 @@ const ProfilePage = () => {
             >
               Sign Out
             </Button>
+            
             <div className="pt-4 border-t">
               <p className="text-sm text-muted-foreground mb-2">
                 Need to cancel your subscription or delete your account? Use the "Manage Billing" button above to access all account management options.
