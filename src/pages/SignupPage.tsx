@@ -7,12 +7,14 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import AuthLayout from "@/components/AuthLayout";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SignupPage() {
   const [search] = useSearchParams();
   const mode = search.get("mode");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { checkSubscription } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -92,22 +94,27 @@ export default function SignupPage() {
   };
 
   const handleDemo = async () => {
-    if (!email) {
-      toast({ title: "Missing email", description: "Email is required for the demo", variant: "destructive" });
+    if (!email || !password) {
+      toast({ title: "Missing info", description: "Email and password are required for the demo", variant: "destructive" });
       return;
     }
     setLoading(true);
     try {
       const { data: demoResp, error: demoErr } = await supabase.functions.invoke("demo-signup", {
-        body: { email },
+        body: { email, password },
       });
       if (demoErr) throw demoErr;
-      const tempPassword = demoResp?.tempPassword as string;
-      if (!tempPassword) throw new Error("Demo signup failed");
 
+      if (demoResp?.alreadyExists) {
+        toast({ title: "Account exists", description: "You already have a demo account. Please log in.", variant: "default" });
+        navigate("/login");
+        return;
+      }
+
+      // Sign in with the password the user chose
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
-        password: tempPassword,
+        password,
       });
       if (signInError) throw signInError;
 
@@ -119,8 +126,11 @@ export default function SignupPage() {
       });
       if (subErr) throw subErr;
 
-      toast({ title: "Demo activated", description: "You have 1 day of free access" });
-      navigate("/app");
+      // Refresh subscription state so the app recognizes the demo immediately
+      await checkSubscription();
+
+      // Go to welcome page instead of the subscription gate
+      navigate("/demo-welcome");
     } catch (e: any) {
       toast({ title: "Demo failed", description: e.message, variant: "destructive" });
     } finally {

@@ -85,12 +85,10 @@ export default function LoginPage() {
                   {loading ? "Signing in..." : "Login"}
                 </Button>
                 <Button className="w-full" variant="ghost" onClick={() => navigate("/signup")}>Need an account? Sign up</Button>
+                <Button className="w-full" variant="link" onClick={() => navigate("/")}>Return Home</Button>
               </div>
             </CardContent>
           </Card>
-        </div>
-        <div className="mt-4 flex justify-center">
-          <Button variant="ghost" onClick={() => navigate('/')}>Return Home</Button>
         </div>
       </div>
     </AuthLayout>
