@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAudioUpload } from '@/hooks/useAudioUpload';
 import { useRef } from 'react';
+import { handleLogout } from '@/lib/utils';
 
 export const Navigation = () => {
   const { toast } = useToast();
@@ -16,35 +17,7 @@ export const Navigation = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const homePath = user ? "/app/tracks" : "/";
-  const handleLogout = async () => {
-    const forceLocalSignOut = async () => {
-      try {
-        await supabase.auth.signOut({ scope: 'local' });
-      } catch (_) {}
-      // Last-resort: clear any persisted Supabase tokens
-      try {
-        Object.keys(localStorage).forEach((k) => {
-          if (k.startsWith('sb-')) localStorage.removeItem(k);
-        });
-      } catch (_) {}
-    };
-
-    try {
-      const { error } = await supabase.auth.signOut({ scope: 'global' });
-      if (error) {
-        // Session might already be gone on the server; fall back to local
-        await forceLocalSignOut();
-      }
-
-      toast({ title: 'Success', description: 'Logged out successfully' });
-      navigate('/', { replace: true });
-    } catch (err: any) {
-      // Any unexpected failure -> ensure local signout so user is never stuck
-      await forceLocalSignOut();
-      toast({ title: 'Signed out locally', description: 'Your session was cleared on this device.', });
-      navigate('/', { replace: true });
-    }
-  };
+  
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
@@ -106,7 +79,7 @@ export const Navigation = () => {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={handleLogout}>
+                  <DropdownMenuItem onSelect={() => handleLogout(navigate)}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out
                   </DropdownMenuItem>
