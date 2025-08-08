@@ -53,15 +53,9 @@ export const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="h-16 flex items-center justify-between">
           <Link to={homePath} className="text-xl font-semibold text-primary">
-            MarkTapDance
+            MTD
           </Link>
           <div className="flex items-center space-x-4">
-            <button
-              onClick={handleUploadClick}
-              className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
-            >
-              Upload
-            </button>
             <Link
               to="/app/tracks"
               className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
