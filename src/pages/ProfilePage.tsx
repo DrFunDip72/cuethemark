@@ -236,7 +236,7 @@ const ProfilePage = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <Button 
-              onClick={handleLogout(navigate)} 
+              onClick={() => handleLogout(navigate)} 
               variant="outline"
               className="w-full"
             >
