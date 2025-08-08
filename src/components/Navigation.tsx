@@ -16,25 +16,34 @@ export const Navigation = () => {
   const navigate = useNavigate();
   const homePath = user ? "/app/tracks" : "/";
   const handleLogout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
-      toast({
-        title: "Success",
-        description: "Logged out successfully"
-      });
+    const forceLocalSignOut = async () => {
+      try {
+        await supabase.auth.signOut({ scope: 'local' });
+      } catch (_) {}
+      // Last-resort: clear any persisted Supabase tokens
+      try {
+        Object.keys(localStorage).forEach((k) => {
+          if (k.startsWith('sb-')) localStorage.removeItem(k);
+        });
+      } catch (_) {}
+    };
 
-      navigate("/");
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
+    try {
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      if (error) {
+        // Session might already be gone on the server; fall back to local
+        await forceLocalSignOut();
+      }
+
+      toast({ title: 'Success', description: 'Logged out successfully' });
+      navigate('/login', { replace: true });
+    } catch (err: any) {
+      // Any unexpected failure -> ensure local signout so user is never stuck
+      await forceLocalSignOut();
+      toast({ title: 'Signed out locally', description: 'Your session was cleared on this device.', });
+      navigate('/login', { replace: true });
     }
   };
-
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
