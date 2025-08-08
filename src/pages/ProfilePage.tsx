@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
+import { handleLogout } from '@/lib/utils';
 
 const ProfilePage = () => {
   const { user, session, subscription, checkSubscription } = useAuth();
@@ -106,6 +108,8 @@ const ProfilePage = () => {
     if (isDemo()) return "Active Demo";
     return "Active Monthly";
   };
+
+  const navigate = useNavigate();
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -232,7 +236,7 @@ const ProfilePage = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <Button 
-              onClick={() => supabase.auth.signOut()} 
+              onClick={handleLogout(navigate)} 
               variant="outline"
               className="w-full"
             >
