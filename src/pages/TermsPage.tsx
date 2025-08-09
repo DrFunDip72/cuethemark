@@ -8,13 +8,12 @@ export default function TermsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen relative text-[hsl(var(--hero-foreground))] bg-gradient-to-br from-[hsl(var(--gradient-hero-start))] via-[hsl(var(--gradient-hero-mid))] to-[hsl(var(--gradient-hero-end))]">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
       <main className="max-w-3xl mx-auto px-6 py-12">
-        <header className="mb-6 flex items-center justify-between">
-          <h1 className="text-4xl font-extrabold tracking-tight">Terms of Service</h1>
-          <a href="/" className="inline-flex items-center px-4 py-2 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80">Back to Home</a>
-        </header>
-        <section className="prose prose-invert max-w-none">
+        <h1 className="text-4xl font-extrabold mb-6 text-center bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+          Terms of Service
+        </h1>
+        <section className="prose prose-neutral dark:prose-invert max-w-none">
           <p>
             <strong>Last updated:</strong> August 9, 2025
           </p>
@@ -67,11 +66,9 @@ export default function TermsPage() {
 
           <h2>7. Contact Us</h2>
           <p>
-            If you have any questions about these Terms, contact us at: <a href="mailto:justinsmaxwell722@gmail.com">justinsmaxwell722@gmail.com</a>
+            If you have any questions about these Terms, contact us at:{" "}
+            <a href="mailto:justinsmaxwell722@gmail.com">justinsmaxwell722@gmail.com</a>
           </p>
-          <div className="mt-8">
-            <a href="/" className="inline-flex items-center px-4 py-2 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80">Back to Home</a>
-          </div>
         </section>
       </main>
     </div>
