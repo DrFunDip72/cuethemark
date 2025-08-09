@@ -58,7 +58,7 @@ export default function PrivacyPolicyPage() {
           <h2>6. Contact Us</h2>
           <p>
             If you have any questions about this policy, contact us at:{" "}
-            <a href="mailto:support@marktapdance.com">support@marktapdance.com</a>
+            <a href="mailto:justinsmaxwell722@gmail.com">justinsmaxwell722@gmail.com</a>
           </p>
         </section>
       </main>
