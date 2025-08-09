@@ -103,10 +103,11 @@ serve(async (req) => {
         },
       };
     } else if (promoCode.type === "monthly_free") {
-      // 1 month free subscription
+      // 1 month free subscription - require payment method upfront but do not charge for first month
       sessionConfig = {
         ...sessionConfig,
         mode: "subscription",
+        payment_method_collection: "always",
         line_items: [{
           price_data: {
             currency: "usd",

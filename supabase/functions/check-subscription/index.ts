@@ -154,22 +154,22 @@ serve(async (req) => {
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
-    // Check for active subscriptions
-    const subscriptions = await stripe.subscriptions.list({
+    // Check for active or trialing subscriptions
+    const subs = await stripe.subscriptions.list({
       customer: customerId,
-      status: "active",
-      limit: 1,
+      limit: 10,
     });
 
-    const hasActiveSub = subscriptions.data.length > 0;
+    const activeOrTrial = subs.data.find((s) => s.status === "active" || s.status === "trialing");
+    const hasActiveOrTrial = !!activeOrTrial;
     let subscriptionTier = null;
     let subscriptionEnd = null;
 
-    if (hasActiveSub) {
-      const subscription = subscriptions.data[0];
+    if (hasActiveOrTrial) {
+      const subscription = activeOrTrial;
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-      subscriptionTier = "monthly";
-      logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
+      subscriptionTier = "monthly"; // Treat trialing as active monthly for gating
+      logStep("Active or trialing subscription found", { subscriptionId: subscription.id, status: subscription.status, endDate: subscriptionEnd });
     } else {
       // Check for lifetime access
       const { data: lifetimeUsage } = await supabaseClient
@@ -187,7 +187,7 @@ serve(async (req) => {
       }
     }
 
-    const isSubscribed = hasActiveSub || subscriptionTier === "lifetime";
+    const isSubscribed = hasActiveOrTrial || subscriptionTier === "lifetime";
 
     await supabaseClient.from("subscribers").upsert({
       email: user.email,
