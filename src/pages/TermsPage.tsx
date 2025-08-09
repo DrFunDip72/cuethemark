@@ -25,7 +25,7 @@ export default function TermsPage() {
 
           <h2>1. Using MarkTapDance</h2>
           <ul>
-            <li>You must be at least 13 years old to use our services.</li>
+            <li>You must be at least 5 years old to use our services.</li>
             <li>You are responsible for your account and any activity under it.</li>
             <li>You agree not to misuse our services or attempt to disrupt them.</li>
           </ul>
