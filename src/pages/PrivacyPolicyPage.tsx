@@ -8,21 +8,57 @@ export default function PrivacyPolicyPage() {
   }, []);
 
   return (
-    <div className="min-h-screen">
-      <main className="max-w-3xl mx-auto px-6 py-10">
-        <h1 className="text-3xl font-bold mb-4">Privacy Policy</h1>
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
+      <main className="max-w-3xl mx-auto px-6 py-12">
+        <h1 className="text-4xl font-extrabold mb-6 text-center bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+          Privacy Policy
+        </h1>
         <section className="prose prose-neutral dark:prose-invert max-w-none">
           <p>
-            This is placeholder content for the Privacy Policy. Replace with your actual policy text.
+            <strong>Last updated:</strong> August 9, 2025
           </p>
           <p>
-            We respect your privacy and are committed to protecting your personal information. This policy explains what data we collect, how we use it, and your rights.
+            MarkTapDance (“we,” “our,” or “us”) respects your privacy and is committed
+            to protecting the personal information you share with us. This Privacy
+            Policy explains how we collect, use, and protect your information when
+            you use our website and application.
           </p>
+          <h2>1. Information We Collect</h2>
+          <ul>
+            <li><strong>Account information</strong> — your name, email address, and password.</li>
+            <li><strong>Usage data</strong> — tracks you upload, labels you create, and pages you visit.</li>
+            <li><strong>Device data</strong> — browser type, operating system, and IP address.</li>
+          </ul>
+          <h2>2. How We Use Your Information</h2>
+          <ul>
+            <li>Provide and improve our services</li>
+            <li>Communicate with you (e.g., updates, support)</li>
+            <li>Troubleshoot issues</li>
+            <li>Ensure account security</li>
+          </ul>
+          <h2>3. How We Share Your Information</h2>
           <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Curabitur ac sem nec nunc posuere volutpat. Integer sagittis mauris at tortor lacinia, in vestibulum purus cursus.
+            We <strong>do not sell</strong> your personal information. We may share it only with:
           </p>
+          <ul>
+            <li>Service providers who help us run the app</li>
+            <li>Authorities, if required by law</li>
+          </ul>
+          <h2>4. Data Storage and Security</h2>
           <p>
-            If you have any questions about this policy, please contact us.
+            We store your data securely and take reasonable measures to protect it.
+            However, no method of transmission or storage is 100% secure.
+          </p>
+          <h2>5. Your Rights</h2>
+          <ul>
+            <li>Request a copy of your data</li>
+            <li>Ask us to update or delete your data (subject to legal requirements)</li>
+            <li>Opt out of non-essential emails</li>
+          </ul>
+          <h2>6. Contact Us</h2>
+          <p>
+            If you have any questions about this policy, contact us at:{" "}
+            <a href="mailto:support@marktapdance.com">support@marktapdance.com</a>
           </p>
         </section>
       </main>
