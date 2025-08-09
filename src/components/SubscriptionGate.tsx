@@ -306,7 +306,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
     const endDate = new Date(subscription.subscription_end);
     if (new Date() > endDate) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="min-h-screen flex items-center justify-center text-[hsl(var(--hero-foreground))] bg-gradient-to-br from-[hsl(var(--gradient-hero-start))] via-[hsl(var(--gradient-hero-mid))] to-[hsl(var(--gradient-hero-end))]">
           <Card className="w-full max-w-md">
             <CardHeader className="text-center">
               <CardTitle>
@@ -356,7 +356,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
   // Show subscription options for authenticated users without subscription
   if (!subscription?.subscribed) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center text-[hsl(var(--hero-foreground))] bg-gradient-to-br from-[hsl(var(--gradient-hero-start))] via-[hsl(var(--gradient-hero-mid))] to-[hsl(var(--gradient-hero-end))]">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle>Subscription Required</CardTitle>

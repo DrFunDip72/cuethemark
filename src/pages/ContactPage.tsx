@@ -58,7 +58,7 @@ export default function ContactPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  useEffect(() => {
+useEffect(() => {
     document.title = "Contact Us – MarkTapDance";
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", "Contact MarkTapDance support. Send us a message and we'll get back to you shortly.");

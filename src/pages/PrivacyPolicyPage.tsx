@@ -8,12 +8,13 @@ export default function PrivacyPolicyPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen relative text-[hsl(var(--hero-foreground))] bg-gradient-to-br from-[hsl(var(--gradient-hero-start))] via-[hsl(var(--gradient-hero-mid))] to-[hsl(var(--gradient-hero-end))]">
       <main className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-4xl font-extrabold mb-6 text-center bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
-          Privacy Policy
-        </h1>
-        <section className="prose prose-neutral dark:prose-invert max-w-none">
+        <header className="mb-6 flex items-center justify-between">
+          <h1 className="text-4xl font-extrabold tracking-tight">Privacy Policy</h1>
+          <a href="/" className="inline-flex items-center px-4 py-2 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80">Back to Home</a>
+        </header>
+        <section className="prose prose-invert max-w-none">
           <p>
             <strong>Last updated:</strong> August 9, 2025
           </p>
@@ -57,9 +58,11 @@ export default function PrivacyPolicyPage() {
           </ul>
           <h2>6. Contact Us</h2>
           <p>
-            If you have any questions about this policy, contact us at:{" "}
-            <a href="mailto:justinsmaxwell722@gmail.com">justinsmaxwell722@gmail.com</a>
+            If you have any questions about this policy, contact us at: <a href="mailto:justinsmaxwell722@gmail.com">justinsmaxwell722@gmail.com</a>
           </p>
+          <div className="mt-8">
+            <a href="/" className="inline-flex items-center px-4 py-2 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80">Back to Home</a>
+          </div>
         </section>
       </main>
     </div>
