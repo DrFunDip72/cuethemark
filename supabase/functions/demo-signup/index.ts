@@ -6,21 +6,15 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-function randomPassword(length = 16) {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
-  let pwd = "";
-  for (let i = 0; i < length; i++) pwd += chars[Math.floor(Math.random() * chars.length)];
-  return pwd;
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { email } = await req.json();
+    const { email, password } = await req.json();
     if (!email) throw new Error("Email is required");
+    if (!password) throw new Error("Password is required");
 
     // Service role client to use Admin API
     const admin = createClient(
@@ -49,26 +43,23 @@ serve(async (req) => {
       page += 1;
     }
 
-    const tempPassword = randomPassword();
-
     if (existingUser) {
-      // Ensure they can log in immediately by setting a password and confirming
-      await admin.auth.admin.updateUserById(existingUser.id, {
-        password: tempPassword,
-        email_confirm: true,
+      // Do NOT reset password. Inform client the account exists.
+      return new Response(JSON.stringify({ alreadyExists: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
       });
     } else {
       await admin.auth.admin.createUser({
         email,
-        password: tempPassword,
+        password,
         email_confirm: true,
       });
+      return new Response(JSON.stringify({ alreadyExists: false }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
     }
-
-    return new Response(JSON.stringify({ tempPassword }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return new Response(JSON.stringify({ error: message }), {

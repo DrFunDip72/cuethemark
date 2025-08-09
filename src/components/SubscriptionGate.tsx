@@ -430,7 +430,20 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
             </CardHeader>
             <CardContent className="text-center space-y-3">
               <Button 
-                onClick={() => window.open('https://checkout.stripe.com', '_blank')} 
+                onClick={async () => {
+                  try {
+                    const { data: checkout, error: checkoutError } = await supabase.functions.invoke('create-subscription-checkout', {
+                      headers: { Authorization: `Bearer ${session?.access_token}` },
+                    });
+                    if (checkoutError) {
+                      toast({ title: 'Payment Setup Failed', description: 'Please try again.', variant: 'destructive' });
+                      return;
+                    }
+                    if (checkout?.url) window.open(checkout.url, '_blank');
+                  } catch (e: any) {
+                    toast({ title: 'Error', description: e.message, variant: 'destructive' });
+                  }
+                }} 
                 className="w-full"
               >
                 Upgrade Now ($1.99/month)

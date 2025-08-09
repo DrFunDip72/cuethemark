@@ -54,14 +54,12 @@ serve(async (req) => {
         .eq("user_id", user.id)
         .maybeSingle();
 
+      let expiredDemoEnd: string | null = null;
       if (existingSubscription) {
         logStep("Found existing subscription record", existingSubscription);
-        
-        // Check if it's a demo that hasn't expired
         if (existingSubscription.subscription_tier === "Demo" && existingSubscription.subscription_end) {
           const endDate = new Date(existingSubscription.subscription_end);
           const now = new Date();
-          
           if (endDate > now) {
             logStep("Found valid demo subscription");
             return new Response(JSON.stringify({
@@ -74,6 +72,7 @@ serve(async (req) => {
             });
           } else {
             logStep("Demo subscription expired");
+            expiredDemoEnd = existingSubscription.subscription_end;
           }
         }
       }
@@ -90,19 +89,61 @@ serve(async (req) => {
 
       const hasLifetimeAccess = !!lifetimeUsage;
       
+      if (hasLifetimeAccess) {
+        await supabaseClient.from("subscribers").upsert({
+          email: user.email,
+          user_id: user.id,
+          stripe_customer_id: null,
+          subscribed: true,
+          subscription_tier: "lifetime",
+          subscription_end: null,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'email' });
+        return new Response(JSON.stringify({ 
+          subscribed: true,
+          subscription_tier: "lifetime",
+          subscription_end: null
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+
+      // If demo expired and no lifetime, persist the expired demo state
+      if (expiredDemoEnd) {
+        await supabaseClient.from("subscribers").upsert({
+          email: user.email,
+          user_id: user.id,
+          stripe_customer_id: null,
+          subscribed: false,
+          subscription_tier: "Demo",
+          subscription_end: expiredDemoEnd,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'email' });
+        return new Response(JSON.stringify({ 
+          subscribed: false,
+          subscription_tier: "Demo",
+          subscription_end: expiredDemoEnd
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+
+      // Default: no subscription
       await supabaseClient.from("subscribers").upsert({
         email: user.email,
         user_id: user.id,
         stripe_customer_id: null,
-        subscribed: hasLifetimeAccess,
-        subscription_tier: hasLifetimeAccess ? "lifetime" : null,
-        subscription_end: hasLifetimeAccess ? null : null,
+        subscribed: false,
+        subscription_tier: null,
+        subscription_end: null,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'email' });
 
       return new Response(JSON.stringify({ 
-        subscribed: hasLifetimeAccess,
-        subscription_tier: hasLifetimeAccess ? "lifetime" : null,
+        subscribed: false,
+        subscription_tier: null,
         subscription_end: null
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

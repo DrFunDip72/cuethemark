@@ -7,12 +7,14 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import AuthLayout from "@/components/AuthLayout";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SignupPage() {
   const [search] = useSearchParams();
   const mode = search.get("mode");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { checkSubscription } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -92,22 +94,26 @@ export default function SignupPage() {
   };
 
   const handleDemo = async () => {
-    if (!email) {
-      toast({ title: "Missing email", description: "Email is required for the demo", variant: "destructive" });
+    if (!email || !password) {
+      toast({ title: "Missing info", description: "Email and password are required for the demo", variant: "destructive" });
       return;
     }
     setLoading(true);
     try {
-      const { data: demoResp, error: demoErr } = await supabase.functions.invoke("demo-signup", {
-        body: { email },
+      const { data: resp, error: demoErr } = await supabase.functions.invoke("demo-signup", {
+        body: { email, password },
       });
       if (demoErr) throw demoErr;
-      const tempPassword = demoResp?.tempPassword as string;
-      if (!tempPassword) throw new Error("Demo signup failed");
+
+      if (resp?.alreadyExists) {
+        toast({ title: "Account exists", description: "Please log in to continue." });
+        navigate(`/login?email=${encodeURIComponent(email)}`);
+        return;
+      }
 
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
-        password: tempPassword,
+        password,
       });
       if (signInError) throw signInError;
 
@@ -119,6 +125,7 @@ export default function SignupPage() {
       });
       if (subErr) throw subErr;
 
+      await checkSubscription();
       toast({ title: "Demo activated", description: "You have 1 day of free access" });
       navigate("/app");
     } catch (e: any) {
