@@ -117,6 +117,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setTimeout(() => {
             checkSubscription();
             checkAdminStatus(session.user.id, session.user.email || '');
+            // Seed starter template (idempotent)
+            supabase.functions
+              .invoke('seed-template', {
+                headers: { Authorization: `Bearer ${session.access_token}` },
+              })
+              .catch((e) => console.warn('Seed template failed (non-fatal):', e));
           }, 0);
         } else {
           setSubscription(null);
@@ -133,6 +139,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (session?.user) {
         checkSubscription();
         checkAdminStatus(session.user.id, session.user.email || '');
+        supabase.functions
+          .invoke('seed-template', {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          })
+          .catch((e) => console.warn('Seed template failed (non-fatal):', e));
       }
       setLoading(false);
     });

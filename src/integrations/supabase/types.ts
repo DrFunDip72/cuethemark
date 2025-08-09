@@ -192,6 +192,27 @@ export type Database = {
         }
         Relationships: []
       }
+      seeded_templates: {
+        Row: {
+          created_at: string
+          id: string
+          template_track_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          template_track_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          template_track_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscribers: {
         Row: {
           created_at: string
