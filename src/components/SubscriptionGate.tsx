@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { PromoGate } from './PromoGate';
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,13 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
   const [password, setPassword] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const { toast } = useToast();
+
+  // Proactively fetch subscription when user exists but subscription is not yet loaded
+  useEffect(() => {
+    if (user && !isAdmin && subscription === null && session) {
+      checkSubscription();
+    }
+  }, [user, isAdmin, subscription, session, checkSubscription]);
 
   if (loading) {
     return (
@@ -136,6 +143,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
             title: "Demo Account Created!",
             description: "You have 1 day of free access. Upgrade anytime from your profile.",
           });
+          await checkSubscription();
         }
       } else {
         toast({
@@ -177,6 +185,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
         title: "Welcome back!",
         description: "You've been logged in successfully"
       });
+      await checkSubscription();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -187,6 +196,18 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
       setAuthLoading(false);
     }
   };
+
+  // While subscription is being resolved, avoid showing the paywall
+  if (user && !isAdmin && subscription === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Checking your access…</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -280,6 +301,58 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
     return <>{children}</>;
   }
 
+  // If subscription has ended (including expired demos), show upgrade prompt
+  if (subscription && subscription.subscription_end && !isAdmin) {
+    const endDate = new Date(subscription.subscription_end);
+    if (new Date() > endDate) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <Card className="w-full max-w-md">
+            <CardHeader className="text-center">
+              <CardTitle>
+                {subscription.subscription_tier === 'Demo' ? 'Demo Expired' : 'Subscription Expired'}
+              </CardTitle>
+              <CardDescription>
+                {subscription.subscription_tier === 'Demo' 
+                  ? 'Your 1-day demo has ended. Upgrade to continue using the application.'
+                  : 'Your subscription has ended. Please renew to continue using the application.'
+                }
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center space-y-3">
+              <Button 
+                onClick={async () => {
+                  try {
+                    const { data: checkout, error: checkoutError } = await supabase.functions.invoke('create-subscription-checkout', {
+                      headers: { Authorization: `Bearer ${session?.access_token}` },
+                    });
+                    if (checkoutError) {
+                      toast({ title: 'Payment Setup Failed', description: 'Please try again.', variant: 'destructive' });
+                      return;
+                    }
+                    if (checkout?.url) window.open(checkout.url, '_blank');
+                  } catch (e: any) {
+                    toast({ title: 'Error', description: e.message, variant: 'destructive' });
+                  }
+                }} 
+                className="w-full"
+              >
+                Upgrade Now ($1.99/month)
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={checkSubscription}
+                className="w-full"
+              >
+                Refresh Status
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+  }
+
   // Show subscription options for authenticated users without subscription
   if (!subscription?.subscribed) {
     return (
@@ -338,46 +411,57 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
             >
               {authLoading ? 'Setting up payment...' : 'Subscribe ($1.99/month)'}
             </Button>
-            <Button 
-              variant="outline"
-              onClick={async () => {
-                setAuthLoading(true);
-                try {
-                  const { error: demoError } = await supabase.functions.invoke('create-demo-subscription', {
-                    headers: {
-                      Authorization: `Bearer ${session?.access_token}`,
-                    },
-                  });
+            {subscription?.subscription_tier === 'Demo' && subscription?.subscription_end && (new Date(subscription.subscription_end) < new Date()) ? (
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled
+              >
+                Demo expired — please subscribe
+              </Button>
+            ) : (
+              <Button 
+                variant="outline"
+                onClick={async () => {
+                  setAuthLoading(true);
+                  try {
+                    const { error: demoError } = await supabase.functions.invoke('create-demo-subscription', {
+                      headers: {
+                        Authorization: `Bearer ${session?.access_token}`,
+                      },
+                    });
 
-                  if (demoError) {
-                    console.error('Demo creation error:', demoError);
+                    if (demoError) {
+                      console.error('Demo creation error:', demoError);
+                      toast({
+                        title: "Demo Setup Failed",
+                        description: "Failed to setup demo. Please contact support.",
+                        variant: "destructive"
+                      });
+                    } else {
+                      toast({
+                        title: "Demo Account Activated!",
+                        description: "You now have 1 day of free access. Upgrade anytime from your profile.",
+                      });
+                      checkSubscription(); // Refresh the subscription status
+                    }
+                  } catch (error: any) {
                     toast({
-                      title: "Demo Setup Failed",
-                      description: "Failed to setup demo. Please contact support.",
+                      title: "Error",
+                      description: error.message,
                       variant: "destructive"
                     });
-                  } else {
-                    toast({
-                      title: "Demo Account Activated!",
-                      description: "You now have 1 day of free access. Upgrade anytime from your profile.",
-                    });
-                    checkSubscription(); // Refresh the subscription status
+                  } finally {
+                    setAuthLoading(false);
                   }
-                } catch (error: any) {
-                  toast({
-                    title: "Error",
-                    description: error.message,
-                    variant: "destructive"
-                  });
-                } finally {
-                  setAuthLoading(false);
-                }
-              }}
-              className="w-full"
-              disabled={authLoading}
-            >
-              {authLoading ? 'Setting up demo...' : 'Try Demo (Free for 1 Day)'}
-            </Button>
+                }}
+                className="w-full"
+                disabled={authLoading}
+              >
+                {authLoading ? 'Setting up demo...' : 'Try Demo (Free for 1 Day)'}
+              </Button>
+            )}
+            
             
             <div className="flex gap-2">
               <Button 
@@ -408,59 +492,6 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
     );
   }
 
-  // Check if subscription has ended (admins bypass this too)
-  if (subscription && subscription.subscription_end && !isAdmin) {
-    const endDate = new Date(subscription.subscription_end);
-    const now = new Date();
-    
-    if (now > endDate) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <Card className="w-full max-w-md">
-            <CardHeader className="text-center">
-              <CardTitle>
-                {subscription.subscription_tier === 'Demo' ? 'Demo Expired' : 'Subscription Expired'}
-              </CardTitle>
-              <CardDescription>
-                {subscription.subscription_tier === 'Demo' 
-                  ? 'Your 1-day demo has ended. Upgrade to continue using the application.'
-                  : 'Your subscription has ended. Please renew to continue using the application.'
-                }
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center space-y-3">
-              <Button 
-                onClick={async () => {
-                  try {
-                    const { data: checkout, error: checkoutError } = await supabase.functions.invoke('create-subscription-checkout', {
-                      headers: { Authorization: `Bearer ${session?.access_token}` },
-                    });
-                    if (checkoutError) {
-                      toast({ title: 'Payment Setup Failed', description: 'Please try again.', variant: 'destructive' });
-                      return;
-                    }
-                    if (checkout?.url) window.open(checkout.url, '_blank');
-                  } catch (e: any) {
-                    toast({ title: 'Error', description: e.message, variant: 'destructive' });
-                  }
-                }} 
-                className="w-full"
-              >
-                Upgrade Now ($1.99/month)
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={checkSubscription}
-                className="w-full"
-              >
-                Refresh Status
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      );
-    }
-  }
 
   // User has active subscription, show the app
   return <>{children}</>;

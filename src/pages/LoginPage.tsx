@@ -48,6 +48,17 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       toast({ title: "Welcome back!" });
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          // Warm subscription status to avoid paywall flash
+          supabase.functions
+            .invoke('check-subscription', {
+              headers: { Authorization: `Bearer ${session.access_token}` },
+            })
+            .catch(() => {});
+        }
+      } catch {}
       navigate("/app");
     } catch (e: any) {
       toast({ title: "Login failed", description: e.message, variant: "destructive" });
