@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -44,6 +44,18 @@ export default function LandingPage() {
           </p>
         </section>
       </main>
+      <footer className="relative z-10">
+        <div className="border-t border-border" />
+        <div className="max-w-6xl mx-auto px-6 py-6">
+          <nav className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-6">
+            <Link to="/contact?from=/" className="hover:underline">Contact Us</Link>
+            <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
+            <Link to="/terms" className="hover:underline">Terms of Service</Link>
+          </nav>
+          <p className="mt-4 text-center text-sm text-muted-foreground">© 2025 MarkTapDance</p>
+        </div>
+        <div className="border-t border-border" />
+      </footer>
     </div>
   );
 }
