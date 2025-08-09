@@ -67,7 +67,7 @@ export default function TermsPage() {
           <h2>7. Contact Us</h2>
           <p>
             If you have any questions about these Terms, contact us at:{" "}
-            <a href="mailto:support@marktapdance.com">support@marktapdance.com</a>
+            <a href="mailto:justinsmaxwell722@gmail.com">justinsmaxwell722@gmail.com</a>
           </p>
         </section>
       </main>
