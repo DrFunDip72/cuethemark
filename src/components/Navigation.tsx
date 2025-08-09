@@ -2,7 +2,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { LogOut, User, Shield } from 'lucide-react';
+import { LogOut, User, Shield, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -78,6 +78,10 @@ export const Navigation = () => {
                       Admin
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuItem onSelect={() => navigate(`/app/feedback?from=${encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)}`)}>
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Send Feedback
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onSelect={() => handleLogout(navigate)}>
                     <LogOut className="h-4 w-4 mr-2" />

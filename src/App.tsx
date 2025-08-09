@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import FeedbackPage from "./pages/FeedbackPage";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
                 <Route path="/app/tracks/:id" element={<TrackPage />} />
                 <Route path="/tracks/:id" element={<TrackPage />} />
                 <Route path="/app/profile" element={<ProfilePage />} />
+                <Route path="/app/feedback" element={<FeedbackPage />} />
                 <Route
                   path="/app/admin"
                   element={

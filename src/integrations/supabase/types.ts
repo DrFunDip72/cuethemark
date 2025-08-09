@@ -97,6 +97,42 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback: {
+        Row: {
+          app_version: string | null
+          created_at: string
+          current_route: string | null
+          device_info: Json | null
+          email: string | null
+          id: string
+          message: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          app_version?: string | null
+          created_at?: string
+          current_route?: string | null
+          device_info?: Json | null
+          email?: string | null
+          id?: string
+          message: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          app_version?: string | null
+          created_at?: string
+          current_route?: string | null
+          device_info?: Json | null
+          email?: string | null
+          id?: string
+          message?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

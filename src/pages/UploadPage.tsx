@@ -1,13 +1,13 @@
-
+import { Link, useLocation } from 'react-router-dom';
 import { useAudioUpload } from '@/hooks/useAudioUpload';
 import { Button } from "@/components/ui/button";
 import { TrackList } from '@/components/TrackList';
 import { Progress } from '@/components/ui/progress';
-import { Upload } from 'lucide-react';
+import { Upload, MessageSquare } from 'lucide-react';
 
 const UploadPage = () => {
   const { uploadAudio, isUploading, uploadProgress } = useAudioUpload();
-  
+  const location = useLocation();
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) uploadAudio(file);
@@ -43,6 +43,13 @@ const UploadPage = () => {
       </div>
 
       <TrackList />
+
+      <Link to={`/app/feedback?from=${encodeURIComponent(location.pathname + location.search + location.hash)}`} className="fixed bottom-6 right-6 z-50">
+        <Button className="shadow-lg">
+          <MessageSquare className="h-4 w-4 mr-2" />
+          Send Feedback
+        </Button>
+      </Link>
     </div>
   );
 };

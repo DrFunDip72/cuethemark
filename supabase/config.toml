@@ -49,3 +49,5 @@ port = 54327
 
 [functions.demo-signup]
 verify_jwt = false
+
+[functions.send-feedback]
