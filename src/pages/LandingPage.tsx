@@ -52,7 +52,7 @@ export default function LandingPage() {
             <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
             <Link to="/terms" className="hover:underline">Terms of Service</Link>
           </nav>
-          <p className="mt-4 text-center text-sm text-muted-foreground">© 2025 MarkTapDance</p>
+          <p className="mt-4 text-center text-sm text-white">© 2025 MarkTapDance</p>
         </div>
         <div className="border-t border-border" />
       </footer>
