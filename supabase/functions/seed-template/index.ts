@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 // Admin template track to clone for each new user
-const TEMPLATE_TRACK_ID = "a3b57842-8bcb-4565-8291-7e95071fc780";
+const TEMPLATE_TRACK_ID = "6a3b806e-3d98-4978-90b9-2f39640acbd4";
 
 function log(step: string, details?: Record<string, unknown>) {
   console.log(`[SEED-TEMPLATE] ${step}${details ? " | " + JSON.stringify(details) : ""}`);
