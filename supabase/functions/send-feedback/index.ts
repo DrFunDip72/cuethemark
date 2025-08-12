@@ -4,6 +4,15 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+const escapeHtml = (value: unknown) => {
+  const str = String(value ?? '');
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
 
 interface FeedbackPayload {
   to: string;
@@ -49,16 +58,14 @@ serve(async (req) => {
 
     const html = `
       <h2>New Feedback Submitted</h2>
-      <p><strong>Type:</strong> ${feedback.type}</p>
-      <p><strong>Message:</strong><br/>${(feedback.message || '').replace(/\n/g, '<br/>')}</p>
-      <p><strong>From (optional):</strong> ${feedback.email ?? 'N/A'}</p>
-      <p><strong>User email:</strong> ${feedback.user_email ?? 'N/A'}</p>
-      <p><strong>User ID:</strong> ${feedback.user_id}</p>
-      <p><strong>Route:</strong> ${feedback.current_route ?? 'N/A'}</p>
-      <p><strong>App Version:</strong> ${feedback.app_version ?? 'N/A'}</p>
-      <pre style="background:#f6f6f6;padding:12px;border-radius:6px;">${
-        JSON.stringify(feedback.device_info ?? {}, null, 2)
-      }</pre>
+      <p><strong>Type:</strong> ${escapeHtml(feedback.type)}</p>
+      <p><strong>Message:</strong><br/>${escapeHtml(feedback.message).replace(/\n/g, '<br/>')}</p>
+      <p><strong>From (optional):</strong> ${escapeHtml(feedback.email ?? 'N/A')}</p>
+      <p><strong>User email:</strong> ${escapeHtml(feedback.user_email ?? 'N/A')}</p>
+      <p><strong>User ID:</strong> ${escapeHtml(feedback.user_id)}</p>
+      <p><strong>Route:</strong> ${escapeHtml(feedback.current_route ?? 'N/A')}</p>
+      <p><strong>App Version:</strong> ${escapeHtml(feedback.app_version ?? 'N/A')}</p>
+      <pre style="background:#f6f6f6;padding:12px;border-radius:6px;">${escapeHtml(JSON.stringify(feedback.device_info ?? {}, null, 2))}</pre>
     `;
 
     const body = {
