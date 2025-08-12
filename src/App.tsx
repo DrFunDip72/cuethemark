@@ -16,7 +16,7 @@ import { AdminRoute } from "./components/AdminRoute";
 import NotFound from "./pages/NotFound";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
+import GetStartedPage from "./pages/GetStartedPage";
 import FeedbackPage from "./pages/FeedbackPage";
 import ContactPage from "./pages/ContactPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
@@ -33,10 +33,10 @@ const App = () => (
         <BrowserRouter>
           <div className="min-h-screen flex flex-col">
             <Routes>
-              {/* Public routes */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/get-started" element={<GetStartedPage />} />
+              <Route path="/signup" element={<GetStartedPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/privacy" element={<PrivacyPolicyPage />} />
               <Route path="/terms" element={<TermsPage />} />

@@ -7,12 +7,12 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   useEffect(() => {
-    document.title = "MarkTapDance – Practice smarter, hit your cue";
+    document.title = "CueTheMark – Mark Your Moves, Master the Dance";
     const meta = document.querySelector('meta[name="description"]');
     if (meta) {
       meta.setAttribute(
         "content",
-        "MarkTapDance: Mark. Tap. Dance. Practice smarter, not longer — set your marks and hit your cue every time."
+        "CueTheMark: Mark your moves and master the dance. $1.99/month after your first month free. Beta code BETA2025."
       );
     }
   }, []);
@@ -22,26 +22,36 @@ export default function LandingPage() {
       {/* Vibrant gradient backdrop */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[hsl(var(--gradient-hero-start))] via-[hsl(var(--gradient-hero-mid))] to-[hsl(var(--gradient-hero-end))]" />
 
-      <main className="px-6 py-8 md:py-12 max-w-6xl mx-auto min-h-screen flex items-center justify-center">
+      <header className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+        <Link to="/" className="font-extrabold tracking-tight text-xl">CueTheMark</Link>
+        <nav className="flex items-center gap-3">
+          {user ? (
+            <Button size="sm" variant="outline" onClick={() => navigate("/app/tracks")}>Go to App</Button>
+          ) : (
+            <>
+              <Button asChild size="sm" variant="outline"><Link to="/login">Log In</Link></Button>
+              <Button asChild size="sm" className="rounded-full"><Link to="/get-started">Get Started</Link></Button>
+            </>
+          )}
+        </nav>
+      </header>
+
+      <main className="px-6 py-8 md:py-12 max-w-6xl mx-auto min-h-[70vh] flex items-center justify-center">
         <section className="w-full text-center space-y-6 animate-enter">
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">MarkTapDance</h1>
-          <p className="text-xl md:text-2xl italic/relaxed opacity-90">Mark. Tap. Dance.</p>
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">Mark Your Moves, Master the Dance.</h1>
+          <p className="text-xl md:text-2xl opacity-90">Only $1.99/month after your first month free 🎉</p>
+          <p className="text-md opacity-80">Beta testers get 1 month free with code BETA2025. Cancel anytime.</p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             {user ? (
               <Button size="lg" className="rounded-full" onClick={() => navigate("/app/tracks")}>Go to App</Button>
             ) : (
               <>
-                <Button size="lg" className="rounded-full" variant="secondary" onClick={() => navigate("/signup?mode=demo")}>Demo for a Day (Free)</Button>
-                <Button size="lg" className="rounded-full" variant="green" onClick={() => navigate("/signup")}>Sign Up & Pay</Button>
-                <Button size="lg" className="rounded-full" variant="purple" onClick={() => navigate("/login")}>Login</Button>
+                <Button asChild size="lg" className="rounded-full"><Link to="/get-started">Get Started</Link></Button>
+                <Button asChild size="lg" className="rounded-full" variant="outline"><Link to="/login">Log In</Link></Button>
               </>
             )}
           </div>
-
-          <p className="text-lg md:text-xl max-w-2xl mx-auto opacity-90">
-            Practice smarter, not longer — set your marks and hit your cue every time.
-          </p>
         </section>
       </main>
       <footer className="relative z-10">
@@ -52,7 +62,7 @@ export default function LandingPage() {
             <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
             <Link to="/terms" className="hover:underline">Terms of Service</Link>
           </nav>
-          <p className="mt-4 text-center text-sm text-white">© 2025 MarkTapDance</p>
+          <p className="mt-4 text-center text-sm text-white">© 2025 CueTheMark</p>
         </div>
         <div className="border-t border-border" />
       </footer>

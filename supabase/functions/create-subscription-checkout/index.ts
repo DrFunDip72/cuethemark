@@ -53,17 +53,18 @@ serve(async (req) => {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       mode: "subscription" as const,
+      allow_promotion_codes: true,
       line_items: [{
         price_data: {
           currency: "usd",
-          product_data: { name: "Audio Labeling Tool" },
+          product_data: { name: "CueTheMark" },
           unit_amount: 199, // $1.99
           recurring: { interval: "month" as const },
         },
         quantity: 1,
       }],
-      success_url: `${req.headers.get("origin")}/success`,
-      cancel_url: `${req.headers.get("origin")}/`,
+      success_url: `${req.headers.get("origin")}/app`,
+      cancel_url: `${req.headers.get("origin")}/get-started`,
     };
 
     logStep("Creating Stripe checkout session for regular subscription");
