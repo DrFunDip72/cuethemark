@@ -23,10 +23,10 @@ export default function LandingPage() {
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[hsl(var(--gradient-hero-start))] via-[hsl(var(--gradient-hero-mid))] to-[hsl(var(--gradient-hero-end))]" />
 
       <header className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
-        <Link to="/" className="font-extrabold tracking-tight text-xl">CueTheMark</Link>
+        {/*<Link to="/" className="font-extrabold tracking-tight text-xl">CueTheMark</Link>*/}
         <nav className="flex items-center gap-3">
           {user ? (
-            <Button size="sm" variant="outline" onClick={() => navigate("/app/tracks")}>Go to App</Button>
+            <Button size="sm" className="rounded-full" onClick={() => navigate("/app/tracks")}>Go to App</Button>
           ) : (
             <>
               <Button asChild size="sm" variant="green" className="rounded-full"><Link to="/login">Log In</Link></Button>
@@ -37,7 +37,7 @@ export default function LandingPage() {
 
       <main className="px-6 py-8 md:py-12 max-w-6xl mx-auto min-h-[70vh] flex items-center justify-center">
         <section className="w-full text-center space-y-6 animate-enter">
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">Cue The Mark</h1>
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">CueTheMark</h1>
           <p className="text-xl md:text-2xl opacity-90">Practice smarter, not longer — set your marks and hit your cue every time.</p>
           <p className="text-md opacity-80">Only $1.99/month. Beta Testers -> BETA2025.</p>
 
