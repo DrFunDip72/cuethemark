@@ -47,7 +47,7 @@ export default function LandingPage() {
             ) : (
               <>
                 <Button asChild size="lg" className="rounded-full"><Link to="/get-started">Get Started</Link></Button>
-                <Button asChild size="lg" className="rounded-full" variant="outline"><Link to="/login">Log In</Link></Button>
+                <Button asChild size="lg" className="rounded-full" variant="green"><Link to="/login">Log In</Link></Button>
               </>
             )}
           </div>
