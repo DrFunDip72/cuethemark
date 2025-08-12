@@ -30,7 +30,6 @@ export default function LandingPage() {
           ) : (
             <>
               <Button asChild size="sm" variant="green" className="rounded-full"><Link to="/login">Log In</Link></Button>
-              <Button asChild size="sm" className="rounded-full"><Link to="/get-started">Get Started</Link></Button>
             </>
           )}
         </nav>
