@@ -29,7 +29,7 @@ export default function LandingPage() {
             <Button size="sm" variant="outline" onClick={() => navigate("/app/tracks")}>Go to App</Button>
           ) : (
             <>
-              <Button asChild size="sm" variant="green"><Link to="/login">Log In</Link></Button>
+              <Button asChild size="sm" variant="green" className="rounded-full"><Link to="/login">Log In</Link></Button>
               <Button asChild size="sm" className="rounded-full"><Link to="/get-started">Get Started</Link></Button>
             </>
           )}
