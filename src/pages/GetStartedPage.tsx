@@ -66,7 +66,7 @@ export default function GetStartedPage() {
     <div className="min-h-screen relative overflow-hidden text-[hsl(var(--foreground))]">
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[hsl(var(--gradient-hero-start))] via-[hsl(var(--gradient-hero-mid))] to-[hsl(var(--gradient-hero-end))]" />
 
-      <header className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+      <header className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between" text-white>
         <Link to="/" className="font-extrabold tracking-tight text-xl">CueTheMark</Link>
         <nav className="flex items-center gap-3">
           <Button asChild variant="outline">
