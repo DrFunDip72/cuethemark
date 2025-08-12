@@ -63,7 +63,7 @@ export default function GetStartedPage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden text-[hsl(var(--foreground))]">
+    <div className="min-h-screen relative overflow-hidden text-white">
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[hsl(var(--gradient-hero-start))] via-[hsl(var(--gradient-hero-mid))] to-[hsl(var(--gradient-hero-end))]" />
 
       <header className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
