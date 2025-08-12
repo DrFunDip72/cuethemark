@@ -7,12 +7,12 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   useEffect(() => {
-    document.title = "CueTheMark – Mark Your Moves, Master the Dance";
+    document.title = "CueTheMark – Practice smarter, not longer — set your marks and hit your cue every time.";
     const meta = document.querySelector('meta[name="description"]');
     if (meta) {
       meta.setAttribute(
         "content",
-        "CueTheMark: Mark your moves and master the dance. $1.99/month after your first month free. Beta code BETA2025."
+        "CueTheMark: Practice smarter, not longer — set your marks and hit your cue every time. $1.99/month after your first month free. Beta code BETA2025."
       );
     }
   }, []);
@@ -38,7 +38,7 @@ export default function LandingPage() {
 
       <main className="px-6 py-8 md:py-12 max-w-6xl mx-auto min-h-[70vh] flex items-center justify-center">
         <section className="w-full text-center space-y-6 animate-enter">
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">Mark Your Moves, Master the Dance.</h1>
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">Practice smarter, not longer — set your marks and hit your cue every time.</h1>
           <p className="text-xl md:text-2xl opacity-90">Only $1.99/month after your first month free 🎉</p>
           <p className="text-md opacity-80">Beta testers get 1 month free with code BETA2025. Cancel anytime.</p>
 
