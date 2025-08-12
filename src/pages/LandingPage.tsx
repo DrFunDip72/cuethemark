@@ -24,6 +24,7 @@ export default function LandingPage() {
 
       <header className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
         {/*<Link to="/" className="font-extrabold tracking-tight text-xl">CueTheMark</Link>*/}
+        <div></div>
         <nav className="flex items-center gap-3">
           {user ? (
             <Button size="sm" className="rounded-full" onClick={() => navigate("/app/tracks")}>Go to App</Button>
