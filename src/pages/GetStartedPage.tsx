@@ -79,7 +79,7 @@ export default function GetStartedPage() {
         <section className="grid md:grid-cols-2 gap-8 items-center">
           <div className="space-y-4">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-              Mark Your Moves, Master the Dance.
+              Practice smarter, not longer — set your marks and hit your cue every time.
             </h1>
             <p className="text-lg opacity-90">
               Only $1.99/month after your first month free.
