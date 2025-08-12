@@ -69,7 +69,7 @@ export default function GetStartedPage() {
       <header className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
         <Link to="/" className="font-extrabold tracking-tight text-xl text-white">CueTheMark</Link>
         <nav className="flex items-center gap-3">
-          <Button asChild variant="outline">
+          <Button asChild variant="green">
             <Link to="/login">Log In</Link>
           </Button>
         </nav>
