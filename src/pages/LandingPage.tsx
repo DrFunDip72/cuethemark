@@ -38,8 +38,8 @@ export default function LandingPage() {
       <main className="px-6 py-8 md:py-12 max-w-6xl mx-auto min-h-[70vh] flex items-center justify-center">
         <section className="w-full text-center space-y-6 animate-enter">
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">Cue The Mark</h1>
-          <p className="text-xl md:text-2xl opacity-90">Only $1.99/month after your first month free 🎉</p>
-          <p className="text-md opacity-80">Beta testers get 1 month free with code BETA2025. Cancel anytime.</p>
+          <p className="text-xl md:text-2xl opacity-90">Practice smarter, not longer — set your marks and hit your cue every time.</p>
+          <p className="text-md opacity-80">Only $1.99/month after your first month free 🎉. Beta testers get 1 month free with code BETA2025. Cancel anytime.</p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             {user ? (
