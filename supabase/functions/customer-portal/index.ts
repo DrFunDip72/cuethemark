@@ -66,15 +66,12 @@ serve(async (req) => {
 
     logStep("Found or created Stripe customer", { customerId });
 
-    const origin = req.headers.get("origin") || "http://localhost:3000";
-    const portalSession = await stripe.billingPortal.sessions.create({
-      customer: customerId,
-      return_url: `${origin}/profile`,
-    });
+    // Use direct billing portal URL instead of creating Stripe portal session
+    const billingUrl = "https://billing.stripe.com/p/login/test_cNi00je5L5kjaaZfs8enS00";
+    
+    logStep("Returning direct billing portal URL", { url: billingUrl });
 
-    logStep("Customer portal session created", { sessionId: portalSession.id });
-
-    return new Response(JSON.stringify({ url: portalSession.url }), {
+    return new Response(JSON.stringify({ url: billingUrl }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
