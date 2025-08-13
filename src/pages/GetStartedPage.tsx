@@ -121,19 +121,6 @@ export default function GetStartedPage() {
           </Card>
         </section>
       </main>
-
-      <footer className="relative z-10">
-        <div className="border-t border-border" />
-        <div className="max-w-6xl mx-auto px-6 py-6">
-          <nav className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-6">
-            <Link to="/contact" className="hover:underline">Contact Us</Link>
-            <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
-            <Link to="/terms" className="hover:underline">Terms of Service</Link>
-          </nav>
-          <p className="mt-4 text-center text-sm text-white">© 2025 CueTheMark</p>
-        </div>
-        <div className="border-t border-border" />
-      </footer>
     </div>
   );
 }
