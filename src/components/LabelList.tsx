@@ -180,7 +180,11 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
   const queryClient = useQueryClient();
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Require 8px movement before drag starts
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
