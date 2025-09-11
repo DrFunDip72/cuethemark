@@ -41,7 +41,7 @@ export default function SignupPage() {
     link.setAttribute("href", window.location.href);
   }, []);
 
-  const handlePaidSignup = async () => {
+  const handleFreeTrialSignup = async () => {
     if (!email || !password) {
       toast({ title: "Missing info", description: "Email and password are required", variant: "destructive" });
       return;
@@ -55,36 +55,23 @@ export default function SignupPage() {
       });
       if (error) throw error;
 
-      // If session exists, proceed to checkout. If not, ask for email confirmation
       if (data.session) {
-        let checkoutUrl: string | null = null;
-        if (promo) {
-          const { data: validation } = await supabase.functions.invoke("validate-promo-code", {
-            body: { code: promo, userId: data.session.user.id },
-            headers: { Authorization: `Bearer ${data.session.access_token}` },
-          });
-          if (validation?.valid && validation.promoCode?.id) {
-            const { data: checkout } = await supabase.functions.invoke("create-checkout", {
-              body: { promoCodeId: validation.promoCode.id },
-              headers: { Authorization: `Bearer ${data.session.access_token}` },
-            });
-            checkoutUrl = checkout?.url ?? null;
-          } else {
-            toast({ title: "Invalid promo", description: validation?.error ?? "Promo code not valid", variant: "destructive" });
-          }
-        } else {
-          const { data: checkout } = await supabase.functions.invoke("create-subscription-checkout", {
-            headers: { Authorization: `Bearer ${data.session.access_token}` },
-          });
-          checkoutUrl = checkout?.url ?? null;
-        }
+        const { error: trialError } = await supabase.functions.invoke('create-free-trial', {
+          headers: {
+            Authorization: `Bearer ${data.session.access_token}`,
+          },
+        });
 
-        if (checkoutUrl) {
-          window.open(checkoutUrl, "_blank");
-          toast({ title: "Almost there", description: "Complete payment in the new tab" });
+        if (trialError) {
+          console.error('Free trial creation error:', trialError);
+          toast({ title: "Free trial setup failed", description: "Account created but free trial setup failed. Please contact support.", variant: "destructive" });
+        } else {
+          toast({ title: "Welcome!", description: "Your 30-day free trial has started." });
+          await checkSubscription();
+          navigate("/app");
         }
       } else {
-        toast({ title: "Confirm your email", description: "Check your inbox, then log in to complete payment." });
+        toast({ title: "Account created!", description: "Please check your email to confirm, then sign in to start your 30-day free trial." });
       }
     } catch (e: any) {
       toast({ title: "Signup failed", description: e.message, variant: "destructive" });
@@ -148,9 +135,9 @@ export default function SignupPage() {
         >
           <Card className="rounded-2xl bg-card/80 backdrop-blur-md border border-border/40">
             <CardHeader className="text-center">
-              <CardTitle>Join MarkTapDance</CardTitle>
+              <CardTitle>Start Your Free Trial</CardTitle>
               <CardDescription>
-                Kickstart focused practice and hit your performance goals faster.
+                Get 30 days free access to MarkTapDance. No payment required to start.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -162,16 +149,9 @@ export default function SignupPage() {
                 <Label htmlFor="password">Password</Label>
                 <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Minimum 6 characters" />
               </div>
-              <div>
-                <Label htmlFor="promo">Promo code (optional)</Label>
-                <Input id="promo" value={promo} onChange={(e) => setPromo(e.target.value)} placeholder="e.g. LAUNCH" />
-              </div>
-              <div className="space-y-2">
-                <Button className="w-full" disabled={loading} onClick={handlePaidSignup}>
-                  {loading ? "Processing..." : "Sign Up & Pay"}
-                </Button>
-                <Button className="w-full" variant="outline" disabled={loading} onClick={handleDemo}>
-                  {loading ? "Setting up demo..." : "Demo for a Day (Free)"}
+              <div className="space-y-3">
+                <Button className="w-full" disabled={loading} onClick={handleFreeTrialSignup}>
+                  {loading ? "Creating account..." : "Start 30-Day Free Trial"}
                 </Button>
                 <Button className="w-full" variant="ghost" onClick={() => navigate("/login")}>
                   Already have an account? Log in
