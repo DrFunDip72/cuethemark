@@ -47,16 +47,38 @@ serve(async (req) => {
     if (customers.data.length === 0) {
       logStep("No Stripe customer found, checking existing subscription");
       
-      // Check existing subscription record first (including demo subscriptions)
+      // Check existing subscription record first (including free trials and demo subscriptions)
       const { data: existingSubscription } = await supabaseClient
         .from("subscribers")
         .select("*")
         .eq("user_id", user.id)
         .maybeSingle();
 
-      let expiredDemoEnd: string | null = null;
+      let expiredTrialEnd: string | null = null;
       if (existingSubscription) {
         logStep("Found existing subscription record", existingSubscription);
+        
+        // Check for active Free Trial
+        if (existingSubscription.subscription_tier === "Free Trial" && existingSubscription.subscription_end) {
+          const endDate = new Date(existingSubscription.subscription_end);
+          const now = new Date();
+          if (endDate > now) {
+            logStep("Found valid free trial subscription");
+            return new Response(JSON.stringify({
+              subscribed: true,
+              subscription_tier: "Free Trial",
+              subscription_end: existingSubscription.subscription_end
+            }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 200,
+            });
+          } else {
+            logStep("Free trial subscription expired");
+            expiredTrialEnd = existingSubscription.subscription_end;
+          }
+        }
+        
+        // Check for active Demo
         if (existingSubscription.subscription_tier === "Demo" && existingSubscription.subscription_end) {
           const endDate = new Date(existingSubscription.subscription_end);
           const now = new Date();
@@ -72,7 +94,7 @@ serve(async (req) => {
             });
           } else {
             logStep("Demo subscription expired");
-            expiredDemoEnd = existingSubscription.subscription_end;
+            expiredTrialEnd = existingSubscription.subscription_end;
           }
         }
       }
