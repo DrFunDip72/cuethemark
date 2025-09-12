@@ -12,6 +12,7 @@ export default function GetStartedPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [referredBy, setReferredBy] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -20,7 +21,7 @@ export default function GetStartedPage() {
     if (meta) {
       meta.setAttribute(
         "content",
-        "Create your CueTheMark account. $1.99/month after your first month free. Enter payment and promo code on the next step."
+        "Create your CueTheMark account. $1.99/month after your first month free. Enter payment info on the next step."
       );
     }
   }, []);
@@ -38,7 +39,10 @@ export default function GetStartedPage() {
         email,
         password,
         options: {
-          data: { full_name: name },
+          data: { 
+            full_name: name,
+            referred_by: referredBy || null
+          },
           emailRedirectTo: redirectUrl,
         },
       });
@@ -82,10 +86,7 @@ export default function GetStartedPage() {
               Practice smarter, not longer — set your marks and hit your cue every time.
             </h1>
             <p className="text-lg opacity-90">
-              Only $1.99/month after your first month free.
-            </p>
-            <p className="text-sm opacity-80">
-              Beta testers get 1 month free with code BETA2025. Cancel anytime.
+              Only $1.99/month after your first month free. Cancel anytime.
             </p>
           </div>
 
@@ -93,7 +94,7 @@ export default function GetStartedPage() {
             <CardHeader>
               <CardTitle>Create your account</CardTitle>
               <CardDescription>
-                Subscription is $1.99/month after your first month free. You’ll enter payment info & promo code on the next step.
+                Subscription is $1.99/month after your first month free. You'll enter payment info on the next step.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -109,6 +110,10 @@ export default function GetStartedPage() {
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
                   <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="referredBy">Referred by (optional)</Label>
+                  <Input id="referredBy" value={referredBy} onChange={(e) => setReferredBy(e.target.value)} placeholder="Name of person who referred you" />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Continuing..." : "Continue to Payment"}

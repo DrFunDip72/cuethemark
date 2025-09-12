@@ -18,7 +18,7 @@ export default function SignupPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [promo, setPromo] = useState("");
+  const [referredBy, setReferredBy] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -51,33 +51,19 @@ export default function SignupPage() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/` },
+        options: { 
+          emailRedirectTo: `${window.location.origin}/`,
+          data: { referred_by: referredBy || null }
+        },
       });
       if (error) throw error;
 
       // If session exists, proceed to checkout. If not, ask for email confirmation
       if (data.session) {
-        let checkoutUrl: string | null = null;
-        if (promo) {
-          const { data: validation } = await supabase.functions.invoke("validate-promo-code", {
-            body: { code: promo, userId: data.session.user.id },
-            headers: { Authorization: `Bearer ${data.session.access_token}` },
-          });
-          if (validation?.valid && validation.promoCode?.id) {
-            const { data: checkout } = await supabase.functions.invoke("create-checkout", {
-              body: { promoCodeId: validation.promoCode.id },
-              headers: { Authorization: `Bearer ${data.session.access_token}` },
-            });
-            checkoutUrl = checkout?.url ?? null;
-          } else {
-            toast({ title: "Invalid promo", description: validation?.error ?? "Promo code not valid", variant: "destructive" });
-          }
-        } else {
-          const { data: checkout } = await supabase.functions.invoke("create-subscription-checkout", {
-            headers: { Authorization: `Bearer ${data.session.access_token}` },
-          });
-          checkoutUrl = checkout?.url ?? null;
-        }
+        const { data: checkout } = await supabase.functions.invoke("create-subscription-checkout", {
+          headers: { Authorization: `Bearer ${data.session.access_token}` },
+        });
+        const checkoutUrl = checkout?.url ?? null;
 
         if (checkoutUrl) {
           window.open(checkoutUrl, "_blank");
@@ -163,8 +149,8 @@ export default function SignupPage() {
                 <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Minimum 6 characters" />
               </div>
               <div>
-                <Label htmlFor="promo">Promo code (optional)</Label>
-                <Input id="promo" value={promo} onChange={(e) => setPromo(e.target.value)} placeholder="e.g. LAUNCH" />
+                <Label htmlFor="referredBy">Referred by (optional)</Label>
+                <Input id="referredBy" value={referredBy} onChange={(e) => setReferredBy(e.target.value)} placeholder="Name of person who referred you" />
               </div>
               <div className="space-y-2">
                 <Button className="w-full" disabled={loading} onClick={handlePaidSignup}>
