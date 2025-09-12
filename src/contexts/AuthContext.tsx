@@ -65,8 +65,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const checkAdminStatus = async (userId: string, userEmail: string) => {
+  const checkAdminStatus = async (userId: string) => {
     try {
+      // Wait a moment for profile to be created by trigger
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('is_admin')
@@ -79,27 +82,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      // If no profile exists, create one
-      if (!data) {
-        const isAdminUser = userEmail === 'justinsmaxwell722@gmail.com';
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert({
-            user_id: userId,
-            email: userEmail,
-            is_admin: isAdminUser
-          });
-
-        if (insertError) {
-          console.error('Error creating profile:', insertError);
-          setIsAdmin(false);
-          return;
-        }
-
-        setIsAdmin(isAdminUser);
-        return;
-      }
-
+      // Profile should exist now due to database trigger
       setIsAdmin(data?.is_admin || false);
     } catch (error) {
       console.error('Error checking admin status:', error);
@@ -116,7 +99,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (session?.user) {
           setTimeout(() => {
             checkSubscription();
-            checkAdminStatus(session.user.id, session.user.email || '');
+            checkAdminStatus(session.user.id);
             // Seed starter template (idempotent)
             supabase.functions
               .invoke('seed-template', {
@@ -138,7 +121,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         checkSubscription();
-        checkAdminStatus(session.user.id, session.user.email || '');
+        checkAdminStatus(session.user.id);
         supabase.functions
           .invoke('seed-template', {
             headers: { Authorization: `Bearer ${session.access_token}` },

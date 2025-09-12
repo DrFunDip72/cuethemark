@@ -28,7 +28,7 @@ enabled = true
 port = 54326
 site_url = "http://localhost:3000"
 additional_redirect_urls = ["https://localhost:3000"]
-jwt_expiry = 3600
+jwt_expiry = 600
 enable_signup = true
 
 [edge_functions]
@@ -51,3 +51,5 @@ port = 54327
 verify_jwt = false
 
 [functions.send-feedback]
+
+[functions.admin-security-audit]
