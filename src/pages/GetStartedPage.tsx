@@ -15,12 +15,12 @@ export default function GetStartedPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    document.title = "Start Free Trial – CueTheMark";
+    document.title = "Create Account – CueTheMark";
     const meta = document.querySelector('meta[name="description"]');
     if (meta) {
       meta.setAttribute(
         "content",
-        "Start your 30-day free trial with CueTheMark. No payment required. Then $1.99/month after your trial ends."
+        "Create your CueTheMark account. $1.99/month after your first month free. Enter payment and promo code on the next step."
       );
     }
   }, []);
@@ -44,24 +44,16 @@ export default function GetStartedPage() {
       });
       if (error) throw error;
 
-      if (data.session) {
-        // Create 30-day free trial
-        const { error: trialError } = await supabase.functions.invoke('create-free-trial', {
-          headers: {
-            Authorization: `Bearer ${data.session.access_token}`,
-          },
-        });
+      // Proceed to Stripe Checkout regardless of email confirmation setting
+      const { data: sessionData, error: funcErr } = await supabase.functions.invoke(
+        "create-subscription-checkout"
+      );
+      if (funcErr) throw new Error(funcErr.message || "Failed to start checkout");
 
-        if (trialError) {
-          console.error('Free trial creation error:', trialError);
-          toast.error("Account created but free trial setup failed. Please contact support.");
-        } else {
-          toast.success("Welcome! Your 30-day free trial has started.");
-          window.location.href = "/app";
-        }
-      } else {
-        toast.success("Account created! Please check your email to confirm, then sign in to start your free trial.");
-      }
+      const url = (sessionData as any)?.url;
+      if (!url) throw new Error("No checkout URL returned");
+
+      window.location.href = url; // go to Stripe Checkout
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Something went wrong. Please try again.");
@@ -90,10 +82,10 @@ export default function GetStartedPage() {
               Practice smarter, not longer — set your marks and hit your cue every time.
             </h1>
             <p className="text-lg opacity-90">
-              Start with a 30-day free trial. Then only $1.99/month.
+              Only $1.99/month after your first month free.
             </p>
             <p className="text-sm opacity-80">
-              No payment required to start. Cancel anytime.
+              Beta testers get 1 month free with code BETA2025. Cancel anytime.
             </p>
           </div>
 
@@ -119,7 +111,7 @@ export default function GetStartedPage() {
                   <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Creating account..." : "Start Free Trial"}
+                  {loading ? "Continuing..." : "Continue to Payment"}
                 </Button>
                 <p className="text-xs opacity-80">
                   By continuing, you agree to our <Link to="/terms" className="underline">Terms</Link> and <Link to="/privacy" className="underline">Privacy Policy</Link>.

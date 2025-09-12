@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { TrialStatus } from '@/components/TrialStatus';
 import { LogOut, User } from 'lucide-react';
 
 interface SubscriptionGateProps {
@@ -40,7 +39,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
     );
   }
 
-  const handleFreeTrialSignUp = async () => {
+  const handleSignUp = async () => {
     if (!email || !password) {
       toast({
         title: "Error",
@@ -63,30 +62,33 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
       if (error) throw error;
       
       if (data.session) {
-        const { error: trialError } = await supabase.functions.invoke('create-free-trial', {
+        const { data: checkout, error: checkoutError } = await supabase.functions.invoke('create-subscription-checkout', {
           headers: {
             Authorization: `Bearer ${data.session.access_token}`,
           },
         });
 
-        if (trialError) {
-          console.error('Free trial creation error:', trialError);
+        if (checkoutError) {
+          console.error('Checkout error:', checkoutError);
           toast({
-            title: "Free Trial Setup Failed",
-            description: "Account created but free trial setup failed. Please contact support.",
+            title: "Payment Setup Failed",
+            description: "Account created but payment setup failed. Please try again from your profile.",
             variant: "destructive"
           });
-        } else {
+          return;
+        }
+
+        if (checkout.url) {
+          window.open(checkout.url, '_blank');
           toast({
-            title: "Welcome to MarkTapDance!",
-            description: "Your 30-day free trial has started. Upgrade anytime from your profile.",
+            title: "Account Created!",
+            description: "Complete your subscription setup in the new tab.",
           });
-          await checkSubscription();
         }
       } else {
         toast({
           title: "Welcome to MarkTapDance!",
-          description: "Please check your email to confirm your account, then sign in to start your 30-day free trial.",
+          description: "Please check your email to confirm your account, then sign in.",
         });
       }
     } catch (error: any) {
@@ -100,6 +102,65 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
     }
   };
 
+  const handleDemoSignup = async () => {
+    if (!email || !password) {
+      toast({
+        title: "Error", 
+        description: "Please enter email and password",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setAuthLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (error) throw error;
+      
+      if (data.session) {
+        const { error: demoError } = await supabase.functions.invoke('create-demo-subscription', {
+          headers: {
+            Authorization: `Bearer ${data.session.access_token}`,
+          },
+        });
+
+        if (demoError) {
+          console.error('Demo creation error:', demoError);
+          toast({
+            title: "Demo Setup Failed",
+            description: "Account created but demo setup failed. Please contact support.",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Demo Account Created!",
+            description: "You have 1 day of free access. Upgrade anytime from your profile.",
+          });
+          await checkSubscription();
+        }
+      } else {
+        toast({
+          title: "Demo Account Created!",
+          description: "Please check your email to confirm your account, then sign in for your 1-day demo.",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setAuthLoading(false);
+    }
+  };
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -159,7 +220,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
             <CardDescription>
               {isLogin 
                 ? 'Sign in to continue using the application'
-                : 'Start your 30-day free trial - no payment required'
+                : 'Choose your access option to get started'
               }
             </CardDescription>
           </CardHeader>
@@ -197,13 +258,23 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
                 {authLoading ? 'Signing in...' : 'Sign In'}
               </Button>
             ) : (
-              <Button 
-                onClick={handleFreeTrialSignUp}
-                className="w-full"
-                disabled={authLoading}
-              >
-                {authLoading ? 'Creating account...' : 'Start 30-Day Free Trial'}
-              </Button>
+              <>
+                <Button 
+                  onClick={handleSignUp}
+                  className="w-full"
+                  disabled={authLoading}
+                >
+                  {authLoading ? 'Creating account...' : 'Sign Up & Pay ($1.99/month)'}
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={handleDemoSignup}
+                  className="w-full"
+                  disabled={authLoading}
+                >
+                  {authLoading ? 'Creating demo...' : 'Demo for a Day (Free)'}
+                </Button>
+              </>
             )}
             
             <div className="text-center">
@@ -238,18 +309,15 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
         <div className="min-h-screen flex items-center justify-center bg-background">
           <Card className="w-full max-w-md">
             <CardHeader className="text-center">
-            <CardTitle>
-              {subscription.subscription_tier === 'Demo' ? 'Demo Expired' : 
-               subscription.subscription_tier === 'Free Trial' ? 'Free Trial Expired' : 'Subscription Expired'}
-            </CardTitle>
-            <CardDescription>
-              {subscription.subscription_tier === 'Demo' 
-                ? 'Your 1-day demo has ended. Upgrade to continue using the application.'
-                : subscription.subscription_tier === 'Free Trial'
-                ? 'Your 30-day free trial has ended. Subscribe to continue using the application.'
-                : 'Your subscription has ended. Please renew to continue using the application.'
-              }
-            </CardDescription>
+              <CardTitle>
+                {subscription.subscription_tier === 'Demo' ? 'Demo Expired' : 'Subscription Expired'}
+              </CardTitle>
+              <CardDescription>
+                {subscription.subscription_tier === 'Demo' 
+                  ? 'Your 1-day demo has ended. Upgrade to continue using the application.'
+                  : 'Your subscription has ended. Please renew to continue using the application.'
+                }
+              </CardDescription>
             </CardHeader>
             <CardContent className="text-center space-y-3">
               <Button 
@@ -343,6 +411,56 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
             >
               {authLoading ? 'Setting up payment...' : 'Subscribe ($1.99/month)'}
             </Button>
+            {subscription?.subscription_tier === 'Demo' && subscription?.subscription_end && (new Date(subscription.subscription_end) < new Date()) ? (
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled
+              >
+                Demo expired — please subscribe
+              </Button>
+            ) : (
+              <Button 
+                variant="outline"
+                onClick={async () => {
+                  setAuthLoading(true);
+                  try {
+                    const { error: demoError } = await supabase.functions.invoke('create-demo-subscription', {
+                      headers: {
+                        Authorization: `Bearer ${session?.access_token}`,
+                      },
+                    });
+
+                    if (demoError) {
+                      console.error('Demo creation error:', demoError);
+                      toast({
+                        title: "Demo Setup Failed",
+                        description: "Failed to setup demo. Please contact support.",
+                        variant: "destructive"
+                      });
+                    } else {
+                      toast({
+                        title: "Demo Account Activated!",
+                        description: "You now have 1 day of free access. Upgrade anytime from your profile.",
+                      });
+                      checkSubscription(); // Refresh the subscription status
+                    }
+                  } catch (error: any) {
+                    toast({
+                      title: "Error",
+                      description: error.message,
+                      variant: "destructive"
+                    });
+                  } finally {
+                    setAuthLoading(false);
+                  }
+                }}
+                className="w-full"
+                disabled={authLoading}
+              >
+                {authLoading ? 'Setting up demo...' : 'Try Demo (Free for 1 Day)'}
+              </Button>
+            )}
             
             
             <div className="flex gap-2">
@@ -376,14 +494,5 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
 
 
   // User has active subscription, show the app
-  return (
-    <>
-      {subscription?.subscription_tier && (subscription.subscription_tier === 'Free Trial' || subscription.subscription_tier === 'Demo') && (
-        <div className="p-4 border-b bg-muted/50">
-          <TrialStatus subscription={subscription} />
-        </div>
-      )}
-      {children}
-    </>
-  );
+  return <>{children}</>;
 };
