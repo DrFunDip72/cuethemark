@@ -313,12 +313,23 @@ const TrackPage = () => {
     setAbLoopStartMarkerId(startMarkerId);
     setAbLoopEndMarkerId(endMarkerId);
     setAbLoopEnabled(true);
+    
+    // Auto-seek to start position and pause
+    if (audioRef.current && labels) {
+      const startLabel = labels.find(l => l.id === startMarkerId);
+      if (startLabel) {
+        const seekTime = startLabel.timestamp_seconds + (startLabel.playback_offset_seconds || 0);
+        audioRef.current.currentTime = roundToOneDecimal(seekTime);
+        setCurrentTime(roundToOneDecimal(seekTime));
+        audioRef.current.pause();
+        setIsPlaying(false);
+      }
+    }
   };
 
   const handleAbLoopDisable = () => {
     setAbLoopEnabled(false);
-    setAbLoopStartMarkerId(null);
-    setAbLoopEndMarkerId(null);
+    // Keep the selected markers but clear the loop bounds
     setAbLoopStart(null);
     setAbLoopEnd(null);
   };

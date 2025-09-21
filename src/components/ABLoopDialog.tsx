@@ -33,45 +33,65 @@ export const ABLoopDialog = ({
   currentStartMarkerId,
   currentEndMarkerId 
 }: ABLoopDialogProps) => {
-  const [selectedStartId, setSelectedStartId] = useState<string | null>(currentStartMarkerId || null);
-  const [selectedEndId, setSelectedEndId] = useState<string | null>(currentEndMarkerId || null);
-  const [step, setStep] = useState<'start' | 'end'>('start');
+  const [selectedMarkers, setSelectedMarkers] = useState<Set<string>>(new Set());
 
-  // Reset state when dialog opens
+  // Initialize selected markers when dialog opens
   useEffect(() => {
     if (open) {
-      if (currentStartMarkerId && currentEndMarkerId) {
-        setSelectedStartId(currentStartMarkerId);
-        setSelectedEndId(currentEndMarkerId);
-        setStep('start');
-      } else {
-        setSelectedStartId(null);
-        setSelectedEndId(null);
-        setStep('start');
-      }
+      const markers = new Set<string>();
+      if (currentStartMarkerId) markers.add(currentStartMarkerId);
+      if (currentEndMarkerId) markers.add(currentEndMarkerId);
+      setSelectedMarkers(markers);
     }
   }, [open, currentStartMarkerId, currentEndMarkerId]);
 
-  const handleMarkerSelect = (markerId: string) => {
-    if (step === 'start') {
-      setSelectedStartId(markerId);
-      setSelectedEndId(null);
-      setStep('end');
+  const handleMarkerToggle = (markerId: string) => {
+    const newSelected = new Set(selectedMarkers);
+    
+    if (newSelected.has(markerId)) {
+      // Deselect the marker
+      newSelected.delete(markerId);
     } else {
-      // Only allow selecting end marker if it comes after start marker
-      const startLabel = labels.find(l => l.id === selectedStartId);
-      const endLabel = labels.find(l => l.id === markerId);
-      
-      if (startLabel && endLabel && endLabel.timestamp_seconds > startLabel.timestamp_seconds) {
-        setSelectedEndId(markerId);
+      // Select the marker
+      if (newSelected.size >= 2) {
+        // If already have 2 selected, replace the chronologically closest one
+        const selectedArray = Array.from(newSelected);
+        const clickedLabel = labels.find(l => l.id === markerId);
+        const selected1 = labels.find(l => l.id === selectedArray[0]);
+        const selected2 = labels.find(l => l.id === selectedArray[1]);
+        
+        if (clickedLabel && selected1 && selected2) {
+          const diff1 = Math.abs(clickedLabel.timestamp_seconds - selected1.timestamp_seconds);
+          const diff2 = Math.abs(clickedLabel.timestamp_seconds - selected2.timestamp_seconds);
+          
+          // Remove the closer one and add the new one
+          if (diff1 < diff2) {
+            newSelected.delete(selectedArray[0]);
+          } else {
+            newSelected.delete(selectedArray[1]);
+          }
+        }
       }
+      newSelected.add(markerId);
     }
+    
+    setSelectedMarkers(newSelected);
   };
 
   const handleApplyLoop = () => {
-    if (selectedStartId && selectedEndId) {
-      onApplyLoop(selectedStartId, selectedEndId);
-      onOpenChange(false);
+    const selectedArray = Array.from(selectedMarkers);
+    if (selectedArray.length === 2) {
+      const label1 = labels.find(l => l.id === selectedArray[0]);
+      const label2 = labels.find(l => l.id === selectedArray[1]);
+      
+      if (label1 && label2) {
+        // Auto-assign A (start) and B (end) based on timestamps
+        const startLabel = label1.timestamp_seconds <= label2.timestamp_seconds ? label1 : label2;
+        const endLabel = label1.timestamp_seconds > label2.timestamp_seconds ? label1 : label2;
+        
+        onApplyLoop(startLabel.id, endLabel.id);
+        onOpenChange(false);
+      }
     }
   };
 
@@ -81,16 +101,31 @@ export const ABLoopDialog = ({
   };
 
   const handleReset = () => {
-    setSelectedStartId(null);
-    setSelectedEndId(null);
-    setStep('start');
+    setSelectedMarkers(new Set());
   };
 
-  const canApply = selectedStartId && selectedEndId;
+  const canApply = selectedMarkers.size === 2;
   const hasCurrentLoop = currentStartMarkerId && currentEndMarkerId;
 
   // Sort labels by timestamp for display
   const sortedLabels = [...labels].sort((a, b) => a.timestamp_seconds - b.timestamp_seconds);
+  
+  // Get the auto-assigned A and B markers
+  const selectedArray = Array.from(selectedMarkers);
+  let startMarkerId = null;
+  let endMarkerId = null;
+  
+  if (selectedArray.length === 2) {
+    const label1 = labels.find(l => l.id === selectedArray[0]);
+    const label2 = labels.find(l => l.id === selectedArray[1]);
+    
+    if (label1 && label2) {
+      const startLabel = label1.timestamp_seconds <= label2.timestamp_seconds ? label1 : label2;
+      const endLabel = label1.timestamp_seconds > label2.timestamp_seconds ? label1 : label2;
+      startMarkerId = startLabel.id;
+      endMarkerId = endLabel.id;
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -131,9 +166,9 @@ export const ABLoopDialog = ({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="text-sm font-medium">
-                {step === 'start' ? 'Select Start Marker (A)' : 'Select End Marker (B)'}
+                Select any two markers for A-B loop
               </div>
-              {(selectedStartId || selectedEndId) && (
+              {selectedMarkers.size > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -145,9 +180,10 @@ export const ABLoopDialog = ({
               )}
             </div>
 
-            {selectedStartId && (
-              <div className="text-xs text-muted-foreground">
-                Start: {labels.find(l => l.id === selectedStartId)?.label_name}
+            {selectedMarkers.size === 2 && (
+              <div className="text-xs text-muted-foreground space-y-1">
+                <div>A (start): {labels.find(l => l.id === startMarkerId)?.label_name}</div>
+                <div>B (end): {labels.find(l => l.id === endMarkerId)?.label_name}</div>
               </div>
             )}
 
@@ -158,17 +194,16 @@ export const ABLoopDialog = ({
                 </div>
               ) : (
                 sortedLabels.map((label) => {
-                  const isSelected = label.id === selectedStartId || label.id === selectedEndId;
-                  const isDisabled = step === 'end' && selectedStartId && 
-                    label.timestamp_seconds <= (labels.find(l => l.id === selectedStartId)?.timestamp_seconds || 0);
+                  const isSelected = selectedMarkers.has(label.id);
+                  const isStart = label.id === startMarkerId;
+                  const isEnd = label.id === endMarkerId;
                   
                   return (
                     <Button
                       key={label.id}
                       variant={isSelected ? "default" : "outline"}
                       className="w-full justify-between text-left h-auto p-2"
-                      onClick={() => handleMarkerSelect(label.id)}
-                      disabled={isDisabled}
+                      onClick={() => handleMarkerToggle(label.id)}
                     >
                       <div className="flex flex-col items-start">
                         <div className="font-medium">{label.label_name}</div>
@@ -178,7 +213,7 @@ export const ABLoopDialog = ({
                       </div>
                       {isSelected && (
                         <Badge variant="secondary" className="text-xs">
-                          {label.id === selectedStartId ? 'A' : 'B'}
+                          {isStart ? 'A' : isEnd ? 'B' : '•'}
                         </Badge>
                       )}
                     </Button>
