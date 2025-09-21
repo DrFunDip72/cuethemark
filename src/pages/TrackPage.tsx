@@ -338,19 +338,20 @@ const TrackPage = () => {
   return (
     <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
       <Card className="p-6 mb-6">
-        {/* First row: Play button and slider */}
+        {/* First row: Play button, slider, and timestamp */}
         <div className="flex items-center gap-4 mb-4">
           <Button 
             size="icon" 
             variant="outline"
             onClick={handlePlayPause}
             disabled={isLoading || !trackUrl}
+            className="flex-shrink-0"
           >
             {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </Button>
           
           <Slider 
-            className="w-full" 
+            className="flex-1" 
             value={[duration ? (currentTime / duration) * 100 : 0]} 
             onValueChange={handleSliderChange}
             min={0}
@@ -358,11 +359,14 @@ const TrackPage = () => {
             step={0.1}
             disabled={isLoading || !trackUrl}
           />
+          
+          <div className="text-sm font-medium text-muted-foreground flex-shrink-0">
+            {formatTimeForDisplay(currentTime)} / {formatTimeForDisplay(duration)}
+          </div>
         </div>
         
-        {/* Second row: Controls and timestamp */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        {/* Second row: Controls */}
+        <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Speed:</span>
               <div className="flex items-center">
@@ -402,11 +406,6 @@ const TrackPage = () => {
               <Repeat className="h-3 w-3 mr-1" />
               {abLoopEnabled ? "A↔B On" : "A↔B"}
             </Button>
-          </div>
-          
-          <div className="text-sm font-medium text-muted-foreground">
-            {formatTimeForDisplay(currentTime)} / {formatTimeForDisplay(duration)}
-          </div>
         </div>
       </Card>
 
