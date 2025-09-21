@@ -578,20 +578,22 @@ const TrackPage = () => {
         </Card>
       )}
 
-      {/* Delete Track Section - at the bottom */}
-      <Card className="p-6 mt-8 border-destructive/20">
-        <div className="text-center space-y-4">
-          <Button
-            variant="destructive"
-            onClick={() => setShowDeleteConfirm(true)}
-            className="w-full sm:w-auto"
-            disabled={isDeleting}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete Track
-          </Button>
-        </div>
-      </Card>
+      {/* Delete Track Section - only shown in labels view */}
+      {view === 'list' && (
+        <Card className="p-6 mt-8 border-destructive/20">
+          <div className="text-center space-y-4">
+            <Button
+              variant="destructive"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="w-full sm:w-auto"
+              disabled={isDeleting}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Track
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {mounted && createPortal(
         <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] md:pb-6">
