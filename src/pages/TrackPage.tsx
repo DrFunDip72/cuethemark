@@ -364,6 +364,40 @@ const TrackPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
+      {/* Track title and view controls - moved to top */}
+      <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+        <div className="flex items-start gap-2 min-w-0 flex-1">
+          <h1 className="text-xl sm:text-2xl font-bold leading-tight break-words">
+            {trackData?.filename || "Track Name"}
+          </h1>
+          <Button 
+            size="icon" 
+            variant="ghost"
+            onClick={() => setEditTrackOpen(true)}
+            className="flex-shrink-0 mt-1"
+          >
+            <Pen className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="flex gap-2 flex-shrink-0">
+          <Button
+            variant={view === 'timeline' ? 'default' : 'outline'}
+            onClick={() => setView('timeline')}
+            size="sm"
+          >
+            Timeline
+          </Button>
+          <Button
+            variant={view === 'list' ? 'default' : 'outline'}
+            onClick={() => setView('list')}
+            size="sm"
+          >
+            Labels
+          </Button>
+        </div>
+      </div>
+
+      {/* Audio player controls */}
       <Card className="p-6 mb-6">
         {/* First row: Play button, slider, and timestamp */}
         <div className="flex items-center gap-4 mb-4">
@@ -440,38 +474,6 @@ const TrackPage = () => {
           </Button>
         </div>
       </Card>
-
-      <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div className="flex items-center gap-2 min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold truncate">
-            {trackData?.filename || "Track Name"}
-          </h1>
-          <Button 
-            size="icon" 
-            variant="ghost"
-            onClick={() => setEditTrackOpen(true)}
-            className="flex-shrink-0"
-          >
-            <Pen className="h-4 w-4" />
-          </Button>
-        </div>
-        <div className="flex gap-2 flex-shrink-0">
-          <Button
-            variant={view === 'timeline' ? 'default' : 'outline'}
-            onClick={() => setView('timeline')}
-            size="sm"
-          >
-            Timeline
-          </Button>
-          <Button
-            variant={view === 'list' ? 'default' : 'outline'}
-            onClick={() => setView('list')}
-            size="sm"
-          >
-            Labels
-          </Button>
-        </div>
-      </div>
 
       {view === 'timeline' ? (
         <Timeline

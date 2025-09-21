@@ -80,24 +80,24 @@ const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onDe
           >
             <Trash2 className="h-4 w-4" />
           </Button>
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-1">
             <Button 
               size="sm"
               variant="ghost" 
               onClick={() => onMoveUp(track.id)}
               disabled={!canMoveUp}
-              className="h-6 w-6 p-0 disabled:opacity-50"
+              className="h-8 w-8 p-0 disabled:opacity-50 md:h-6 md:w-6"
             >
-              <ArrowUp className="h-3 w-3" />
+              <ArrowUp className="h-4 w-4 md:h-3 md:w-3" />
             </Button>
             <Button 
               size="sm"
               variant="ghost" 
               onClick={() => onMoveDown(track.id)}
               disabled={!canMoveDown}
-              className="h-6 w-6 p-0 disabled:opacity-50"
+              className="h-8 w-8 p-0 disabled:opacity-50 md:h-6 md:w-6"
             >
-              <ArrowDown className="h-3 w-3" />
+              <ArrowDown className="h-4 w-4 md:h-3 md:w-3" />
             </Button>
           </div>
         </div>
