@@ -60,6 +60,13 @@ const TrackPage = () => {
     setSpeedInput(playbackRate.toString());
   }, [playbackRate]);
 
+  // Apply playback rate when trackUrl is loaded
+  useEffect(() => {
+    if (audioRef.current && trackUrl) {
+      audioRef.current.playbackRate = playbackRate;
+    }
+  }, [trackUrl, playbackRate]);
+
   // Load saved timestamp when component mounts
   useEffect(() => {
     if (id && audioRef.current) {
@@ -337,6 +344,12 @@ const TrackPage = () => {
     setAbLoopEnd(null);
   };
 
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = playbackRate;
+    }
+  };
+
   const handleAudioEnded = () => {
     setIsPlaying(false);
     if (autoLoop && !abLoopEnabled) {
@@ -532,6 +545,7 @@ const TrackPage = () => {
       <audio
         ref={audioRef}
         src={trackUrl || undefined}
+        onLoadedMetadata={handleLoadedMetadata}
         onTimeUpdate={handleTimeUpdate}
         onDurationChange={(e) => setDuration(roundToOneDecimal(e.currentTarget.duration))}
         onPlay={() => setIsPlaying(true)}
