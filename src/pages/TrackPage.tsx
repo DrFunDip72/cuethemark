@@ -64,6 +64,19 @@ const TrackPage = () => {
     }
   }, [id, trackUrl]);
 
+  // Load saved playback rate when component mounts
+  useEffect(() => {
+    if (id) {
+      const savedRate = localStorage.getItem(`track-${id}-playbackRate`);
+      if (savedRate) {
+        const rate = parseFloat(savedRate);
+        if (!isNaN(rate) && rate >= 0.5 && rate <= 2) {
+          setPlaybackRate(rate);
+        }
+      }
+    }
+  }, [id]);
+
   // Save timestamp when it changes (rounded to 1 decimal)
   useEffect(() => {
     if (id && currentTime > 0) {
@@ -71,6 +84,13 @@ const TrackPage = () => {
       localStorage.setItem(`track-${id}-timestamp`, roundedTime.toString());
     }
   }, [id, currentTime]);
+
+  // Save playback rate when it changes
+  useEffect(() => {
+    if (id && playbackRate !== 1) {
+      localStorage.setItem(`track-${id}-playbackRate`, playbackRate.toString());
+    }
+  }, [id, playbackRate]);
 
   const { data: trackData } = useQuery({
     queryKey: ['track', id],
