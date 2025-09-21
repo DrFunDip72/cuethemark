@@ -433,8 +433,8 @@ const TrackPage = () => {
       {/* Track title and view controls */}
       <div className="mb-6">
         {/* Title row - right aligned on mobile and desktop */}
-        <div className="flex justify-end items-start gap-2 mb-4 sm:mb-0">
-          <h1 className="text-xl sm:text-2xl font-bold leading-tight break-words text-right">
+        <div className="flex items-start gap-2 min-w-0 flex-1">
+          <h1 className="text-xl sm:text-2xl font-bold leading-tight break-words">
             {trackData?.filename || "Track Name"}
           </h1>
           <Button 
