@@ -11,7 +11,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatTime, roundToOneDecimal } from '@/lib/formatTime';
@@ -27,7 +26,6 @@ interface AddLabelDialogProps {
 export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: AddLabelDialogProps) {
   const [labelName, setLabelName] = useState('');
   const [timestamp, setTimestamp] = useState(currentTime.toString());
-  const [notes, setNotes] = useState('');
   const [playbackOffset, setPlaybackOffset] = useState('3');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -95,7 +93,6 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
           user_id: user.id,
           label_name: labelName.trim(),
           timestamp_seconds: roundToOneDecimal(timestampValue),
-          notes: notes || null,
           playback_offset_seconds: roundToOneDecimal(offsetValue),
           order: newOrder
         });
@@ -131,7 +128,6 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
       // Reset form
       setLabelName('');
       setTimestamp(currentTime.toString());
-      setNotes('');
       setPlaybackOffset('3');
       
       // Invalidate queries to refresh the data
@@ -184,27 +180,14 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
               />
             </div>
 
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="notes" className="text-right pt-2">
-                Notes
-              </Label>
-              <Textarea
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="col-span-3"
-                placeholder="Optional notes about this section"
-                rows={3}
-              />
-            </div>
-
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="timestamp" className="text-right">
                 Timestamp (s)
               </Label>
               <Input
                 id="timestamp"
-                type="text"
+                type="number"
+                step="0.1"
                 value={timestamp}
                 onChange={handleTimestampChange}
                 className="col-span-3"
@@ -219,7 +202,8 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
               <div className="col-span-3 flex items-center gap-2">
                 <Input
                   id="playback-offset"
-                  type="text"
+                  type="number"
+                  step="0.1"
                   value={playbackOffset}
                   onChange={handleOffsetChange}
                   className="flex-1"
