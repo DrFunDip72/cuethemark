@@ -338,6 +338,7 @@ const TrackPage = () => {
   return (
     <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
       <Card className="p-6 mb-6">
+        {/* First row: Play button and slider */}
         <div className="flex items-center gap-4 mb-4">
           <Button 
             size="icon" 
@@ -357,7 +358,10 @@ const TrackPage = () => {
             step={0.1}
             disabled={isLoading || !trackUrl}
           />
-
+        </div>
+        
+        {/* Second row: Controls and timestamp */}
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Speed:</span>
@@ -399,10 +403,10 @@ const TrackPage = () => {
               {abLoopEnabled ? "A↔B On" : "A↔B"}
             </Button>
           </div>
-        </div>
-        
-        <div className="text-center text-sm font-medium text-gray-600">
-          {formatTimeForDisplay(currentTime)} / {formatTimeForDisplay(duration)}
+          
+          <div className="text-sm font-medium text-muted-foreground">
+            {formatTimeForDisplay(currentTime)} / {formatTimeForDisplay(duration)}
+          </div>
         </div>
       </Card>
 
