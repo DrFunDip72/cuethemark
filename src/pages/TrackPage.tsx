@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Play, Pause, Plus, Pen, Minus } from 'lucide-react';
+import { Play, Pause, Plus, Pen } from 'lucide-react';
 import { useTrackLabels } from '@/hooks/useTrackLabels';
 import { LabelList } from '@/components/LabelList';
 import { Timeline } from '@/components/Timeline';
@@ -198,13 +198,6 @@ const TrackPage = () => {
     setPlaybackRate(parseFloat(value));
   };
 
-  const adjustSpeed = (delta: number) => {
-    const newRate = Math.round((playbackRate + delta) * 100) / 100; // Round to 2 decimals
-    if (newRate >= 0.25 && newRate <= 3) {
-      setPlaybackRate(newRate);
-    }
-  };
-
   return (
     <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
       <Card className="p-6 mb-6">
@@ -230,15 +223,6 @@ const TrackPage = () => {
 
           <div className="flex items-center gap-2 min-w-fit">
             <span className="text-sm text-muted-foreground">Speed:</span>
-            <Button
-              size="icon"
-              variant="outline"
-              className="h-8 w-8"
-              onClick={() => adjustSpeed(-0.05)}
-              disabled={playbackRate <= 0.25}
-            >
-              <Minus className="h-3 w-3" />
-            </Button>
             <Select value={playbackRate.toString()} onValueChange={handleSpeedChange}>
               <SelectTrigger className="w-20">
                 <SelectValue />
@@ -252,15 +236,6 @@ const TrackPage = () => {
                 <SelectItem value="2">2x</SelectItem>
               </SelectContent>
             </Select>
-            <Button
-              size="icon"
-              variant="outline"
-              className="h-8 w-8"
-              onClick={() => adjustSpeed(0.05)}
-              disabled={playbackRate >= 3}
-            >
-              <Plus className="h-3 w-3" />
-            </Button>
           </div>
         </div>
         
