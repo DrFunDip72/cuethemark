@@ -1,10 +1,10 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Play, Pause, Plus, Pen, RotateCcw, Repeat, Gauge } from 'lucide-react';
+import { Play, Pause, Plus, Pen, RotateCcw, Repeat, Gauge, Trash2 } from 'lucide-react';
 import { useTrackLabels } from '@/hooks/useTrackLabels';
 import { LabelList } from '@/components/LabelList';
 import { Timeline } from '@/components/Timeline';
@@ -15,8 +15,18 @@ import { useToast } from '@/hooks/use-toast';
 import { formatTime, roundToOneDecimal, formatTimeForDisplay } from '@/lib/formatTime';
 import { Slider } from '@/components/ui/slider';
 import { EditTrackDialog } from '@/components/EditTrackDialog';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type TrackData = {
   id: string;
@@ -27,6 +37,7 @@ type TrackData = {
 
 const TrackPage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -44,8 +55,11 @@ const TrackPage = () => {
   const [abLoopStartMarkerId, setAbLoopStartMarkerId] = useState<string | null>(null);
   const [abLoopEndMarkerId, setAbLoopEndMarkerId] = useState<string | null>(null);
   const [showAbLoopDialog, setShowAbLoopDialog] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -362,6 +376,58 @@ const TrackPage = () => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!id) return;
+    
+    setIsDeleting(true);
+    
+    try {
+      // First delete all associated labels
+      const { error: labelsError } = await supabase
+        .from('audio_labels')
+        .delete()
+        .eq('track_id', id);
+
+      if (labelsError) {
+        console.error('Error deleting labels:', labelsError);
+        throw labelsError;
+      }
+
+      // Then delete the track
+      const { error: trackError } = await supabase
+        .from('audio_tracks')
+        .delete()
+        .eq('id', id);
+
+      if (trackError) {
+        console.error('Error deleting track:', trackError);
+        throw trackError;
+      }
+
+      toast({
+        title: "Success",
+        description: "Track and all associated labels deleted successfully"
+      });
+      
+      // Invalidate queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['tracks'] });
+      queryClient.invalidateQueries({ queryKey: ['track', id] });
+      
+      // Navigate back to tracks
+      navigate('/app/tracks');
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      toast({
+        title: "Error",
+        description: "Failed to delete track",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
       {/* Track title and view controls - moved to top */}
@@ -507,6 +573,25 @@ const TrackPage = () => {
         </Card>
       )}
 
+      {/* Delete Track Section - at the bottom */}
+      <Card className="p-6 mt-8 border-destructive/20">
+        <div className="text-center space-y-4">
+          <h2 className="text-lg font-semibold text-destructive">Danger Zone</h2>
+          <p className="text-sm text-muted-foreground">
+            Once you delete this track, there is no going back. This will permanently delete the track and all its labels.
+          </p>
+          <Button
+            variant="destructive"
+            onClick={() => setShowDeleteConfirm(true)}
+            className="w-full sm:w-auto"
+            disabled={isDeleting}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete Track
+          </Button>
+        </div>
+      </Card>
+
       {mounted && createPortal(
         <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] md:pb-6">
           <Button
@@ -546,6 +631,28 @@ const TrackPage = () => {
         currentStartMarkerId={abLoopStartMarkerId || undefined}
         currentEndMarkerId={abLoopEndMarkerId || undefined}
       />
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the track "{trackData?.filename}" and all its associated labels.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Track'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <audio
         ref={audioRef}

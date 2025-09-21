@@ -14,18 +14,6 @@ import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { Trash2 } from 'lucide-react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 
 interface Track {
   id: string;
@@ -43,11 +31,8 @@ interface EditTrackDialogProps {
 export function EditTrackDialog({ open, onOpenChange, track }: EditTrackDialogProps) {
   const [filename, setFilename] = useState(track.filename);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   // Update filename when track prop changes
   useEffect(() => {
@@ -107,57 +92,6 @@ export function EditTrackDialog({ open, onOpenChange, track }: EditTrackDialogPr
     }
   };
 
-  const handleDelete = async () => {
-    setIsDeleting(true);
-    
-    try {
-      // First delete all associated labels
-      const { error: labelsError } = await supabase
-        .from('audio_labels')
-        .delete()
-        .eq('track_id', track.id);
-
-      if (labelsError) {
-        console.error('Error deleting labels:', labelsError);
-        throw labelsError;
-      }
-
-      // Then delete the track
-      const { error: trackError } = await supabase
-        .from('audio_tracks')
-        .delete()
-        .eq('id', track.id);
-
-      if (trackError) {
-        console.error('Error deleting track:', trackError);
-        throw trackError;
-      }
-
-      toast({
-        title: "Success",
-        description: "Track and all associated labels deleted successfully"
-      });
-      
-      // Invalidate queries to refresh the data
-      queryClient.invalidateQueries({ queryKey: ['tracks'] });
-      queryClient.invalidateQueries({ queryKey: ['track', track.id] });
-      
-      // Close dialog and navigate back to tracks
-      onOpenChange(false);
-      navigate('/app/tracks');
-    } catch (err) {
-      console.error('Unexpected error:', err);
-      toast({
-        title: "Error",
-        description: "Failed to delete track",
-        variant: "destructive"
-      });
-    } finally {
-      setIsDeleting(false);
-      setShowDeleteConfirm(false);
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -185,23 +119,6 @@ export function EditTrackDialog({ open, onOpenChange, track }: EditTrackDialogPr
             </div>
           </div>
 
-          {/* Delete section */}
-          <div className="border-t pt-4 mt-4">
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={() => setShowDeleteConfirm(true)}
-              className="w-full"
-              disabled={isSubmitting || isDeleting}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete Track
-            </Button>
-            <p className="text-xs text-muted-foreground mt-2 text-center">
-              This will permanently delete the track and all its labels
-            </p>
-          </div>
-
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
@@ -212,28 +129,6 @@ export function EditTrackDialog({ open, onOpenChange, track }: EditTrackDialogPr
           </DialogFooter>
         </form>
       </DialogContent>
-
-      {/* Delete confirmation dialog */}
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the track "{track.filename}" and all its associated labels.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isDeleting ? 'Deleting...' : 'Delete Track'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Dialog>
   );
 }
