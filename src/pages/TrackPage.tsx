@@ -430,10 +430,11 @@ const TrackPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
-      {/* Track title and view controls - moved to top */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-        <div className="flex items-start gap-2 min-w-0 flex-1">
-          <h1 className="text-xl sm:text-2xl font-bold leading-tight break-words">
+      {/* Track title and view controls */}
+      <div className="mb-6">
+        {/* Title row - right aligned on mobile and desktop */}
+        <div className="flex justify-end items-start gap-2 mb-4 sm:mb-0">
+          <h1 className="text-xl sm:text-2xl font-bold leading-tight break-words text-right">
             {trackData?.filename || "Track Name"}
           </h1>
           <Button 
@@ -445,11 +446,14 @@ const TrackPage = () => {
             <Pen className="h-4 w-4" />
           </Button>
         </div>
-        <div className="flex gap-2 flex-shrink-0">
+        
+        {/* Timeline/Labels buttons - centered and full width on mobile, normal on desktop */}
+        <div className="flex gap-2 justify-center sm:justify-end">
           <Button
             variant={view === 'timeline' ? 'default' : 'outline'}
             onClick={() => setView('timeline')}
             size="sm"
+            className="flex-1 sm:flex-none"
           >
             Timeline
           </Button>
@@ -457,6 +461,7 @@ const TrackPage = () => {
             variant={view === 'list' ? 'default' : 'outline'}
             onClick={() => setView('list')}
             size="sm"
+            className="flex-1 sm:flex-none"
           >
             Labels
           </Button>
