@@ -4,21 +4,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { Pencil, ArrowUp, ArrowDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { EditTrackDialog } from '@/components/EditTrackDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 import {
   Accordion,
@@ -37,13 +27,12 @@ type Track = {
   order?: number;
 };
 
-const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown }: {
+const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onMoveUp, onMoveDown, canMoveUp, canMoveDown }: {
   track: Track;
   notes: Record<string, string>;
   saveTimeouts: Record<string, NodeJS.Timeout>;
   onNotesChange: (trackId: string, value: string) => void;
   onNavigate: (trackId: string, e: React.MouseEvent) => void;
-  onDelete: (trackId: string, e: React.MouseEvent) => void;
   onMoveUp: (trackId: string) => void;
   onMoveDown: (trackId: string) => void;
   canMoveUp: boolean;
@@ -71,14 +60,6 @@ const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onDe
             onClick={(e) => onNavigate(track.id, e)}
           >
             <Pencil className="h-4 w-4" />
-          </Button>
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            onClick={(e) => onDelete(track.id, e)}
-            className="text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
           </Button>
           <div className="flex flex-col gap-1">
             <Button 
@@ -128,7 +109,6 @@ const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onDe
 };
 
 export const TrackList = () => {
-  const [deletingTrackId, setDeletingTrackId] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [saveTimeouts, setSaveTimeouts] = useState<Record<string, NodeJS.Timeout>>({});
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -257,43 +237,10 @@ export const TrackList = () => {
     }
   };
 
-  const handleDeleteTrack = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('audio_tracks')
-        .delete()
-        .eq('id', id);
-        
-      if (error) throw error;
-      
-      queryClient.invalidateQueries({ queryKey: ['tracks'] });
-      
-      toast({
-        title: "Success",
-        description: "Track deleted successfully"
-      });
-    } catch (error) {
-      console.error('Error deleting track:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete track",
-        variant: "destructive"
-      });
-    } finally {
-      setDeletingTrackId(null);
-    }
-  };
-
   const handleNavigateToTrack = (trackId: string, e: React.MouseEvent) => {
     e.preventDefault(); 
     e.stopPropagation();
     navigate(`/app/tracks/${trackId}`);
-  };
-
-  const handleDeleteClick = (trackId: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDeletingTrackId(trackId);
   };
 
   if (!user) {
@@ -322,7 +269,6 @@ export const TrackList = () => {
           saveTimeouts={saveTimeouts}
           onNotesChange={handleNotesChange}
           onNavigate={handleNavigateToTrack}
-          onDelete={handleDeleteClick}
           onMoveUp={(trackId) => handleMoveTrack(trackId, 'up')}
           onMoveDown={(trackId) => handleMoveTrack(trackId, 'down')}
           canMoveUp={index > 0}
@@ -330,28 +276,6 @@ export const TrackList = () => {
         />
       ))}
 
-      <AlertDialog 
-        open={!!deletingTrackId} 
-        onOpenChange={(open) => !open && setDeletingTrackId(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the track and all its associated labels.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={() => deletingTrackId && handleDeleteTrack(deletingTrackId)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };
