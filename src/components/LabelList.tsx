@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Play, Pencil, Trash2, GripVertical } from 'lucide-react';
+import { Play, Pencil, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatTime } from '@/lib/formatTime';
@@ -28,27 +28,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import {
-  useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-
 export type Label = {
   id: string;
   label_name: string;
@@ -67,7 +46,7 @@ type LabelListProps = {
   onPauseAudio?: () => void;
 };
 
-type SortableLabelItemProps = {
+type LabelItemProps = {
   label: Label;
   activeLabel: string | null;
   notes: Record<string, string>;
@@ -76,9 +55,13 @@ type SortableLabelItemProps = {
   onEdit: (label: Label) => void;
   onDelete: (labelId: string) => void;
   onPlayFromLabel: (label: Label) => void;
+  onMoveUp: (labelId: string) => void;
+  onMoveDown: (labelId: string) => void;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
 };
 
-const SortableLabelItem = ({ 
+const LabelItem = ({ 
   label, 
   activeLabel, 
   notes, 
@@ -86,44 +69,19 @@ const SortableLabelItem = ({
   onNotesChange, 
   onEdit, 
   onDelete, 
-  onPlayFromLabel 
-}: SortableLabelItemProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: label.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
+  onPlayFromLabel,
+  onMoveUp,
+  onMoveDown,
+  canMoveUp,
+  canMoveDown
+}: LabelItemProps) => {
   return (
     <Card
-      ref={setNodeRef}
-      style={style}
       className={`p-4 hover:bg-accent transition-colors ${
         activeLabel === label.id ? 'border-primary' : ''
-      } ${
-        isDragging ? 'shadow-lg rotate-1' : ''
       }`}
     >
-      <div className="flex items-center justify-between">
-        <div
-          {...attributes}
-          {...listeners}
-          className="cursor-grab active:cursor-grabbing p-2 hover:bg-gray-100 rounded mr-3 flex-shrink-0"
-          style={{ touchAction: 'none' }}
-          onPointerDown={(e) => e.stopPropagation()}
-          onTouchStart={(e) => e.stopPropagation()}
-        >
-          <GripVertical className="h-4 w-4 text-gray-400" />
-        </div>
-        
+      <div className="flex items-center justify-between">        
         <div 
           className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
           onClick={() => onPlayFromLabel(label)}
@@ -137,7 +95,7 @@ const SortableLabelItem = ({
           </div>
         </div>
         
-        <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+        <div className="flex items-center gap-1 flex-shrink-0 ml-3">
           <Button size="icon" variant="ghost" onClick={() => onEdit(label)}>
             <Pencil className="h-4 w-4" />
           </Button>
@@ -148,6 +106,24 @@ const SortableLabelItem = ({
             className="text-destructive hover:text-destructive"
           >
             <Trash2 className="h-4 w-4" />
+          </Button>
+          <Button 
+            size="icon" 
+            variant="ghost" 
+            onClick={() => onMoveUp(label.id)}
+            disabled={!canMoveUp}
+            className="disabled:opacity-50"
+          >
+            <ChevronUp className="h-4 w-4" />
+          </Button>
+          <Button 
+            size="icon" 
+            variant="ghost" 
+            onClick={() => onMoveDown(label.id)}
+            disabled={!canMoveDown}
+            className="disabled:opacity-50"
+          >
+            <ChevronDown className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -183,31 +159,20 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [saveTimeouts, setSaveTimeouts] = useState<Record<string, NodeJS.Timeout>>({});
   const [isNotesUpdating, setIsNotesUpdating] = useState<Record<string, boolean>>({});
+  const [localLabels, setLocalLabels] = useState<Label[]>(labels);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 150,
-        tolerance: 5,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  // Update local labels when props change
+  useEffect(() => {
+    setLocalLabels(labels);
+  }, [labels]);
 
   // Find the active label based on current time
   useEffect(() => {
-    const currentLabel = labels.find(
+    const currentLabel = localLabels.find(
       (label) => currentTime >= label.timestamp_seconds && 
-      (currentTime < (labels.find(l => l.timestamp_seconds > label.timestamp_seconds)?.timestamp_seconds || Infinity))
+      (currentTime < (localLabels.find(l => l.timestamp_seconds > label.timestamp_seconds)?.timestamp_seconds || Infinity))
     );
     setActiveLabel(currentLabel?.id || null);
   });
@@ -215,11 +180,11 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
   // Initialize notes from labels
   useEffect(() => {
     const initialNotes: Record<string, string> = {};
-    labels.forEach(label => {
+    localLabels.forEach(label => {
       initialNotes[label.id] = label.notes || '';
     });
     setNotes(initialNotes);
-  }, [labels]);
+  }, [localLabels]);
 
   // Auto-save notes with debouncing
   const handleNotesChange = (labelId: string, value: string) => {
@@ -266,26 +231,26 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
     };
   }, [saveTimeouts]);
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
+  const handleMoveLabel = async (labelId: string, direction: 'up' | 'down') => {
+    const currentIndex = localLabels.findIndex(label => label.id === labelId);
+    if (currentIndex === -1) return;
+    
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex < 0 || newIndex >= localLabels.length) return;
 
-    if (!over || active.id === over.id) {
-      return;
-    }
-
-    const oldIndex = labels.findIndex(label => label.id === active.id);
-    const newIndex = labels.findIndex(label => label.id === over.id);
-
-    const reorderedLabels = arrayMove(labels, oldIndex, newIndex);
-
-    // Update the order values for all affected labels
-    const updates = reorderedLabels.map((label, index) => ({
-      id: label.id,
-      order: index + 1
-    }));
+    // Optimistically update the UI
+    const newLabels = [...localLabels];
+    const [movedLabel] = newLabels.splice(currentIndex, 1);
+    newLabels.splice(newIndex, 0, movedLabel);
+    setLocalLabels(newLabels);
 
     try {
-      // Update all labels with new order
+      // Update the order in the database
+      const updates = newLabels.map((label, index) => ({
+        id: label.id,
+        order: index + 1
+      }));
+
       for (const update of updates) {
         const { error } = await supabase
           .from('audio_labels')
@@ -309,6 +274,8 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
         description: "Failed to reorder labels",
         variant: "destructive"
       });
+      // Revert the local state if the database update fails
+      setLocalLabels(labels);
     }
   };
 
@@ -393,28 +360,26 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
   };
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext items={labels.map(l => l.id)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-3">
-          {labels.map((label) => (
-            <SortableLabelItem
-              key={label.id}
-              label={label}
-              activeLabel={activeLabel}
-              notes={notes}
-              saveTimeouts={saveTimeouts}
-              onNotesChange={handleNotesChange}
-              onEdit={openEditDialog}
-              onDelete={(labelId) => setDeletingLabel(labelId)}
-              onPlayFromLabel={handlePlayFromLabel}
-            />
-          ))}
-        </div>
-      </SortableContext>
+    <>
+      <div className="space-y-3">
+        {localLabels.map((label, index) => (
+          <LabelItem
+            key={label.id}
+            label={label}
+            activeLabel={activeLabel}
+            notes={notes}
+            saveTimeouts={saveTimeouts}
+            onNotesChange={handleNotesChange}
+            onEdit={openEditDialog}
+            onDelete={(labelId) => setDeletingLabel(labelId)}
+            onPlayFromLabel={handlePlayFromLabel}
+            onMoveUp={(labelId) => handleMoveLabel(labelId, 'up')}
+            onMoveDown={(labelId) => handleMoveLabel(labelId, 'down')}
+            canMoveUp={index > 0}
+            canMoveDown={index < localLabels.length - 1}
+          />
+        ))}
+      </div>
       
       {editingLabel && (
         <EditLabelDialog 
@@ -444,6 +409,6 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </DndContext>
+    </>
   );
 };

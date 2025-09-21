@@ -393,77 +393,80 @@ const TrackPage = () => {
         </div>
         
         {/* Second row: Controls */}
-        <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <Gauge className="h-4 w-4 text-muted-foreground" />
-              <div className="flex items-center">
-                <Input
-                  type="number"
-                  value={speedInput}
-                  onChange={handleSpeedChange}
-                  onBlur={handleSpeedBlur}
-                  min="0.5"
-                  max="2"
-                  step="0.05"
-                  className="w-16 h-8 text-center text-sm"
-                  disabled={isLoading || !trackUrl}
-                />
-                <span className="text-sm text-muted-foreground ml-1">x</span>
-              </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Gauge className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center">
+              <Input
+                type="number"
+                value={speedInput}
+                onChange={handleSpeedChange}
+                onBlur={handleSpeedBlur}
+                min="0.5"
+                max="2"
+                step="0.05"
+                className="w-16 h-8 text-center text-sm"
+                disabled={isLoading || !trackUrl}
+              />
+              <span className="text-sm text-muted-foreground ml-1">x</span>
             </div>
+          </div>
 
-            <Button
-              size="sm"
-              variant={autoLoop ? "default" : "outline"}
-              onClick={handleAutoLoopToggle}
-              disabled={isLoading || !trackUrl}
-              className="h-8"
-            >
-              <RotateCcw className="h-4 w-4" />
-            </Button>
+          <Button
+            size="sm"
+            variant={autoLoop ? "default" : "outline"}
+            onClick={handleAutoLoopToggle}
+            disabled={isLoading || !trackUrl}
+            className="h-8"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </Button>
 
-            <Button
-              size="sm"
-              variant={abLoopEnabled ? "default" : "outline"}
-              onClick={() => {
-                if (audioRef.current && isPlaying) {
-                  audioRef.current.pause();
-                }
-                setShowAbLoopDialog(true);
-              }}
-              disabled={isLoading || !trackUrl}
-              className="h-8"
-            >
-              <span className="text-sm font-medium">A</span>
-              <RotateCcw className="h-3 w-3 mx-1" />
-              <span className="text-sm font-medium">B</span>
-            </Button>
+          <Button
+            size="sm"
+            variant={abLoopEnabled ? "default" : "outline"}
+            onClick={() => {
+              if (audioRef.current && isPlaying) {
+                audioRef.current.pause();
+              }
+              setShowAbLoopDialog(true);
+            }}
+            disabled={isLoading || !trackUrl}
+            className="h-8"
+          >
+            <span className="text-sm font-medium">A</span>
+            <RotateCcw className="h-3 w-3 mx-1" />
+            <span className="text-sm font-medium">B</span>
+          </Button>
         </div>
       </Card>
 
-      <div className="mb-6 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold">
+      <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div className="flex items-center gap-2 min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold truncate">
             {trackData?.filename || "Track Name"}
           </h1>
           <Button 
             size="icon" 
             variant="ghost"
             onClick={() => setEditTrackOpen(true)}
+            className="flex-shrink-0"
           >
             <Pen className="h-4 w-4" />
           </Button>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-shrink-0">
           <Button
             variant={view === 'timeline' ? 'default' : 'outline'}
             onClick={() => setView('timeline')}
+            size="sm"
           >
             Timeline
           </Button>
           <Button
             variant={view === 'list' ? 'default' : 'outline'}
             onClick={() => setView('list')}
+            size="sm"
           >
             Labels
           </Button>

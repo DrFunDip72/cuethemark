@@ -4,29 +4,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2, GripVertical } from 'lucide-react';
+import { Pencil, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { EditTrackDialog } from '@/components/EditTrackDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-  useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,62 +37,34 @@ type Track = {
   order?: number;
 };
 
-const SortableTrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onDelete }: {
+const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown }: {
   track: Track;
   notes: Record<string, string>;
   saveTimeouts: Record<string, NodeJS.Timeout>;
   onNotesChange: (trackId: string, value: string) => void;
   onNavigate: (trackId: string, e: React.MouseEvent) => void;
   onDelete: (trackId: string, e: React.MouseEvent) => void;
+  onMoveUp: (trackId: string) => void;
+  onMoveDown: (trackId: string) => void;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
 }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: track.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="p-4 rounded-lg border border-gray-200 hover:border-primary transition-colors bg-white"
-    >
+    <div className="p-4 rounded-lg border border-gray-200 hover:border-primary transition-colors bg-white">
       <div className="flex justify-between items-center">
-        <div
-          {...attributes}
-          {...listeners}
-          className="cursor-grab active:cursor-grabbing p-2 hover:bg-gray-100 rounded mr-3 flex-shrink-0"
-          style={{ touchAction: 'none' }}
-          onPointerDown={(e) => e.stopPropagation()}
-          onTouchStart={(e) => e.stopPropagation()}
-        >
-          <GripVertical className="h-4 w-4 text-gray-400" />
-        </div>
-        
         <Link
           to={`/app/tracks/${track.id}`}
           className="block flex-1 min-w-0"
         >
-          <div className="flex justify-between items-center">
-            <div className="min-w-0 flex-1">
-              <h3 className="font-medium truncate">{track.filename}</h3>
-              <p className="text-sm text-gray-500">
-                {new Date(track.uploaded_at).toLocaleDateString()}
-              </p>
-            </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-medium truncate">{track.filename}</h3>
+            <p className="text-sm text-gray-500">
+              {new Date(track.uploaded_at).toLocaleDateString()}
+            </p>
           </div>
         </Link>
         
-        <div className="flex gap-2 flex-shrink-0 ml-3">
+        <div className="flex gap-1 flex-shrink-0 ml-3">
           <Button 
             size="icon" 
             variant="ghost" 
@@ -125,6 +79,24 @@ const SortableTrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNaviga
             className="text-destructive hover:text-destructive"
           >
             <Trash2 className="h-4 w-4" />
+          </Button>
+          <Button 
+            size="icon" 
+            variant="ghost" 
+            onClick={() => onMoveUp(track.id)}
+            disabled={!canMoveUp}
+            className="disabled:opacity-50"
+          >
+            <ChevronUp className="h-4 w-4" />
+          </Button>
+          <Button 
+            size="icon" 
+            variant="ghost" 
+            onClick={() => onMoveDown(track.id)}
+            disabled={!canMoveDown}
+            className="disabled:opacity-50"
+          >
+            <ChevronDown className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -162,23 +134,6 @@ export const TrackList = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 150,
-        tolerance: 5,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
 
   const { data: tracksData, isLoading, error } = useQuery({
     queryKey: ['tracks'],
@@ -260,41 +215,43 @@ export const TrackList = () => {
     };
   }, [saveTimeouts]);
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
+  const handleMoveTrack = async (trackId: string, direction: 'up' | 'down') => {
+    const currentIndex = tracks.findIndex(track => track.id === trackId);
+    if (currentIndex === -1) return;
+    
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex < 0 || newIndex >= tracks.length) return;
 
-    if (over && active.id !== over.id) {
-      const oldIndex = tracks.findIndex(track => track.id === active.id);
-      const newIndex = tracks.findIndex(track => track.id === over.id);
+    // Optimistically update the UI
+    const newTracks = [...tracks];
+    const [movedTrack] = newTracks.splice(currentIndex, 1);
+    newTracks.splice(newIndex, 0, movedTrack);
+    setTracks(newTracks);
 
-      const newTracks = arrayMove(tracks, oldIndex, newIndex);
-      setTracks(newTracks);
-
+    try {
       // Update the order in the database
-      try {
-        const updates = newTracks.map((track, index) => ({
-          id: track.id,
-          order: index + 1,
-        }));
+      const updates = newTracks.map((track, index) => ({
+        id: track.id,
+        order: index + 1,
+      }));
 
-        for (const update of updates) {
-          await supabase
-            .from('audio_tracks')
-            .update({ order: update.order })
-            .eq('id', update.id);
-        }
-
-        queryClient.invalidateQueries({ queryKey: ['tracks'] });
-      } catch (error) {
-        console.error('Error updating track order:', error);
-        toast({
-          title: "Error",
-          description: "Failed to update track order",
-          variant: "destructive"
-        });
-        // Revert the local state if the database update fails
-        setTracks(tracksData || []);
+      for (const update of updates) {
+        await supabase
+          .from('audio_tracks')
+          .update({ order: update.order })
+          .eq('id', update.id);
       }
+
+      queryClient.invalidateQueries({ queryKey: ['tracks'] });
+    } catch (error) {
+      console.error('Error updating track order:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update track order",
+        variant: "destructive"
+      });
+      // Revert the local state if the database update fails
+      setTracks(tracksData || []);
     }
   };
 
@@ -355,25 +312,21 @@ export const TrackList = () => {
 
   return (
     <div className="grid gap-4">
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={tracks.map(track => track.id)} strategy={verticalListSortingStrategy}>
-          {tracks.map((track) => (
-            <SortableTrackItem
-              key={track.id}
-              track={track}
-              notes={notes}
-              saveTimeouts={saveTimeouts}
-              onNotesChange={handleNotesChange}
-              onNavigate={handleNavigateToTrack}
-              onDelete={handleDeleteClick}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
+      {tracks.map((track, index) => (
+        <TrackItem
+          key={track.id}
+          track={track}
+          notes={notes}
+          saveTimeouts={saveTimeouts}
+          onNotesChange={handleNotesChange}
+          onNavigate={handleNavigateToTrack}
+          onDelete={handleDeleteClick}
+          onMoveUp={(trackId) => handleMoveTrack(trackId, 'up')}
+          onMoveDown={(trackId) => handleMoveTrack(trackId, 'down')}
+          canMoveUp={index > 0}
+          canMoveDown={index < tracks.length - 1}
+        />
+      ))}
 
       <AlertDialog 
         open={!!deletingTrackId} 
