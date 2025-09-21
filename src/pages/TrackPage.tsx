@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Play, Pause, Plus, Pen, RotateCcw, Repeat } from 'lucide-react';
+import { Play, Pause, Plus, Pen, RotateCcw, Repeat, Gauge } from 'lucide-react';
 import { useTrackLabels } from '@/hooks/useTrackLabels';
 import { LabelList } from '@/components/LabelList';
 import { Timeline } from '@/components/Timeline';
@@ -368,7 +368,7 @@ const TrackPage = () => {
         {/* Second row: Controls */}
         <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Speed:</span>
+              <Gauge className="h-4 w-4 text-muted-foreground" />
               <div className="flex items-center">
                 <Input
                   type="number"
@@ -392,8 +392,7 @@ const TrackPage = () => {
               disabled={isLoading || !trackUrl}
               className="h-8"
             >
-              <RotateCcw className="h-3 w-3 mr-1" />
-              {autoLoop ? "Loop On" : "Loop"}
+              <RotateCcw className="h-4 w-4" />
             </Button>
 
             <Button
@@ -403,8 +402,9 @@ const TrackPage = () => {
               disabled={isLoading || !trackUrl}
               className="h-8"
             >
-              <Repeat className="h-3 w-3 mr-1" />
-              {abLoopEnabled ? "A↔B On" : "A↔B"}
+              <span className="text-sm font-medium">A</span>
+              <RotateCcw className="h-3 w-3 mx-1" />
+              <span className="text-sm font-medium">B</span>
             </Button>
         </div>
       </Card>
