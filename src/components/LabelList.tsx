@@ -253,11 +253,6 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
 
       // Refresh the labels list
       queryClient.invalidateQueries({ queryKey: ['track-labels', trackId] });
-      
-      toast({
-        title: "Success",
-        description: "Labels reordered successfully"
-      });
     } catch (error) {
       console.error('Error reordering labels:', error);
       toast({
