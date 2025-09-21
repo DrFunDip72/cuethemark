@@ -576,10 +576,6 @@ const TrackPage = () => {
       {/* Delete Track Section - at the bottom */}
       <Card className="p-6 mt-8 border-destructive/20">
         <div className="text-center space-y-4">
-          <h2 className="text-lg font-semibold text-destructive">Danger Zone</h2>
-          <p className="text-sm text-muted-foreground">
-            Once you delete this track, there is no going back. This will permanently delete the track and all its labels.
-          </p>
           <Button
             variant="destructive"
             onClick={() => setShowDeleteConfirm(true)}
