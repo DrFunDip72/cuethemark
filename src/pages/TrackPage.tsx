@@ -77,9 +77,11 @@ const TrackPage = () => {
     if (id) {
       // Load playback rate
       const savedRate = localStorage.getItem(`track-${id}-playbackRate`);
+      console.log(`Loading playback rate for track ${id}:`, savedRate);
       if (savedRate) {
         const rate = parseFloat(savedRate);
         if (!isNaN(rate) && rate >= 0.5 && rate <= 2) {
+          console.log(`Setting playback rate to:`, rate);
           setPlaybackRate(rate);
         }
       }
@@ -113,7 +115,8 @@ const TrackPage = () => {
 
   // Save settings when they change
   useEffect(() => {
-    if (id && playbackRate !== 1) {
+    if (id) {
+      console.log(`Saving playback rate for track ${id}:`, playbackRate);
       localStorage.setItem(`track-${id}-playbackRate`, playbackRate.toString());
     }
   }, [id, playbackRate]);
