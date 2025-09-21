@@ -15,13 +15,7 @@ import { formatTime, roundToOneDecimal, formatTimeForDisplay } from '@/lib/forma
 import { Slider } from '@/components/ui/slider';
 import { EditTrackDialog } from '@/components/EditTrackDialog';
 import { useQuery } from '@tanstack/react-query';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 type TrackData = {
   id: string;
@@ -194,8 +188,27 @@ const TrackPage = () => {
     setAddLabelOpen(true);
   };
 
-  const handleSpeedChange = (value: string) => {
-    setPlaybackRate(parseFloat(value));
+  const handleSpeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const numValue = parseFloat(value);
+    
+    // Allow empty input for editing
+    if (value === '') return;
+    
+    // Validate range (0.25x to 3x)
+    if (!isNaN(numValue) && numValue >= 0.25 && numValue <= 3) {
+      setPlaybackRate(numValue);
+    }
+  };
+
+  const handleSpeedBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const numValue = parseFloat(value);
+    
+    // Reset to 1 if invalid input
+    if (value === '' || isNaN(numValue) || numValue < 0.25 || numValue > 3) {
+      setPlaybackRate(1);
+    }
   };
 
   return (
@@ -223,19 +236,20 @@ const TrackPage = () => {
 
           <div className="flex items-center gap-2 min-w-fit">
             <span className="text-sm text-muted-foreground">Speed:</span>
-            <Select value={playbackRate.toString()} onValueChange={handleSpeedChange}>
-              <SelectTrigger className="w-20">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0.5">0.5x</SelectItem>
-                <SelectItem value="0.75">0.75x</SelectItem>
-                <SelectItem value="1">1x</SelectItem>
-                <SelectItem value="1.25">1.25x</SelectItem>
-                <SelectItem value="1.5">1.5x</SelectItem>
-                <SelectItem value="2">2x</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center">
+              <Input
+                type="number"
+                value={playbackRate}
+                onChange={handleSpeedChange}
+                onBlur={handleSpeedBlur}
+                min="0.25"
+                max="3"
+                step="0.05"
+                className="w-16 h-8 text-center text-sm"
+                disabled={isLoading || !trackUrl}
+              />
+              <span className="text-sm text-muted-foreground ml-1">x</span>
+            </div>
           </div>
         </div>
         
