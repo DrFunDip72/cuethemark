@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
+import { Pencil, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { EditTrackDialog } from '@/components/EditTrackDialog';
 import { useAuth } from '@/contexts/AuthContext';
@@ -64,7 +64,7 @@ const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onDe
           </div>
         </Link>
         
-        <div className="flex gap-1 flex-shrink-0 ml-3">
+        <div className="flex gap-2 flex-shrink-0 items-center">
           <Button 
             size="icon" 
             variant="ghost" 
@@ -80,24 +80,26 @@ const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onDe
           >
             <Trash2 className="h-4 w-4" />
           </Button>
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            onClick={() => onMoveUp(track.id)}
-            disabled={!canMoveUp}
-            className="disabled:opacity-50"
-          >
-            <ChevronUp className="h-4 w-4" />
-          </Button>
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            onClick={() => onMoveDown(track.id)}
-            disabled={!canMoveDown}
-            className="disabled:opacity-50"
-          >
-            <ChevronDown className="h-4 w-4" />
-          </Button>
+          <div className="flex flex-col">
+            <Button 
+              size="sm"
+              variant="ghost" 
+              onClick={() => onMoveUp(track.id)}
+              disabled={!canMoveUp}
+              className="h-6 w-6 p-0 disabled:opacity-50"
+            >
+              <ArrowUp className="h-3 w-3" />
+            </Button>
+            <Button 
+              size="sm"
+              variant="ghost" 
+              onClick={() => onMoveDown(track.id)}
+              disabled={!canMoveDown}
+              className="h-6 w-6 p-0 disabled:opacity-50"
+            >
+              <ArrowDown className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
       </div>
 

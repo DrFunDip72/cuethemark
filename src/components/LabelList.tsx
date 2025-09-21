@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Play, Pencil, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
+import { Play, Pencil, ArrowUp, ArrowDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatTime } from '@/lib/formatTime';
@@ -53,7 +53,6 @@ type LabelItemProps = {
   saveTimeouts: Record<string, NodeJS.Timeout>;
   onNotesChange: (labelId: string, value: string) => void;
   onEdit: (label: Label) => void;
-  onDelete: (labelId: string) => void;
   onPlayFromLabel: (label: Label) => void;
   onMoveUp: (labelId: string) => void;
   onMoveDown: (labelId: string) => void;
@@ -68,7 +67,6 @@ const LabelItem = ({
   saveTimeouts, 
   onNotesChange, 
   onEdit, 
-  onDelete, 
   onPlayFromLabel,
   onMoveUp,
   onMoveDown,
@@ -95,36 +93,30 @@ const LabelItem = ({
           </div>
         </div>
         
-        <div className="flex items-center gap-1 flex-shrink-0 ml-3">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <Button size="icon" variant="ghost" onClick={() => onEdit(label)}>
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            onClick={() => onDelete(label.id)}
-            className="text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            onClick={() => onMoveUp(label.id)}
-            disabled={!canMoveUp}
-            className="disabled:opacity-50"
-          >
-            <ChevronUp className="h-4 w-4" />
-          </Button>
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            onClick={() => onMoveDown(label.id)}
-            disabled={!canMoveDown}
-            className="disabled:opacity-50"
-          >
-            <ChevronDown className="h-4 w-4" />
-          </Button>
+          <div className="flex flex-col">
+            <Button 
+              size="sm"
+              variant="ghost" 
+              onClick={() => onMoveUp(label.id)}
+              disabled={!canMoveUp}
+              className="h-6 w-6 p-0 disabled:opacity-50"
+            >
+              <ArrowUp className="h-3 w-3" />
+            </Button>
+            <Button 
+              size="sm"
+              variant="ghost" 
+              onClick={() => onMoveDown(label.id)}
+              disabled={!canMoveDown}
+              className="h-6 w-6 p-0 disabled:opacity-50"
+            >
+              <ArrowDown className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -155,7 +147,6 @@ const LabelItem = ({
 export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, onPauseAudio }: LabelListProps) => {
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
   const [editingLabel, setEditingLabel] = useState<Label | null>(null);
-  const [deletingLabel, setDeletingLabel] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [saveTimeouts, setSaveTimeouts] = useState<Record<string, NodeJS.Timeout>>({});
   const [isNotesUpdating, setIsNotesUpdating] = useState<Record<string, boolean>>({});
@@ -288,6 +279,9 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
         
       if (error) throw error;
       
+      // Refresh the labels list
+      queryClient.invalidateQueries({ queryKey: ['track-labels', trackId] });
+      
       toast({
         title: "Success",
         description: "Label deleted successfully"
@@ -299,8 +293,6 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
         description: "Failed to delete label",
         variant: "destructive"
       });
-    } finally {
-      setDeletingLabel(null);
     }
   };
 
@@ -371,7 +363,6 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
             saveTimeouts={saveTimeouts}
             onNotesChange={handleNotesChange}
             onEdit={openEditDialog}
-            onDelete={(labelId) => setDeletingLabel(labelId)}
             onPlayFromLabel={handlePlayFromLabel}
             onMoveUp={(labelId) => handleMoveLabel(labelId, 'up')}
             onMoveDown={(labelId) => handleMoveLabel(labelId, 'down')}
@@ -387,28 +378,9 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
           onOpenChange={(open) => !open && setEditingLabel(null)}
           label={editingLabel}
           trackId={trackId}
+          onDelete={handleDeleteLabel}
         />
       )}
-
-      <AlertDialog open={!!deletingLabel} onOpenChange={(open) => !open && setDeletingLabel(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the label.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={() => deletingLabel && handleDeleteLabel(deletingLabel)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 };
