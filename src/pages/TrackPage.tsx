@@ -35,6 +35,7 @@ const TrackPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [editTrackOpen, setEditTrackOpen] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
+  const [speedInput, setSpeedInput] = useState('1');
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
@@ -47,6 +48,8 @@ const TrackPage = () => {
     if (audioRef.current) {
       audioRef.current.playbackRate = playbackRate;
     }
+    // Sync speedInput with playbackRate
+    setSpeedInput(playbackRate.toString());
   }, [playbackRate]);
 
   // Load saved timestamp when component mounts
@@ -190,24 +193,20 @@ const TrackPage = () => {
 
   const handleSpeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    const numValue = parseFloat(value);
-    
-    // Allow empty input for editing
-    if (value === '') return;
-    
-    // Validate range (0.25x to 3x)
-    if (!isNaN(numValue) && numValue >= 0.25 && numValue <= 3) {
-      setPlaybackRate(numValue);
-    }
+    // Always update speedInput to allow typing and clearing
+    setSpeedInput(value);
   };
 
   const handleSpeedBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const numValue = parseFloat(value);
     
-    // Reset to 1 if invalid input
-    if (value === '' || isNaN(numValue) || numValue < 0.25 || numValue > 3) {
-      setPlaybackRate(1);
+    // Reset to current playbackRate if invalid input
+    if (value === '' || isNaN(numValue) || numValue < 0.5 || numValue > 2) {
+      setSpeedInput(playbackRate.toString());
+    } else {
+      // Valid input, update playbackRate
+      setPlaybackRate(numValue);
     }
   };
 
@@ -239,11 +238,11 @@ const TrackPage = () => {
             <div className="flex items-center">
               <Input
                 type="number"
-                value={playbackRate}
+                value={speedInput}
                 onChange={handleSpeedChange}
                 onBlur={handleSpeedBlur}
-                min="0.25"
-                max="3"
+                min="0.5"
+                max="2"
                 step="0.05"
                 className="w-16 h-8 text-center text-sm"
                 disabled={isLoading || !trackUrl}
