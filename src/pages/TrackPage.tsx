@@ -409,7 +409,12 @@ const TrackPage = () => {
             <Button
               size="sm"
               variant={abLoopEnabled ? "default" : "outline"}
-              onClick={() => setShowAbLoopDialog(true)}
+              onClick={() => {
+                if (audioRef.current && isPlaying) {
+                  audioRef.current.pause();
+                }
+                setShowAbLoopDialog(true);
+              }}
               disabled={isLoading || !trackUrl}
               className="h-8"
             >
@@ -467,6 +472,11 @@ const TrackPage = () => {
               currentTime={currentTime}
               onPlayFromTimestamp={handlePlayFromTimestamp}
               trackId={id || ''}
+              onPauseAudio={() => {
+                if (audioRef.current && isPlaying) {
+                  audioRef.current.pause();
+                }
+              }}
             />
           ) : (
             <div className="text-center text-gray-500 py-8">

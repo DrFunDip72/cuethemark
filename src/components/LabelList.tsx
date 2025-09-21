@@ -63,6 +63,7 @@ type LabelListProps = {
   currentTime: number;
   onPlayFromTimestamp: (timestamp: number) => void;
   trackId: string;
+  onPauseAudio?: () => void;
 };
 
 type SortableLabelItemProps = {
@@ -169,7 +170,7 @@ const SortableLabelItem = ({
   );
 };
 
-export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }: LabelListProps) => {
+export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, onPauseAudio }: LabelListProps) => {
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
   const [editingLabel, setEditingLabel] = useState<Label | null>(null);
   const [deletingLabel, setDeletingLabel] = useState<string | null>(null);
@@ -351,6 +352,7 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId }:
   };
 
   const openEditDialog = (label: Label) => {
+    onPauseAudio?.();
     setEditingLabel(label);
   };
 

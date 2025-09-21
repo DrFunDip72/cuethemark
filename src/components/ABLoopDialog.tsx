@@ -207,7 +207,7 @@ export const ABLoopDialog = ({
                     >
                       <div className="flex flex-col items-start">
                         <div className="font-medium">{label.label_name}</div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className={`text-xs ${isSelected ? 'text-white' : 'text-muted-foreground'}`}>
                           {formatTime(label.timestamp_seconds)}
                         </div>
                       </div>
