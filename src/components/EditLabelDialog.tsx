@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Trash2 } from 'lucide-react';
+import { Trash2, X, Save } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatTime, roundToOneDecimal } from '@/lib/formatTime';
@@ -234,8 +234,14 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId, onDelete }
               </div>
             </div>
 
-            <DialogFooter className="flex justify-between">
-              <div>
+            <DialogFooter className="flex justify-between items-center">
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+                <Button type="submit" disabled={isSubmitting} size="sm">
+                  <Save className="h-4 w-4" />
+                </Button>
                 {onDelete && (
                   <Button 
                     type="button" 
@@ -243,18 +249,9 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId, onDelete }
                     size="sm"
                     onClick={() => setShowDeleteDialog(true)}
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 )}
-              </div>
-              <div className="flex gap-2">
-                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Saving...' : 'Save Changes'}
-                </Button>
               </div>
             </DialogFooter>
           </form>
