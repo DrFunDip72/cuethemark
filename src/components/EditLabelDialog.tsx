@@ -188,10 +188,11 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId, onDelete }
                 <div className="col-span-3 flex items-center gap-2">
                   <Input
                     id="edit-timestamp"
-                    type="text"
+                    type="number"
                     value={timestamp}
                     onChange={(e) => setTimestamp(e.target.value)}
                     className="flex-1"
+                    step="0.1"
                   />
                   <span className="text-sm text-gray-500 w-16">
                     {formatTime(parseFloat(timestamp) || 0)}
@@ -206,11 +207,12 @@ export function EditLabelDialog({ open, onOpenChange, label, trackId, onDelete }
                 <div className="col-span-3 flex items-center gap-2">
                   <Input
                     id="edit-playback-offset"
-                    type="text"
+                    type="number"
                     value={playbackOffset}
                     onChange={(e) => setPlaybackOffset(e.target.value)}
                     className="flex-1"
                     placeholder="3"
+                    step="0.1"
                   />
                   <span className="text-sm text-gray-500 text-xs">
                     seconds before
