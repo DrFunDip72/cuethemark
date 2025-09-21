@@ -295,7 +295,7 @@ const TrackPage = () => {
       const endLabel = labels.find(l => l.id === abLoopEndMarkerId);
       
       if (startLabel && endLabel) {
-        const startTime = startLabel.timestamp_seconds + (startLabel.playback_offset_seconds || 0);
+        const startTime = Math.max(0, startLabel.timestamp_seconds - (startLabel.playback_offset_seconds || 0));
         setAbLoopStart(startTime);
         setAbLoopEnd(endLabel.timestamp_seconds);
       }
@@ -318,7 +318,7 @@ const TrackPage = () => {
     if (audioRef.current && labels) {
       const startLabel = labels.find(l => l.id === startMarkerId);
       if (startLabel) {
-        const seekTime = startLabel.timestamp_seconds + (startLabel.playback_offset_seconds || 0);
+        const seekTime = Math.max(0, startLabel.timestamp_seconds - (startLabel.playback_offset_seconds || 0));
         audioRef.current.currentTime = roundToOneDecimal(seekTime);
         setCurrentTime(roundToOneDecimal(seekTime));
         audioRef.current.pause();
