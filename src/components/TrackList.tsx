@@ -84,45 +84,50 @@ const SortableTrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNaviga
       style={style}
       className="p-4 rounded-lg border border-gray-200 hover:border-primary transition-colors bg-white"
     >
-      <Link
-        to={`/app/tracks/${track.id}`}
-        className="block"
-      >
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div
-              {...attributes}
-              {...listeners}
-              className="cursor-grab hover:cursor-grabbing p-1 hover:bg-gray-100 rounded"
-            >
-              <GripVertical className="h-4 w-4 text-gray-400" />
-            </div>
-            <div>
-              <h3 className="font-medium">{track.filename}</h3>
+      <div className="flex justify-between items-center">
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-2 hover:bg-gray-100 rounded mr-3 flex-shrink-0"
+          style={{ touchAction: 'none' }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+        >
+          <GripVertical className="h-4 w-4 text-gray-400" />
+        </div>
+        
+        <Link
+          to={`/app/tracks/${track.id}`}
+          className="block flex-1 min-w-0"
+        >
+          <div className="flex justify-between items-center">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-medium truncate">{track.filename}</h3>
               <p className="text-sm text-gray-500">
                 {new Date(track.uploaded_at).toLocaleDateString()}
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button 
-              size="icon" 
-              variant="ghost" 
-              onClick={(e) => onNavigate(track.id, e)}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button 
-              size="icon" 
-              variant="ghost" 
-              onClick={(e) => onDelete(track.id, e)}
-              className="text-destructive hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+        </Link>
+        
+        <div className="flex gap-2 flex-shrink-0 ml-3">
+          <Button 
+            size="icon" 
+            variant="ghost" 
+            onClick={(e) => onNavigate(track.id, e)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button 
+            size="icon" 
+            variant="ghost" 
+            onClick={(e) => onDelete(track.id, e)}
+            className="text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
-      </Link>
+      </div>
 
       <Accordion type="single" collapsible className="w-full mt-2">
         <AccordionItem value={`notes-${track.id}`} className="border-0">
@@ -166,7 +171,7 @@ export const TrackList = () => {
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 250,
+        delay: 150,
         tolerance: 5,
       },
     }),

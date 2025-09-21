@@ -113,19 +113,31 @@ const SortableLabelItem = ({
       }`}
     >
       <div className="flex items-center justify-between">
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-2 hover:bg-gray-100 rounded mr-3 flex-shrink-0"
+          style={{ touchAction: 'none' }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+        >
+          <GripVertical className="h-4 w-4 text-gray-400" />
+        </div>
+        
         <div 
-          className="flex items-center gap-3 cursor-pointer flex-1"
+          className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
           onClick={() => onPlayFromLabel(label)}
         >
-          <Play className="h-4 w-4 text-primary" />
-          <div>
-            <h3 className="font-medium">{label.label_name}</h3>
+          <Play className="h-4 w-4 text-primary flex-shrink-0" />
+          <div className="min-w-0 flex-1">
+            <h3 className="font-medium truncate">{label.label_name}</h3>
             <Badge variant="secondary">
               {formatTime(label.timestamp_seconds)}
             </Badge>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        
+        <div className="flex items-center gap-2 flex-shrink-0 ml-3">
           <Button size="icon" variant="ghost" onClick={() => onEdit(label)}>
             <Pencil className="h-4 w-4" />
           </Button>
@@ -137,13 +149,6 @@ const SortableLabelItem = ({
           >
             <Trash2 className="h-4 w-4" />
           </Button>
-          <div
-            {...attributes}
-            {...listeners}
-            className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
-          >
-            <GripVertical className="h-4 w-4 text-gray-400" />
-          </div>
         </div>
       </div>
 
@@ -189,7 +194,7 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 250,
+        delay: 150,
         tolerance: 5,
       },
     }),
