@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { X, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatTime, roundToOneDecimal } from '@/lib/formatTime';
@@ -217,12 +218,14 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Adding...' : 'Add Label'}
-            </Button>
+            <div className="flex gap-2 justify-center">
+              <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+              <Button type="submit" disabled={isSubmitting} size="sm">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>
