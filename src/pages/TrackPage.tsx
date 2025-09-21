@@ -4,11 +4,12 @@ import { createPortal } from 'react-dom';
 import { useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Play, Pause, Plus, Pen } from 'lucide-react';
+import { Play, Pause, Plus, Pen, RotateCcw, Repeat } from 'lucide-react';
 import { useTrackLabels } from '@/hooks/useTrackLabels';
 import { LabelList } from '@/components/LabelList';
 import { Timeline } from '@/components/Timeline';
 import { AddLabelDialog } from '@/components/AddLabelDialog';
+import { ABLoopDialog } from '@/components/ABLoopDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatTime, roundToOneDecimal, formatTimeForDisplay } from '@/lib/formatTime';
@@ -36,6 +37,13 @@ const TrackPage = () => {
   const [editTrackOpen, setEditTrackOpen] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [speedInput, setSpeedInput] = useState('1');
+  const [autoLoop, setAutoLoop] = useState(false);
+  const [abLoopEnabled, setAbLoopEnabled] = useState(false);
+  const [abLoopStart, setAbLoopStart] = useState<number | null>(null);
+  const [abLoopEnd, setAbLoopEnd] = useState<number | null>(null);
+  const [abLoopStartMarkerId, setAbLoopStartMarkerId] = useState<string | null>(null);
+  const [abLoopEndMarkerId, setAbLoopEndMarkerId] = useState<string | null>(null);
+  const [showAbLoopDialog, setShowAbLoopDialog] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
@@ -64,14 +72,32 @@ const TrackPage = () => {
     }
   }, [id, trackUrl]);
 
-  // Load saved playback rate when component mounts
+  // Load saved settings when component mounts
   useEffect(() => {
     if (id) {
+      // Load playback rate
       const savedRate = localStorage.getItem(`track-${id}-playbackRate`);
       if (savedRate) {
         const rate = parseFloat(savedRate);
         if (!isNaN(rate) && rate >= 0.5 && rate <= 2) {
           setPlaybackRate(rate);
+        }
+      }
+
+      // Load auto-loop setting
+      const savedAutoLoop = localStorage.getItem(`track-${id}-autoLoop`);
+      if (savedAutoLoop === 'true') {
+        setAutoLoop(true);
+      }
+
+      // Load A-B loop settings
+      const savedAbLoop = localStorage.getItem(`track-${id}-abLoop`);
+      if (savedAbLoop) {
+        const abLoopData = JSON.parse(savedAbLoop);
+        if (abLoopData.enabled && abLoopData.startMarkerId && abLoopData.endMarkerId) {
+          setAbLoopEnabled(true);
+          setAbLoopStartMarkerId(abLoopData.startMarkerId);
+          setAbLoopEndMarkerId(abLoopData.endMarkerId);
         }
       }
     }
@@ -85,12 +111,36 @@ const TrackPage = () => {
     }
   }, [id, currentTime]);
 
-  // Save playback rate when it changes
+  // Save settings when they change
   useEffect(() => {
     if (id && playbackRate !== 1) {
       localStorage.setItem(`track-${id}-playbackRate`, playbackRate.toString());
     }
   }, [id, playbackRate]);
+
+  useEffect(() => {
+    if (id) {
+      if (autoLoop) {
+        localStorage.setItem(`track-${id}-autoLoop`, 'true');
+      } else {
+        localStorage.removeItem(`track-${id}-autoLoop`);
+      }
+    }
+  }, [id, autoLoop]);
+
+  useEffect(() => {
+    if (id) {
+      if (abLoopEnabled && abLoopStartMarkerId && abLoopEndMarkerId) {
+        localStorage.setItem(`track-${id}-abLoop`, JSON.stringify({
+          enabled: true,
+          startMarkerId: abLoopStartMarkerId,
+          endMarkerId: abLoopEndMarkerId
+        }));
+      } else {
+        localStorage.removeItem(`track-${id}-abLoop`);
+      }
+    }
+  }, [id, abLoopEnabled, abLoopStartMarkerId, abLoopEndMarkerId]);
 
   const { data: trackData } = useQuery({
     queryKey: ['track', id],
@@ -189,7 +239,15 @@ const TrackPage = () => {
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
-      setCurrentTime(roundToOneDecimal(audioRef.current.currentTime));
+      const currentTime = roundToOneDecimal(audioRef.current.currentTime);
+      setCurrentTime(currentTime);
+
+      // Check A-B loop bounds
+      if (abLoopEnabled && abLoopEnd && currentTime >= abLoopEnd) {
+        const startTime = abLoopStart || 0;
+        audioRef.current.currentTime = startTime;
+        setCurrentTime(startTime);
+      }
     }
   };
 
@@ -230,6 +288,53 @@ const TrackPage = () => {
     }
   };
 
+  // Update A-B loop timestamps when labels change
+  useEffect(() => {
+    if (abLoopEnabled && abLoopStartMarkerId && abLoopEndMarkerId && labels) {
+      const startLabel = labels.find(l => l.id === abLoopStartMarkerId);
+      const endLabel = labels.find(l => l.id === abLoopEndMarkerId);
+      
+      if (startLabel && endLabel) {
+        const startTime = startLabel.timestamp_seconds + (startLabel.playback_offset_seconds || 0);
+        setAbLoopStart(startTime);
+        setAbLoopEnd(endLabel.timestamp_seconds);
+      }
+    } else {
+      setAbLoopStart(null);
+      setAbLoopEnd(null);
+    }
+  }, [abLoopEnabled, abLoopStartMarkerId, abLoopEndMarkerId, labels]);
+
+  const handleAutoLoopToggle = () => {
+    setAutoLoop(!autoLoop);
+  };
+
+  const handleAbLoopApply = (startMarkerId: string, endMarkerId: string) => {
+    setAbLoopStartMarkerId(startMarkerId);
+    setAbLoopEndMarkerId(endMarkerId);
+    setAbLoopEnabled(true);
+  };
+
+  const handleAbLoopDisable = () => {
+    setAbLoopEnabled(false);
+    setAbLoopStartMarkerId(null);
+    setAbLoopEndMarkerId(null);
+    setAbLoopStart(null);
+    setAbLoopEnd(null);
+  };
+
+  const handleAudioEnded = () => {
+    setIsPlaying(false);
+    if (autoLoop && !abLoopEnabled) {
+      // Only auto-loop if A-B loop is not active
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play();
+        setIsPlaying(true);
+      }
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
       <Card className="p-6 mb-6">
@@ -253,22 +358,46 @@ const TrackPage = () => {
             disabled={isLoading || !trackUrl}
           />
 
-          <div className="flex items-center gap-2 min-w-fit">
-            <span className="text-sm text-muted-foreground">Speed:</span>
-            <div className="flex items-center">
-              <Input
-                type="number"
-                value={speedInput}
-                onChange={handleSpeedChange}
-                onBlur={handleSpeedBlur}
-                min="0.5"
-                max="2"
-                step="0.05"
-                className="w-16 h-8 text-center text-sm"
-                disabled={isLoading || !trackUrl}
-              />
-              <span className="text-sm text-muted-foreground ml-1">x</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Speed:</span>
+              <div className="flex items-center">
+                <Input
+                  type="number"
+                  value={speedInput}
+                  onChange={handleSpeedChange}
+                  onBlur={handleSpeedBlur}
+                  min="0.5"
+                  max="2"
+                  step="0.05"
+                  className="w-16 h-8 text-center text-sm"
+                  disabled={isLoading || !trackUrl}
+                />
+                <span className="text-sm text-muted-foreground ml-1">x</span>
+              </div>
             </div>
+
+            <Button
+              size="sm"
+              variant={autoLoop ? "default" : "outline"}
+              onClick={handleAutoLoopToggle}
+              disabled={isLoading || !trackUrl}
+              className="h-8"
+            >
+              <RotateCcw className="h-3 w-3 mr-1" />
+              {autoLoop ? "Loop On" : "Loop"}
+            </Button>
+
+            <Button
+              size="sm"
+              variant={abLoopEnabled ? "default" : "outline"}
+              onClick={() => setShowAbLoopDialog(true)}
+              disabled={isLoading || !trackUrl}
+              className="h-8"
+            >
+              <Repeat className="h-3 w-3 mr-1" />
+              {abLoopEnabled ? "A↔B On" : "A↔B"}
+            </Button>
           </div>
         </div>
         
@@ -363,6 +492,16 @@ const TrackPage = () => {
         />
       )}
 
+      <ABLoopDialog
+        open={showAbLoopDialog}
+        onOpenChange={setShowAbLoopDialog}
+        labels={labels || []}
+        onApplyLoop={handleAbLoopApply}
+        onDisableLoop={handleAbLoopDisable}
+        currentStartMarkerId={abLoopStartMarkerId || undefined}
+        currentEndMarkerId={abLoopEndMarkerId || undefined}
+      />
+
       <audio
         ref={audioRef}
         src={trackUrl || undefined}
@@ -370,7 +509,7 @@ const TrackPage = () => {
         onDurationChange={(e) => setDuration(roundToOneDecimal(e.currentTarget.duration))}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
-        onEnded={() => setIsPlaying(false)}
+        onEnded={handleAudioEnded}
       />
     </div>
   );
