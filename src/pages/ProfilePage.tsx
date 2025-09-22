@@ -141,8 +141,8 @@ const ProfilePage = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm mb-4">
             <User className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-4xl font-bold mb-2 text-white">Account Profile</h1>
-          <p className="text-xl opacity-90 text-white">Manage your CueTheMark account</p>
+          <h1 className="text-4xl font-bold mb-2 text-black">Account Profile</h1>
+          <p className="text-xl opacity-90 text-black">Manage your CueTheMark account</p>
         </div>
         
         <div className="grid gap-6 md:grid-cols-2">
