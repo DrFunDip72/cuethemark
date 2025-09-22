@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { handleLogout } from '@/lib/utils';
 
 const ProfilePage = () => {
@@ -17,22 +17,6 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [subscriber, setSubscriber] = useState<{ stripe_customer_id: string | null; subscription_end: string | null; subscription_tier: string | null } | null>(null);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
-
-  // Handle billing success
-  useEffect(() => {
-    if (searchParams.get('billing') === 'success') {
-      toast({
-        title: "Billing Updated",
-        description: "Your subscription has been successfully updated.",
-      });
-      // Remove the query parameter
-      setSearchParams({});
-      // Refresh subscription status
-      checkSubscription();
-    }
-  }, [searchParams, setSearchParams, checkSubscription, toast]);
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,6 +108,8 @@ const ProfilePage = () => {
     if (isDemo()) return "Active Demo";
     return "Active Monthly";
   };
+
+  const navigate = useNavigate();
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
