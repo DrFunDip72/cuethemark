@@ -22,8 +22,8 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    document.title = "Sign Up – MarkTapDance";
-    const desc = "Create your MarkTapDance account — start practicing smarter today.";
+    document.title = "Sign Up – CueTheMark";
+    const desc = "Create your CueTheMark account — start practicing smarter today.";
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     if (!meta) {
       meta = document.createElement("meta");
@@ -80,7 +80,7 @@ export default function SignupPage() {
 
   return (
     <AuthLayout>
-      <h1 className="sr-only">Create your MarkTapDance account</h1>
+      <h1 className="sr-only">Create your CueTheMark account</h1>
       <div className="w-full max-w-md animate-enter">
         <div
           className="rounded-2xl p-[1.5px] shadow-xl"
@@ -91,7 +91,7 @@ export default function SignupPage() {
         >
           <Card className="rounded-2xl bg-card/80 backdrop-blur-md border border-border/40">
             <CardHeader className="text-center">
-              <CardTitle>Join MarkTapDance</CardTitle>
+              <CardTitle>Join CueTheMark</CardTitle>
               <CardDescription>
                 Start your 30-day free trial and practice smarter today.
               </CardDescription>

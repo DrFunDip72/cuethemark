@@ -59,9 +59,9 @@ export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    document.title = "Contact Us – MarkTapDance";
+    document.title = "Contact Us – CueTheMark";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Contact MarkTapDance support. Send us a message and we'll get back to you shortly.");
+    if (meta) meta.setAttribute("content", "Contact CueTheMark support. Send us a message and we'll get back to you shortly.");
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

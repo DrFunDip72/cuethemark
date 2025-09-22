@@ -8,12 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { handleLogout } from '@/lib/utils';
 
 const ProfilePage = () => {
   const { user, session, subscription, checkSubscription } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [subscriber, setSubscriber] = useState<{ stripe_customer_id: string | null; subscription_end: string | null; subscription_tier: string | null } | null>(null);
@@ -86,6 +88,19 @@ const ProfilePage = () => {
     fetchSubscriber();
   }, [user?.id]);
 
+  // Handle successful checkout
+  useEffect(() => {
+    if (searchParams.get('checkout') === 'success') {
+      toast({
+        title: "Payment Successful!",
+        description: "Your subscription has been activated. Refreshing your account status...",
+      });
+      checkSubscription();
+      // Clean up URL
+      navigate('/app/profile', { replace: true });
+    }
+  }, [searchParams, checkSubscription, navigate, toast]);
+
   const isDemo = () => {
     if (!subscription?.subscribed) return false;
     const endStr = subscriber?.subscription_end || subscription?.subscription_end;
@@ -109,7 +124,6 @@ const ProfilePage = () => {
     return "Active Monthly";
   };
 
-  const navigate = useNavigate();
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">

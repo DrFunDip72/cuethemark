@@ -101,13 +101,13 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
         }
 
         toast({
-          title: "Welcome to MarkTapDance!",
+          title: "Welcome to CueTheMark!",
           description: "Your 30-day free trial has started. Enjoy full access!",
         });
         await checkSubscription();
       } else {
         toast({
-          title: "Welcome to MarkTapDance!",
+          title: "Welcome to CueTheMark!",
           description: "Please check your email to confirm your account, then sign in to start your trial.",
         });
       }
@@ -176,7 +176,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle>
-              {isLogin ? 'Welcome Back to MarkTapDance!' : 'Welcome to MarkTapDance'}
+              {isLogin ? 'Welcome Back to CueTheMark!' : 'Welcome to CueTheMark'}
             </CardTitle>
             <CardDescription>
               {isLogin 
@@ -333,7 +333,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
           <CardHeader className="text-center">
             <CardTitle>Subscription Required</CardTitle>
             <CardDescription>
-              Start your subscription to access MarkTapDance
+              Start your subscription to access CueTheMark
             </CardDescription>
             <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground">
               <User className="h-4 w-4" />

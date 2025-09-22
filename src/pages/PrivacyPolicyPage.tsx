@@ -2,9 +2,9 @@ import React, { useEffect } from "react";
 
 export default function PrivacyPolicyPage() {
   useEffect(() => {
-    document.title = "Privacy Policy – MarkTapDance";
+    document.title = "Privacy Policy – CueTheMark";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Read the MarkTapDance privacy policy.");
+    if (meta) meta.setAttribute("content", "Read the CueTheMark privacy policy.");
   }, []);
 
   return (
@@ -18,7 +18,7 @@ export default function PrivacyPolicyPage() {
             <strong>Last updated:</strong> August 9, 2025
           </p>
           <p>
-            MarkTapDance (“we,” “our,” or “us”) respects your privacy and is committed
+            CueTheMark ("we," "our," or "us") respects your privacy and is committed
             to protecting the personal information you share with us. This Privacy
             Policy explains how we collect, use, and protect your information when
             you use our website and application.

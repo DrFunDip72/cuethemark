@@ -39,7 +39,7 @@ const FeedbackPage = () => {
 
   // Simple SEO tags
   useEffect(() => {
-    document.title = 'Send Feedback | MarkTapDance';
+    document.title = 'Send Feedback | CueTheMark';
     const meta = document.querySelector('meta[name="description"]') || document.createElement('meta');
     meta.setAttribute('name', 'description');
     meta.setAttribute('content', 'Send feedback: bug reports, feature requests, and general feedback.');

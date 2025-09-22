@@ -2,9 +2,9 @@ import React, { useEffect } from "react";
 
 export default function TermsPage() {
   useEffect(() => {
-    document.title = "Terms of Service – MarkTapDance";
+    document.title = "Terms of Service – CueTheMark";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Read the MarkTapDance terms of service.");
+    if (meta) meta.setAttribute("content", "Read the CueTheMark terms of service.");
   }, []);
 
   return (
@@ -23,7 +23,7 @@ export default function TermsPage() {
             agree, please do not use our services.
           </p>
 
-          <h2>1. Using MarkTapDance</h2>
+          <h2>1. Using CueTheMark</h2>
           <ul>
             <li>You must be at least 5 years old to use our services.</li>
             <li>You are responsible for your account and any activity under it.</li>
@@ -53,7 +53,7 @@ export default function TermsPage() {
 
           <h2>5. Liability</h2>
           <p>
-            To the fullest extent permitted by law, MarkTapDance is not liable for
+            To the fullest extent permitted by law, CueTheMark is not liable for
             indirect, incidental, or consequential damages arising from your use
             of the service.
           </p>

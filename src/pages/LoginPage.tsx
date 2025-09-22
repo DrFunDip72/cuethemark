@@ -17,8 +17,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    document.title = "Login – MarkTapDance";
-    const desc = "Log in to MarkTapDance to practice smarter and perform your best.";
+    document.title = "Login – CueTheMark";
+    const desc = "Log in to CueTheMark to practice smarter and perform your best.";
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     if (!meta) {
       meta = document.createElement("meta");
@@ -69,7 +69,7 @@ export default function LoginPage() {
 
   return (
     <AuthLayout>
-      <h1 className="sr-only">Login to MarkTapDance</h1>
+      <h1 className="sr-only">Login to CueTheMark</h1>
       <div className="w-full max-w-md animate-enter">
         <div
           className="rounded-2xl p-[1.5px] shadow-xl"
