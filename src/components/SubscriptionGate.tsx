@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, Sparkles } from 'lucide-react';
 
 interface SubscriptionGateProps {
   children: React.ReactNode;
@@ -19,7 +19,29 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
+  const [userName, setUserName] = useState<string>('');
   const { toast } = useToast();
+
+  // Fetch user's name from profiles
+  useEffect(() => {
+    const fetchUserName = async () => {
+      if (user?.id) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (profile?.email) {
+          // Extract first name from email (everything before @ and before any dots/numbers)
+          const emailParts = profile.email.split('@')[0];
+          const firstName = emailParts.split(/[^a-zA-Z]/)[0];
+          setUserName(firstName.charAt(0).toUpperCase() + firstName.slice(1) || 'there');
+        }
+      }
+    };
+    fetchUserName();
+  }, [user]);
 
   // Proactively fetch subscription when user exists but subscription is not yet loaded
   useEffect(() => {
@@ -234,49 +256,70 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
   if (subscription && subscription.subscription_end && !isAdmin) {
     const endDate = new Date(subscription.subscription_end);
     if (new Date() > endDate) {
+      const isTrialExpired = subscription.subscription_tier === 'Trial';
+      const displayName = userName || 'friend';
+      
       return (
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <Card className="w-full max-w-md">
-            <CardHeader className="text-center">
-              <CardTitle>
-                {subscription.subscription_tier === 'Trial' ? 'Free Trial Expired' : 'Subscription Expired'}
-              </CardTitle>
-              <CardDescription>
-                {subscription.subscription_tier === 'Trial' 
-                  ? 'Your 30-day free trial has ended. Subscribe to continue using the application.'
-                  : 'Your subscription has ended. Please renew to continue using the application.'
-                }
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center space-y-3">
-              <Button 
-                onClick={async () => {
-                  try {
-                    const { data: checkout, error: checkoutError } = await supabase.functions.invoke('create-subscription-checkout', {
-                      headers: { Authorization: `Bearer ${session?.access_token}` },
-                    });
-                    if (checkoutError) {
-                      toast({ title: 'Payment Setup Failed', description: 'Please try again.', variant: 'destructive' });
-                      return;
-                    }
-                    if (checkout?.url) window.open(checkout.url, '_blank');
-                  } catch (e: any) {
-                    toast({ title: 'Error', description: e.message, variant: 'destructive' });
+        <div className="min-h-screen relative overflow-hidden text-[hsl(var(--hero-foreground))]">
+          {/* Vibrant gradient backdrop matching landing page */}
+          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[hsl(var(--gradient-hero-start))] via-[hsl(var(--gradient-hero-mid))] to-[hsl(var(--gradient-hero-end))]" />
+          
+          <div className="min-h-screen flex items-center justify-center px-6">
+            <div className="w-full max-w-lg text-center space-y-8 animate-enter">
+              <div className="space-y-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm mb-4">
+                  <Sparkles className="w-8 h-8" />
+                </div>
+                
+                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+                  {isTrialExpired ? `Hey ${displayName}!` : `Welcome back, ${displayName}!`}
+                </h1>
+                
+                <p className="text-xl md:text-2xl opacity-90 leading-relaxed">
+                  {isTrialExpired 
+                    ? `Your free trial was pretty great, wasn't it? 🎵 Ready to keep the music flowing for just $1.99/month?`
+                    : `Time to get back to making those perfect cues! Your subscription expired, but we've saved all your work. 🎯`
                   }
-                }} 
-                className="w-full"
-              >
-                Upgrade Now ($1.99/month)
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={checkSubscription}
-                className="w-full"
-              >
-                Refresh Status
-              </Button>
-            </CardContent>
-          </Card>
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <Button 
+                  onClick={async () => {
+                    try {
+                      const { data: checkout, error: checkoutError } = await supabase.functions.invoke('create-subscription-checkout', {
+                        headers: { Authorization: `Bearer ${session?.access_token}` },
+                      });
+                      if (checkoutError) {
+                        toast({ title: 'Payment Setup Failed', description: 'Please try again.', variant: 'destructive' });
+                        return;
+                      }
+                      if (checkout?.url) window.open(checkout.url, '_blank');
+                    } catch (e: any) {
+                      toast({ title: 'Error', description: e.message, variant: 'destructive' });
+                    }
+                  }} 
+                  size="lg"
+                  className="rounded-full px-8 py-6 text-lg font-semibold w-full max-w-sm"
+                >
+                  {isTrialExpired ? 'Continue for $1.99/month' : 'Renew Subscription'}
+                </Button>
+                
+                <Button 
+                  variant="outline"
+                  onClick={checkSubscription}
+                  size="lg"
+                  className="rounded-full px-8 py-3 w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20"
+                >
+                  Check Status Again
+                </Button>
+              </div>
+
+              <p className="text-sm opacity-70 mt-8">
+                Questions? We're here to help! 💙
+              </p>
+            </div>
+          </div>
         </div>
       );
     }
