@@ -60,7 +60,7 @@ export default function GetStartedPage() {
       if (trialError) throw new Error(trialError.message || "Failed to create trial");
 
       toast.success("Welcome to CueTheMark! Your 30-day free trial has started.");
-      window.location.href = "/"; // go to app
+      window.location.href = "/app/tracks"; // go to app
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Something went wrong. Please try again.");

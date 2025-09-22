@@ -67,7 +67,7 @@ export default function SignupPage() {
 
         await checkSubscription();
         toast({ title: "Welcome!", description: "Your 30-day free trial has started!" });
-        navigate("/");
+        navigate("/app/tracks");
       } else {
         toast({ title: "Confirm your email", description: "Check your inbox, then log in to start your trial." });
       }
