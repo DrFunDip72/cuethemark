@@ -127,41 +127,41 @@ const ProfilePage = () => {
 
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden text-[hsl(var(--hero-foreground))]">
       {/* Vibrant gradient backdrop */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[hsl(var(--gradient-hero-start))] via-[hsl(var(--gradient-hero-mid))] to-[hsl(var(--gradient-hero-end))]" />
       
       <div className="container mx-auto px-6 py-8 max-w-4xl">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm mb-4">
-            <User className="w-8 h-8 text-[hsl(var(--hero-foreground))]" />
+            <User className="w-8 h-8" />
           </div>
-          <h1 className="text-4xl font-bold text-[hsl(var(--hero-foreground))] mb-2">Account Profile</h1>
-          <p className="text-xl opacity-90 text-[hsl(var(--hero-foreground))]">Manage your CueTheMark account</p>
+          <h1 className="text-4xl font-bold mb-2">Account Profile</h1>
+          <p className="text-xl opacity-90">Manage your CueTheMark account</p>
         </div>
         
         <div className="grid gap-6 md:grid-cols-2">
         {/* Account Information */}
         <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardHeader>
-            <CardTitle className="text-[hsl(var(--hero-foreground))]">Account Information</CardTitle>
-            <CardDescription className="text-[hsl(var(--hero-foreground))]/70">Your basic account details</CardDescription>
+            <CardTitle>Account Information</CardTitle>
+            <CardDescription className="opacity-70">Your basic account details</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label className="text-[hsl(var(--hero-foreground))]">Email</Label>
-              <Input value={user?.email || ''} disabled className="bg-white/10 border-white/20 text-[hsl(var(--hero-foreground))]" />
+              <Label>Email</Label>
+              <Input value={user?.email || ''} disabled className="bg-white/10 border-white/20" />
             </div>
             <div>
-              <Label className="text-[hsl(var(--hero-foreground))]">User ID</Label>
-              <Input value={user?.id || ''} disabled className="font-mono text-sm bg-white/10 border-white/20 text-[hsl(var(--hero-foreground))]" />
+              <Label>User ID</Label>
+              <Input value={user?.id || ''} disabled className="font-mono text-sm bg-white/10 border-white/20" />
             </div>
             <div>
-              <Label className="text-[hsl(var(--hero-foreground))]">Account Created</Label>
+              <Label>Account Created</Label>
               <Input 
                 value={user?.created_at ? format(new Date(user.created_at), 'PPP') : ''} 
                 disabled 
-                className="bg-white/10 border-white/20 text-[hsl(var(--hero-foreground))]"
+                className="bg-white/10 border-white/20"
               />
             </div>
           </CardContent>
@@ -170,35 +170,35 @@ const ProfilePage = () => {
         {/* Subscription Status */}
         <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardHeader>
-            <CardTitle className="text-[hsl(var(--hero-foreground))]">Subscription Status</CardTitle>
-            <CardDescription className="text-[hsl(var(--hero-foreground))]/70">Manage your subscription and billing</CardDescription>
+            <CardTitle>Subscription Status</CardTitle>
+            <CardDescription className="opacity-70">Manage your subscription and billing</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-2">
-              <Label className="text-[hsl(var(--hero-foreground))]">Status:</Label>
-              <Badge variant={getSubscriptionBadgeVariant()} className="bg-white/20 text-[hsl(var(--hero-foreground))] border-white/20">
+              <Label>Status:</Label>
+              <Badge variant={getSubscriptionBadgeVariant()} className="bg-white/20 border-white/20">
                 {getSubscriptionStatus()}
               </Badge>
             </div>
             
             {subscription?.subscription_tier && (
               <div>
-                <Label className="text-[hsl(var(--hero-foreground))]">Plan</Label>
+                <Label>Plan</Label>
                 <Input 
                   value={subscription.subscription_tier === 'lifetime' ? 'Lifetime Access' : (isDemo() ? 'Demo (1 day trial)' : 'Monthly ($1.99/month)')} 
                   disabled 
-                  className="bg-white/10 border-white/20 text-[hsl(var(--hero-foreground))]"
+                  className="bg-white/10 border-white/20"
                 />
               </div>
             )}
             
             {subscription?.subscription_end && subscription.subscription_tier !== 'lifetime' && (
               <div>
-                <Label className="text-[hsl(var(--hero-foreground))]">{isDemo() ? 'Demo ends on' : 'Next Billing Date'}</Label>
+                <Label>{isDemo() ? 'Demo ends on' : 'Next Billing Date'}</Label>
                 <Input 
                   value={format(new Date(subscription.subscription_end), 'PPP')} 
                   disabled 
-                  className="bg-white/10 border-white/20 text-[hsl(var(--hero-foreground))]"
+                  className="bg-white/10 border-white/20"
                 />
               </div>
             )}
@@ -209,7 +209,7 @@ const ProfilePage = () => {
                 variant="outline" 
                 size="sm"
                 disabled={loading}
-                className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 text-[hsl(var(--hero-foreground))]"
+                className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20"
               >
                 Refresh Status
               </Button>
@@ -219,7 +219,7 @@ const ProfilePage = () => {
                   onClick={handleManageBilling}
                   disabled={loading}
                   size="sm"
-                  className="bg-white/20 hover:bg-white/30 text-[hsl(var(--hero-foreground))]"
+                  className="bg-white/20 hover:bg-white/30"
                 >
                   Manage Billing
                 </Button>
@@ -231,13 +231,13 @@ const ProfilePage = () => {
         {/* Security Settings */}
         <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardHeader>
-            <CardTitle className="text-[hsl(var(--hero-foreground))]">Security</CardTitle>
-            <CardDescription className="text-[hsl(var(--hero-foreground))]/70">Update your account security settings</CardDescription>
+            <CardTitle>Security</CardTitle>
+            <CardDescription className="opacity-70">Update your account security settings</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleUpdatePassword} className="space-y-4">
               <div>
-                <Label htmlFor="newPassword" className="text-[hsl(var(--hero-foreground))]">New Password</Label>
+                <Label htmlFor="newPassword">New Password</Label>
                 <Input
                   id="newPassword"
                   type="password"
@@ -245,13 +245,13 @@ const ProfilePage = () => {
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Enter new password"
                   disabled={loading}
-                  className="bg-white/10 border-white/20 text-[hsl(var(--hero-foreground))] placeholder:text-[hsl(var(--hero-foreground))]/50"
+                  className="bg-white/10 border-white/20 placeholder:opacity-50"
                 />
               </div>
               <Button 
                 type="submit" 
                 disabled={loading || !newPassword.trim()}
-                className="w-full bg-white/20 hover:bg-white/30 text-[hsl(var(--hero-foreground))] border-white/20"
+                className="w-full bg-white/20 hover:bg-white/30 border-white/20"
               >
                 {loading ? 'Updating...' : 'Update Password'}
               </Button>
@@ -262,20 +262,20 @@ const ProfilePage = () => {
         {/* Account Actions */}
         <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardHeader>
-            <CardTitle className="text-[hsl(var(--hero-foreground))]">Account Actions</CardTitle>
-            <CardDescription className="text-[hsl(var(--hero-foreground))]/70">Manage your account preferences</CardDescription>
+            <CardTitle>Account Actions</CardTitle>
+            <CardDescription className="opacity-70">Manage your account preferences</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button 
               onClick={() => handleLogout(navigate)} 
               variant="outline"
-              className="w-full bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 text-[hsl(var(--hero-foreground))]"
+              className="w-full bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20"
             >
               Sign Out
             </Button>
             
             <div className="pt-4 border-t border-white/20">
-              <p className="text-sm text-[hsl(var(--hero-foreground))]/70 mb-2">
+              <p className="text-sm opacity-70 mb-2">
                 Need to cancel your subscription or delete your account? Use the "Manage Billing" button above to access all account management options.
               </p>
             </div>
