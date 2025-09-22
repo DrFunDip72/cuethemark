@@ -323,89 +323,92 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
 
   // Show subscription options for authenticated users without subscription
   if (!subscription?.subscribed) {
+    const displayName = userName || 'friend';
+    
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle>Subscription Required</CardTitle>
-            <CardDescription>
-              Start your subscription to access CueTheMark
-            </CardDescription>
-            <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground">
-              <User className="h-4 w-4" />
-              <span>Logged in as: {user?.email}</span>
+      <div className="min-h-screen relative overflow-hidden text-[hsl(var(--hero-foreground))]">
+        {/* Vibrant gradient backdrop matching landing page */}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[hsl(var(--gradient-hero-start))] via-[hsl(var(--gradient-hero-mid))] to-[hsl(var(--gradient-hero-end))]" />
+        
+        <div className="min-h-screen flex items-center justify-center px-6">
+          <div className="w-full max-w-lg text-center space-y-8 animate-enter">
+            <div className="space-y-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm mb-4">
+                <Sparkles className="w-8 h-8" />
+              </div>
+              
+              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+                Hey {displayName}!
+              </h1>
+              
+              <p className="text-xl md:text-2xl opacity-90 leading-relaxed">
+                Ready to unlock all the power of CueTheMark? 🎵 Start your subscription for just $1.99/month!
+              </p>
+              
+              <div className="flex items-center justify-center gap-2 mt-4 text-sm opacity-70">
+                <User className="h-4 w-4" />
+                <span>Logged in as: {user?.email}</span>
+              </div>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button 
-              onClick={async () => {
-                setAuthLoading(true);
-                try {
-                  const { data: checkout, error: checkoutError } = await supabase.functions.invoke('create-subscription-checkout', {
-                    headers: {
-                      Authorization: `Bearer ${session?.access_token}`,
-                    },
-                  });
 
-                  if (checkoutError) {
-                    console.error('Checkout error:', checkoutError);
-                    toast({
-                      title: "Payment Setup Failed",
-                      description: "Failed to setup payment. Please try again.",
-                      variant: "destructive"
-                    });
-                    return;
-                  }
-
-                  if (checkout.url) {
-                    window.open(checkout.url, '_blank');
-                    toast({
-                      title: "Redirecting to Payment",
-                      description: "Complete your subscription setup in the new tab.",
-                    });
-                  }
-                } catch (error: any) {
-                  toast({
-                    title: "Error",
-                    description: error.message,
-                    variant: "destructive"
-                  });
-                } finally {
-                  setAuthLoading(false);
-                }
-              }}
-              className="w-full"
-              disabled={authLoading}
-            >
-              {authLoading ? 'Setting up payment...' : 'Subscribe ($1.99/month)'}
-            </Button>
-            
-            
-            <div className="flex gap-2">
+            <div className="space-y-4">
               <Button 
-                variant="outline"
-                onClick={checkSubscription}
-                className="flex-1"
-              >
-                Refresh Status
-              </Button>
-              <Button 
-                variant="ghost"
-                size="icon"
                 onClick={async () => {
-                  await supabase.auth.signOut();
-                  toast({
-                    title: "Logged out",
-                    description: "You've been logged out successfully."
-                  });
-                }}
-                className="shrink-0"
+                  setAuthLoading(true);
+                  try {
+                    const { data: checkout, error: checkoutError } = await supabase.functions.invoke('create-subscription-checkout', {
+                      headers: { Authorization: `Bearer ${session?.access_token}` },
+                    });
+                    if (checkoutError) {
+                      toast({ title: 'Payment Setup Failed', description: 'Please try again.', variant: 'destructive' });
+                      return;
+                    }
+                    if (checkout?.url) window.open(checkout.url, '_blank');
+                  } catch (e: any) {
+                    toast({ title: 'Error', description: e.message, variant: 'destructive' });
+                  } finally {
+                    setAuthLoading(false);
+                  }
+                }} 
+                size="lg"
+                className="rounded-full px-8 py-6 text-lg font-semibold w-full max-w-sm"
+                disabled={authLoading}
               >
-                <LogOut className="h-4 w-4" />
+                {authLoading ? 'Setting up payment...' : 'Subscribe for $1.99/month'}
               </Button>
+              
+              <div className="flex gap-2 justify-center">
+                <Button 
+                  variant="outline"
+                  onClick={checkSubscription}
+                  size="lg"
+                  className="rounded-full px-8 py-3 bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20"
+                >
+                  Check Status Again
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="lg"
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    toast({
+                      title: "Logged out",
+                      description: "You've been logged out successfully."
+                    });
+                  }}
+                  className="rounded-full px-8 py-3 bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+
+            <p className="text-sm opacity-70 mt-8">
+              Questions? We're here to help! 💙
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
