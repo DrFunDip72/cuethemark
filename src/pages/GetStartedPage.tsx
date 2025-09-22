@@ -86,18 +86,15 @@ export default function GetStartedPage() {
         <section className="grid md:grid-cols-2 gap-8 items-center">
           <div className="space-y-4">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
-              Start your 30-day free trial — practice smarter, not longer.
+              Start your free trial
             </h1>
-            <p className="text-lg opacity-90">
-              Start your 30-day free trial. Only $1.99/month afterwards. Cancel anytime.
-            </p>
           </div>
 
           <Card className="backdrop-blur bg-white/80 dark:bg-black/40 shadow-lg">
             <CardHeader>
               <CardTitle>Create your account</CardTitle>
               <CardDescription>
-                Start your 30-day free trial immediately. You'll be prompted to add payment info when your trial ends.
+                No payment required upfront.
               </CardDescription>
             </CardHeader>
             <CardContent>
