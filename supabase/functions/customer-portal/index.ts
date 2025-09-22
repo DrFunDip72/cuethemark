@@ -66,12 +66,30 @@ serve(async (req) => {
 
     logStep("Found or created Stripe customer", { customerId });
 
-    // Use direct billing portal URL instead of creating Stripe portal session
-    const billingUrl = "https://billing.stripe.com/p/login/test_cNi00je5L5kjaaZfs8enS00";
-    
-    logStep("Returning direct billing portal URL", { url: billingUrl });
+    // Create subscription checkout session for billing management
+    const sessionConfig = {
+      customer: customerId,
+      mode: "subscription" as const,
+      allow_promotion_codes: true,
+      line_items: [{
+        price_data: {
+          currency: "usd",
+          product_data: { name: "CueTheMark" },
+          unit_amount: 199, // $1.99
+          recurring: { interval: "month" as const },
+        },
+        quantity: 1,
+      }],
+      success_url: `${req.headers.get("origin")}/app/profile?billing=success`,
+      cancel_url: `${req.headers.get("origin")}/app/profile`,
+    };
 
-    return new Response(JSON.stringify({ url: billingUrl }), {
+    logStep("Creating Stripe checkout session for billing management");
+    const session = await stripe.checkout.sessions.create(sessionConfig);
+    
+    logStep("Checkout session created", { sessionId: session.id, url: session.url });
+
+    return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
