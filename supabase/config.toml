@@ -45,6 +45,8 @@ port = 54327
 
 [functions.create-demo-subscription]
 
+[functions.create-trial-subscription]
+
 [functions.promote-admin]
 
 [functions.demo-signup]

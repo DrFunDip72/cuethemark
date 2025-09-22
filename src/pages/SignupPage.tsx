@@ -41,7 +41,7 @@ export default function SignupPage() {
     link.setAttribute("href", window.location.href);
   }, []);
 
-  const handlePaidSignup = async () => {
+  const handleTrialSignup = async () => {
     if (!email || !password) {
       toast({ title: "Missing info", description: "Email and password are required", variant: "destructive" });
       return;
@@ -58,64 +58,21 @@ export default function SignupPage() {
       });
       if (error) throw error;
 
-      // If session exists, proceed to checkout. If not, ask for email confirmation
+      // If session exists, create trial and redirect to app
       if (data.session) {
-        const { data: checkout } = await supabase.functions.invoke("create-subscription-checkout", {
+        const { error: trialError } = await supabase.functions.invoke("create-trial-subscription", {
           headers: { Authorization: `Bearer ${data.session.access_token}` },
         });
-        const checkoutUrl = checkout?.url ?? null;
+        if (trialError) throw trialError;
 
-        if (checkoutUrl) {
-          window.open(checkoutUrl, "_blank");
-          toast({ title: "Almost there", description: "Complete payment in the new tab" });
-        }
+        await checkSubscription();
+        toast({ title: "Welcome!", description: "Your 30-day free trial has started!" });
+        navigate("/");
       } else {
-        toast({ title: "Confirm your email", description: "Check your inbox, then log in to complete payment." });
+        toast({ title: "Confirm your email", description: "Check your inbox, then log in to start your trial." });
       }
     } catch (e: any) {
       toast({ title: "Signup failed", description: e.message, variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDemo = async () => {
-    if (!email || !password) {
-      toast({ title: "Missing info", description: "Email and password are required for the demo", variant: "destructive" });
-      return;
-    }
-    setLoading(true);
-    try {
-      const { data: resp, error: demoErr } = await supabase.functions.invoke("demo-signup", {
-        body: { email, password },
-      });
-      if (demoErr) throw demoErr;
-
-      if (resp?.alreadyExists) {
-        toast({ title: "Account exists", description: "Please log in to continue." });
-        navigate(`/login?email=${encodeURIComponent(email)}`);
-        return;
-      }
-
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (signInError) throw signInError;
-
-      const token = signInData.session?.access_token;
-      if (!token) throw new Error("Missing session after demo login");
-
-      const { error: subErr } = await supabase.functions.invoke("create-demo-subscription", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (subErr) throw subErr;
-
-      await checkSubscription();
-      toast({ title: "Demo activated", description: "You have 1 day of free access" });
-      navigate("/app");
-    } catch (e: any) {
-      toast({ title: "Demo failed", description: e.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -136,7 +93,7 @@ export default function SignupPage() {
             <CardHeader className="text-center">
               <CardTitle>Join MarkTapDance</CardTitle>
               <CardDescription>
-                Kickstart focused practice and hit your performance goals faster.
+                Start your 30-day free trial and practice smarter today.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -153,11 +110,8 @@ export default function SignupPage() {
                 <Input id="referredBy" value={referredBy} onChange={(e) => setReferredBy(e.target.value)} placeholder="Name of person who referred you" />
               </div>
               <div className="space-y-2">
-                <Button className="w-full" disabled={loading} onClick={handlePaidSignup}>
-                  {loading ? "Processing..." : "Sign Up & Pay"}
-                </Button>
-                <Button className="w-full" variant="outline" disabled={loading} onClick={handleDemo}>
-                  {loading ? "Setting up demo..." : "Demo for a Day (Free)"}
+                <Button className="w-full" disabled={loading} onClick={handleTrialSignup}>
+                  {loading ? "Starting trial..." : "Start 30-Day Free Trial"}
                 </Button>
                 <Button className="w-full" variant="ghost" onClick={() => navigate("/login")}>
                   Already have an account? Log in

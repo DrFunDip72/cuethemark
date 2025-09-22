@@ -21,7 +21,7 @@ export default function GetStartedPage() {
     if (meta) {
       meta.setAttribute(
         "content",
-        "Create your CueTheMark account. $1.99/month after your first month free. Enter payment info on the next step."
+        "Create your CueTheMark account. Start your 30-day free trial today. No payment required upfront."
       );
     }
   }, []);
@@ -48,16 +48,19 @@ export default function GetStartedPage() {
       });
       if (error) throw error;
 
-      // Proceed to Stripe Checkout regardless of email confirmation setting
-      const { data: sessionData, error: funcErr } = await supabase.functions.invoke(
-        "create-subscription-checkout"
+      // Create 30-day trial subscription and redirect to app
+      const { error: trialError } = await supabase.functions.invoke(
+        "create-trial-subscription",
+        {
+          headers: {
+            Authorization: `Bearer ${data.session?.access_token}`,
+          },
+        }
       );
-      if (funcErr) throw new Error(funcErr.message || "Failed to start checkout");
+      if (trialError) throw new Error(trialError.message || "Failed to create trial");
 
-      const url = (sessionData as any)?.url;
-      if (!url) throw new Error("No checkout URL returned");
-
-      window.location.href = url; // go to Stripe Checkout
+      toast.success("Welcome to CueTheMark! Your 30-day free trial has started.");
+      window.location.href = "/"; // go to app
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Something went wrong. Please try again.");
@@ -83,10 +86,10 @@ export default function GetStartedPage() {
         <section className="grid md:grid-cols-2 gap-8 items-center">
           <div className="space-y-4">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
-              Practice smarter, not longer — set your marks and hit your cue every time.
+              Start your 30-day free trial — practice smarter, not longer.
             </h1>
             <p className="text-lg opacity-90">
-              Only $1.99/month after your first month free. Cancel anytime.
+              Start your 30-day free trial. Only $1.99/month afterwards. Cancel anytime.
             </p>
           </div>
 
@@ -94,7 +97,7 @@ export default function GetStartedPage() {
             <CardHeader>
               <CardTitle>Create your account</CardTitle>
               <CardDescription>
-                Subscription is $1.99/month after your first month free. You'll enter payment info on the next step.
+                Start your 30-day free trial immediately. You'll be prompted to add payment info when your trial ends.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -116,7 +119,7 @@ export default function GetStartedPage() {
                   <Input id="referredBy" value={referredBy} onChange={(e) => setReferredBy(e.target.value)} placeholder="Name of person who referred you" />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Continuing..." : "Continue to Payment"}
+                  {loading ? "Starting trial..." : "Start Free Trial"}
                 </Button>
                 <p className="text-xs opacity-80">
                   By continuing, you agree to our <Link to="/terms" className="underline">Terms</Link> and <Link to="/privacy" className="underline">Privacy Policy</Link>.
