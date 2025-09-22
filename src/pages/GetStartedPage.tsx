@@ -103,7 +103,7 @@ export default function GetStartedPage() {
               Start your free trial
             </h1>
             <p className="text-lg opacity-90">
-              Join musicians who are mastering their craft with precision practice tools.
+              Start practicing better. Today.
             </p>
           </div>
 
