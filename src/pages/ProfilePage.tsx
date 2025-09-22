@@ -127,17 +127,22 @@ const ProfilePage = () => {
 
 
   return (
-    <div className="min-h-screen relative overflow-hidden text-[hsl(var(--hero-foreground))]">
+    <div className="min-h-screen w-full relative overflow-hidden">
       {/* Vibrant gradient backdrop */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[hsl(var(--gradient-hero-start))] via-[hsl(var(--gradient-hero-mid))] to-[hsl(var(--gradient-hero-end))]" />
+      <div 
+        className="absolute inset-0 -z-10"
+        style={{
+          backgroundImage: "linear-gradient(135deg, hsl(var(--gradient-hero-start)), hsl(var(--gradient-hero-mid)) 40%, hsl(var(--gradient-hero-end)))"
+        }}
+      />
       
-      <div className="container mx-auto px-6 py-8 max-w-4xl">
-        <div className="text-center mb-8">
+      <div className="container mx-auto px-6 pt-4 pb-8 max-w-4xl text-white">
+        <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm mb-4">
-            <User className="w-8 h-8" />
+            <User className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-4xl font-bold mb-2">Account Profile</h1>
-          <p className="text-xl opacity-90">Manage your CueTheMark account</p>
+          <h1 className="text-4xl font-bold mb-2 text-white">Account Profile</h1>
+          <p className="text-xl opacity-90 text-white">Manage your CueTheMark account</p>
         </div>
         
         <div className="grid gap-6 md:grid-cols-2">
@@ -157,18 +162,18 @@ const ProfilePage = () => {
               <CardContent className="space-y-4">
                 <div>
                   <Label>Email</Label>
-                  <Input value={user?.email || ''} disabled className="bg-white/10 border-white/20" />
+                  <Input value={user?.email || ''} disabled className="bg-white/20 border-white/30 text-foreground font-medium" />
                 </div>
                 <div>
                   <Label>User ID</Label>
-                  <Input value={user?.id || ''} disabled className="font-mono text-sm bg-white/10 border-white/20" />
+                  <Input value={user?.id || ''} disabled className="font-mono text-sm bg-white/20 border-white/30 text-foreground" />
                 </div>
                 <div>
                   <Label>Account Created</Label>
                   <Input 
                     value={user?.created_at ? format(new Date(user.created_at), 'PPP') : ''} 
                     disabled 
-                    className="bg-white/10 border-white/20"
+                    className="bg-white/20 border-white/30 text-foreground font-medium"
                   />
                 </div>
               </CardContent>
@@ -202,7 +207,7 @@ const ProfilePage = () => {
                     <Input 
                       value={subscription.subscription_tier === 'lifetime' ? 'Lifetime Access' : (isDemo() ? 'Demo (1 day trial)' : 'Monthly ($1.99/month)')} 
                       disabled 
-                      className="bg-white/10 border-white/20"
+                      className="bg-white/20 border-white/30 text-foreground font-medium"
                     />
                   </div>
                 )}
@@ -213,7 +218,7 @@ const ProfilePage = () => {
                     <Input 
                       value={format(new Date(subscription.subscription_end), 'PPP')} 
                       disabled 
-                      className="bg-white/10 border-white/20"
+                      className="bg-white/20 border-white/30 text-foreground font-medium"
                     />
                   </div>
                 )}
@@ -221,7 +226,7 @@ const ProfilePage = () => {
                 <div className="flex gap-2">
                   <Button 
                     onClick={checkSubscription} 
-                    variant="green"
+                    variant="purple"
                     size="sm"
                     disabled={loading}
                   >
@@ -233,7 +238,7 @@ const ProfilePage = () => {
                       onClick={handleManageBilling}
                       disabled={loading}
                       size="sm"
-                      variant="purple"
+                      variant="green"
                     >
                       Manage Billing
                     </Button>
@@ -267,7 +272,7 @@ const ProfilePage = () => {
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Enter new password"
                       disabled={loading}
-                      className="bg-white/10 border-white/20 placeholder:opacity-50"
+                      className="bg-white/20 border-white/30 placeholder:opacity-70 text-foreground"
                     />
                   </div>
                   <Button 
