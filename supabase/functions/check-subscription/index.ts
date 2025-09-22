@@ -57,6 +57,28 @@ serve(async (req) => {
       let expiredDemoEnd: string | null = null;
       if (existingSubscription) {
         logStep("Found existing subscription record", existingSubscription);
+        
+        // Check for valid Trial subscription
+        if (existingSubscription.subscription_tier === "Trial" && existingSubscription.subscription_end) {
+          const endDate = new Date(existingSubscription.subscription_end);
+          const now = new Date();
+          if (endDate > now) {
+            logStep("Found valid trial subscription");
+            return new Response(JSON.stringify({
+              subscribed: true,
+              subscription_tier: "Trial",
+              subscription_end: existingSubscription.subscription_end
+            }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 200,
+            });
+          } else {
+            logStep("Trial subscription expired");
+            expiredDemoEnd = existingSubscription.subscription_end;
+          }
+        }
+        
+        // Check for valid Demo subscription
         if (existingSubscription.subscription_tier === "Demo" && existingSubscription.subscription_end) {
           const endDate = new Date(existingSubscription.subscription_end);
           const now = new Date();
