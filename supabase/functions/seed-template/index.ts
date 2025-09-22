@@ -6,8 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Admin template track to clone for each new user
-const TEMPLATE_TRACK_ID = "08185e53-8aba-48e3-8f16-c515a7a79782";
+// System template track to clone for each new user (independent of admin account)
+const TEMPLATE_TRACK_ID = "00000000-0000-0000-0000-000000000001";
 
 function log(step: string, details?: Record<string, unknown>) {
   console.log(`[SEED-TEMPLATE] ${step}${details ? " | " + JSON.stringify(details) : ""}`);
