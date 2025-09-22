@@ -70,7 +70,7 @@ serve(async (req) => {
 
     const body = {
       personalizations: [ { to: [ { email: to } ] } ],
-      from: { email: 'no-reply@marktapdance.app', name: 'MarkTapDance' },
+      from: { email: 'no-reply@cuethemark.app', name: 'CueTheMark' },
       subject,
       content: [
         { type: 'text/plain', value: text },

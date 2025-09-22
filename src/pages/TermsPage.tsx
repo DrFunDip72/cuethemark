@@ -18,7 +18,7 @@ export default function TermsPage() {
             <strong>Last updated:</strong> August 9, 2025
           </p>
           <p>
-            Welcome to MarkTapDance (“we,” “our,” or “us”). By using our website
+            Welcome to CueTheMark (“we,” “our,” or “us”). By using our website
             or application, you agree to these Terms of Service. If you do not
             agree, please do not use our services.
           </p>
