@@ -63,7 +63,21 @@ export default function GetStartedPage() {
       window.location.href = "/app/tracks"; // go to app
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Something went wrong. Please try again.");
+      
+      // Provide better error messages for common scenarios
+      let errorMessage = "Something went wrong. Please try again.";
+      
+      if (err.message?.includes("already registered") || err.message?.includes("User already registered")) {
+        errorMessage = "An account with this email already exists. Try logging in instead.";
+      } else if (err.message?.includes("Invalid email")) {
+        errorMessage = "Please enter a valid email address.";
+      } else if (err.message?.includes("Password")) {
+        errorMessage = "Password must be at least 6 characters long.";
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -84,10 +98,13 @@ export default function GetStartedPage() {
 
       <main className="px-6 py-8 md:py-12 max-w-6xl mx-auto">
         <section className="grid md:grid-cols-2 gap-8 items-center">
-          <div className="space-y-4">
+          <div className="space-y-4 text-center md:text-left">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
               Start your free trial
             </h1>
+            <p className="text-lg opacity-90">
+              Join musicians who are mastering their craft with precision practice tools.
+            </p>
           </div>
 
           <Card className="backdrop-blur bg-white/80 dark:bg-black/40 shadow-lg">
