@@ -50,16 +50,6 @@ serve(async (req) => {
         metadata: { supabase_user_id: user.id },
       });
       customerId = newCustomer.id;
-      // Persist the customer id for this user (no subscription yet)
-      await supabaseClient.from("subscribers").upsert({
-        email: user.email,
-        user_id: user.id,
-        stripe_customer_id: customerId,
-        subscribed: false,
-        subscription_tier: null,
-        subscription_end: null,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'email' });
     } else {
       customerId = customers.data[0].id;
     }
