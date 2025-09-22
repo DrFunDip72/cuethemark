@@ -165,10 +165,6 @@ const ProfilePage = () => {
                   <Input value={user?.email || ''} disabled className="bg-white/20 border-white/30 text-foreground font-medium" />
                 </div>
                 <div>
-                  <Label>User ID</Label>
-                  <Input value={user?.id || ''} disabled className="font-mono text-sm bg-white/20 border-white/30 text-foreground" />
-                </div>
-                <div>
                   <Label>Account Created</Label>
                   <Input 
                     value={user?.created_at ? format(new Date(user.created_at), 'PPP') : ''} 
