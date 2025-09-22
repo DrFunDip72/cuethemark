@@ -199,7 +199,7 @@ const ProfilePage = () => {
                 Refresh Status
               </Button>
               
-              {subscription?.subscribed && subscription.subscription_tier !== 'lifetime' && !isDemo() && (
+              {subscription?.subscribed && subscription.subscription_tier !== 'lifetime' && !isDemo() && subscriber?.stripe_customer_id && (
                 <Button 
                   onClick={handleManageBilling}
                   disabled={loading}

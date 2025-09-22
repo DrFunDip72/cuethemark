@@ -47,7 +47,6 @@ export default function LoginPage() {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      toast({ title: "Welcome back!" });
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.access_token) {

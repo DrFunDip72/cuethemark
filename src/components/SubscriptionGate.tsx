@@ -142,10 +142,6 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
       
       if (error) throw error;
       
-      toast({
-        title: "Welcome back!",
-        description: "You've been logged in successfully"
-      });
       await checkSubscription();
     } catch (error: any) {
       toast({
