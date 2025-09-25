@@ -131,16 +131,7 @@ export const ABLoopDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            A-B Loop Setup
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onOpenChange(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </DialogTitle>
+          <DialogTitle>A-B Loop Setup</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
