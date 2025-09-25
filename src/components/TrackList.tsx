@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Pencil, ArrowUp, ArrowDown } from 'lucide-react';
+import { Pencil, ArrowUp, ArrowDown, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { EditTrackDialog } from '@/components/EditTrackDialog';
 import { useAuth } from '@/contexts/AuthContext';
@@ -39,15 +39,17 @@ const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onMo
   canMoveDown: boolean;
 }) => {
   return (
-    <div className="p-4 rounded-lg border border-gray-200 hover:border-primary transition-colors bg-white">
-      <div className="flex justify-between items-center">
+    <div className="group relative p-6 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 hover:border-white/40 hover:bg-white/15 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl shadow-lg">
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[hsl(var(--gradient-hero-start))] via-[hsl(var(--gradient-hero-mid))] to-[hsl(var(--gradient-hero-end))] opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+      
+      <div className="relative flex justify-between items-center">
         <Link
           to={`/app/tracks/${track.id}`}
-          className="block flex-1 min-w-0"
+          className="block flex-1 min-w-0 group-hover:text-white transition-colors duration-200"
         >
           <div className="min-w-0 flex-1">
-            <h3 className="font-medium truncate">{track.filename}</h3>
-            <p className="text-sm text-gray-500">
+            <h3 className="font-semibold text-lg text-[hsl(var(--hero-foreground))] truncate group-hover:text-white transition-colors duration-200">{track.filename}</h3>
+            <p className="text-sm text-[hsl(var(--hero-foreground))]/70 group-hover:text-white/80 transition-colors duration-200">
               {new Date(track.uploaded_at).toLocaleDateString()}
             </p>
           </div>
@@ -58,6 +60,7 @@ const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onMo
             size="icon" 
             variant="ghost" 
             onClick={(e) => onNavigate(track.id, e)}
+            className="text-[hsl(var(--hero-foreground))] hover:text-white hover:bg-white/20 border border-white/20 hover:border-white/40 transition-all duration-200"
           >
             <Pencil className="h-4 w-4" />
           </Button>
@@ -67,7 +70,7 @@ const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onMo
               variant="ghost" 
               onClick={() => onMoveUp(track.id)}
               disabled={!canMoveUp}
-              className="h-8 w-8 p-0 disabled:opacity-50 md:h-6 md:w-6"
+              className="h-8 w-8 p-0 disabled:opacity-50 md:h-6 md:w-6 text-[hsl(var(--hero-foreground))] hover:text-white hover:bg-white/20 border border-white/20 hover:border-white/40 transition-all duration-200"
             >
               <ArrowUp className="h-4 w-4 md:h-3 md:w-3" />
             </Button>
@@ -76,7 +79,7 @@ const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onMo
               variant="ghost" 
               onClick={() => onMoveDown(track.id)}
               disabled={!canMoveDown}
-              className="h-8 w-8 p-0 disabled:opacity-50 md:h-6 md:w-6"
+              className="h-8 w-8 p-0 disabled:opacity-50 md:h-6 md:w-6 text-[hsl(var(--hero-foreground))] hover:text-white hover:bg-white/20 border border-white/20 hover:border-white/40 transition-all duration-200"
             >
               <ArrowDown className="h-4 w-4 md:h-3 md:w-3" />
             </Button>
@@ -84,21 +87,26 @@ const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onMo
         </div>
       </div>
 
-      <Accordion type="single" collapsible className="w-full mt-2">
+      <Accordion type="single" collapsible className="w-full mt-4">
         <AccordionItem value={`notes-${track.id}`} className="border-0">
-          <AccordionTrigger className="py-2 px-0">
-            <span className="text-sm text-gray-500">Notes</span>
+          <AccordionTrigger className="py-3 px-0 hover:no-underline">
+            <span className="text-sm font-medium text-[hsl(var(--hero-foreground))]/80 group-hover:text-white/90 transition-colors duration-200">Notes</span>
           </AccordionTrigger>
           <AccordionContent>
-            <div className="space-y-2">
+            <div className="space-y-3 pt-2">
               <Textarea 
                 value={notes[track.id] || ''} 
                 onChange={(e) => onNotesChange(track.id, e.target.value)}
                 placeholder="Add notes about this track... (auto-saves)"
-                className="min-h-[100px] text-sm"
+                className="min-h-[100px] text-sm bg-white/10 border-white/20 text-[hsl(var(--hero-foreground))] placeholder:text-[hsl(var(--hero-foreground))]/50 focus:border-white/40 focus:bg-white/15 transition-all duration-200"
               />
-              <div className="text-xs text-gray-500">
-                {saveTimeouts[track.id] ? '⏳ Saving...' : '✓ Auto-saved'}
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full transition-colors duration-200 ${
+                  saveTimeouts[track.id] ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'
+                }`} />
+                <span className="text-xs text-[hsl(var(--hero-foreground))]/70">
+                  {saveTimeouts[track.id] ? 'Saving...' : 'Auto-saved'}
+                </span>
               </div>
             </div>
           </AccordionContent>
@@ -244,19 +252,27 @@ export const TrackList = () => {
   };
 
   if (!user) {
-    return <div className="text-center py-4 text-gray-500">Please log in to view your tracks</div>;
+    return <div className="text-center py-8 text-[hsl(var(--hero-foreground))]/70">Please log in to view your tracks</div>;
   }
 
   if (isLoading) {
-    return <div className="text-center py-4">Loading tracks...</div>;
+    return <div className="text-center py-8 text-[hsl(var(--hero-foreground))]">Loading tracks...</div>;
   }
 
   if (error) {
-    return <div className="text-center py-4 text-red-500">Failed to load tracks</div>;
+    return <div className="text-center py-8 text-red-400">Failed to load tracks</div>;
   }
 
   if (!tracks?.length) {
-    return <div className="text-center py-4 text-gray-500">No tracks uploaded yet</div>;
+    return (
+      <div className="text-center py-12">
+        <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-8 max-w-md mx-auto">
+          <Upload className="h-12 w-12 text-[hsl(var(--hero-foreground))]/50 mx-auto mb-4" />
+          <p className="text-[hsl(var(--hero-foreground))]/70 text-lg">No tracks uploaded yet</p>
+          <p className="text-[hsl(var(--hero-foreground))]/50 text-sm mt-2">Click "Upload Track" to get started!</p>
+        </div>
+      </div>
+    );
   }
 
   return (

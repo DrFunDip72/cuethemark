@@ -429,244 +429,250 @@ const TrackPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
-      {/* Track title and view controls */}
-      <div className="mb-6">
-        {/* Title row - right aligned on mobile and desktop */}
-        <div className="flex items-start gap-2 min-w-0 flex-1">
-          <h1 className="text-xl sm:text-2xl font-bold leading-tight break-words">
-            {trackData?.filename || "Track Name"}
-          </h1>
-          <Button 
-            size="icon" 
-            variant="ghost"
-            onClick={() => setEditTrackOpen(true)}
-            className="flex-shrink-0 mt-1"
-          >
-            <Pen className="h-4 w-4" />
-          </Button>
-        </div>
-        
-        {/* Timeline/Labels buttons - centered and full width on mobile, normal on desktop */}
-        <div className="flex gap-2 justify-center sm:justify-end">
-          <Button
-            variant={view === 'timeline' ? 'default' : 'outline'}
-            onClick={() => setView('timeline')}
-            size="sm"
-            className="flex-1 sm:flex-none"
-          >
-            Timeline
-          </Button>
-          <Button
-            variant={view === 'list' ? 'default' : 'outline'}
-            onClick={() => setView('list')}
-            size="sm"
-            className="flex-1 sm:flex-none"
-          >
-            Labels
-          </Button>
-        </div>
-      </div>
-
-      {/* Audio player controls */}
-      <Card className="p-6 mb-6">
-        {/* First row: Play button, slider, and timestamp */}
-        <div className="flex items-center gap-4 mb-4">
-          <Button 
-            size="icon" 
-            variant="outline"
-            onClick={handlePlayPause}
-            disabled={isLoading || !trackUrl}
-            className="flex-shrink-0"
-          >
-            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          </Button>
+    <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--gradient-hero-start))] via-[hsl(var(--gradient-hero-mid))] to-[hsl(var(--gradient-hero-end))]">
+      <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
+        {/* Track title and view controls */}
+        <div className="mb-8">
+          {/* Title row - right aligned on mobile and desktop */}
+          <div className="flex items-start gap-3 min-w-0 flex-1 mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold leading-tight break-words text-[hsl(var(--hero-foreground))]">
+              {trackData?.filename || "Track Name"}
+            </h1>
+            <Button 
+              size="icon" 
+              variant="ghost"
+              onClick={() => setEditTrackOpen(true)}
+              className="flex-shrink-0 mt-1 text-[hsl(var(--hero-foreground))] hover:text-white hover:bg-white/20 border border-white/20 hover:border-white/40 transition-all duration-200"
+            >
+              <Pen className="h-4 w-4" />
+            </Button>
+          </div>
           
-          <Slider 
-            className="flex-1" 
-            value={[duration ? (currentTime / duration) * 100 : 0]} 
-            onValueChange={handleSliderChange}
-            min={0}
-            max={100}
-            step={0.1}
-            disabled={isLoading || !trackUrl}
-          />
-          
-          <div className="text-sm font-medium text-muted-foreground flex-shrink-0">
-            {formatTimeForDisplay(currentTime)} / {formatTimeForDisplay(duration)}
+          {/* Timeline/Labels buttons - centered and full width on mobile, normal on desktop */}
+          <div className="flex gap-3 justify-center sm:justify-end">
+            <Button
+              variant={view === 'timeline' ? 'green' : 'outline'}
+              onClick={() => setView('timeline')}
+              size="sm"
+              className="flex-1 sm:flex-none shadow-lg hover:scale-105 transition-transform duration-200"
+            >
+              Timeline
+            </Button>
+            <Button
+              variant={view === 'list' ? 'purple' : 'outline'}
+              onClick={() => setView('list')}
+              size="sm"
+              className="flex-1 sm:flex-none shadow-lg hover:scale-105 transition-transform duration-200"
+            >
+              Labels
+            </Button>
           </div>
         </div>
-        
-        {/* Second row: Controls */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Gauge className="h-4 w-4 text-muted-foreground" />
-            <div className="flex items-center">
-              <Input
-                type="number"
-                value={speedInput}
-                onChange={handleSpeedChange}
-                onBlur={handleSpeedBlur}
-                min="0.5"
-                max="2"
-                step="0.05"
-                className="w-16 h-8 text-center text-sm"
-                disabled={isLoading || !trackUrl}
-              />
-              <span className="text-sm text-muted-foreground ml-1">x</span>
+
+        {/* Audio player controls */}
+        <Card className="p-6 mb-8 bg-white/10 backdrop-blur-sm border border-white/20 shadow-xl relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--gradient-hero-start))]/10 via-[hsl(var(--gradient-hero-mid))]/10 to-[hsl(var(--gradient-hero-end))]/10" />
+          {/* First row: Play button, slider, and timestamp */}
+          <div className="relative flex items-center gap-4 mb-4">
+            <Button 
+              size="icon" 
+              variant={isPlaying ? "green" : "outline"}
+              onClick={handlePlayPause}
+              disabled={isLoading || !trackUrl}
+              className="flex-shrink-0 shadow-lg hover:scale-110 transition-all duration-200 border-white/20 text-[hsl(var(--hero-foreground))] hover:text-white"
+            >
+              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </Button>
+            
+            <Slider 
+              className="flex-1" 
+              value={[duration ? (currentTime / duration) * 100 : 0]} 
+              onValueChange={handleSliderChange}
+              min={0}
+              max={100}
+              step={0.1}
+              disabled={isLoading || !trackUrl}
+            />
+            
+            <div className="text-sm font-medium text-[hsl(var(--hero-foreground))] flex-shrink-0 bg-white/10 px-3 py-1 rounded-full border border-white/20">
+              {formatTimeForDisplay(currentTime)} / {formatTimeForDisplay(duration)}
             </div>
           </div>
+          
+          {/* Second row: Controls */}
+          <div className="relative flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-lg border border-white/20">
+              <Gauge className="h-4 w-4 text-[hsl(var(--hero-foreground))]" />
+              <div className="flex items-center">
+                <Input
+                  type="number"
+                  value={speedInput}
+                  onChange={handleSpeedChange}
+                  onBlur={handleSpeedBlur}
+                  min="0.5"
+                  max="2"
+                  step="0.05"
+                  className="w-16 h-8 text-center text-sm bg-white/10 border-white/20 text-[hsl(var(--hero-foreground))] focus:border-white/40"
+                  disabled={isLoading || !trackUrl}
+                />
+                <span className="text-sm text-[hsl(var(--hero-foreground))]/70 ml-1">x</span>
+              </div>
+            </div>
 
-          <Button
-            size="sm"
-            variant={autoLoop ? "default" : "outline"}
-            onClick={handleAutoLoopToggle}
-            disabled={isLoading || !trackUrl}
-            className="h-8"
-          >
-            <RotateCcw className="h-4 w-4" />
-          </Button>
+            <Button
+              size="sm"
+              variant={autoLoop ? "purple" : "outline"}
+              onClick={handleAutoLoopToggle}
+              disabled={isLoading || !trackUrl}
+              className="h-8 shadow-lg hover:scale-105 transition-transform duration-200"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
 
-          <Button
-            size="sm"
-            variant={abLoopEnabled ? "default" : "outline"}
-            onClick={() => {
-              if (audioRef.current && isPlaying) {
-                audioRef.current.pause();
-              }
-              setShowAbLoopDialog(true);
-            }}
-            disabled={isLoading || !trackUrl}
-            className="h-8"
-          >
-            <span className="text-sm font-medium">A</span>
-            <RotateCcw className="h-3 w-3 mx-1" />
-            <span className="text-sm font-medium">B</span>
-          </Button>
-        </div>
-      </Card>
-
-      {view === 'timeline' ? (
-        <Timeline
-          labels={labels || []}
-          currentTime={currentTime}
-          duration={duration}
-          onSeek={handleSeek}
-          onPlayFromTimestamp={handlePlayFromTimestamp}
-        />
-      ) : (
-        <Card className="p-6">
-          {labelsLoading ? (
-            <div className="text-center py-4">Loading labels...</div>
-          ) : labels?.length ? (
-            <LabelList
-              labels={labels}
-              currentTime={currentTime}
-              onPlayFromTimestamp={handlePlayFromTimestamp}
-              trackId={id || ''}
-              onPauseAudio={() => {
+            <Button
+              size="sm"
+              variant={abLoopEnabled ? "green" : "outline"}
+              onClick={() => {
                 if (audioRef.current && isPlaying) {
                   audioRef.current.pause();
                 }
+                setShowAbLoopDialog(true);
               }}
-            />
-          ) : (
-            <div className="text-center text-gray-500 py-8">
-              No labels added yet
-            </div>
-          )}
-        </Card>
-      )}
-
-      {/* Delete Track Section - only shown in labels view */}
-      {view === 'list' && (
-        <Card className="p-6 mt-8 border-destructive/20">
-          <div className="text-center space-y-4">
-            <Button
-              variant="destructive"
-              onClick={() => setShowDeleteConfirm(true)}
-              className="w-full sm:w-auto"
-              disabled={isDeleting}
+              disabled={isLoading || !trackUrl}
+              className="h-8 shadow-lg hover:scale-105 transition-transform duration-200"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete Track
+              <span className="text-sm font-medium">A</span>
+              <RotateCcw className="h-3 w-3 mx-1" />
+              <span className="text-sm font-medium">B</span>
             </Button>
           </div>
         </Card>
-      )}
 
-      {mounted && createPortal(
-        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] md:pb-6">
-          <Button
-            className="pointer-events-auto w-full md:w-auto md:ml-auto md:float-right"
-            size="lg"
-            onClick={handleAddLabelClick}
-          >
-            <Plus className="mr-2 h-4 w-4" /> Add Label
-          </Button>
-        </div>,
-        document.body
-      )}
+        {view === 'timeline' ? (
+          <Timeline
+            labels={labels || []}
+            currentTime={currentTime}
+            duration={duration}
+            onSeek={handleSeek}
+            onPlayFromTimestamp={handlePlayFromTimestamp}
+          />
+        ) : (
+          <Card className="p-6 bg-white/10 backdrop-blur-sm border border-white/20 shadow-xl">
+            {labelsLoading ? (
+              <div className="text-center py-4 text-[hsl(var(--hero-foreground))]">Loading labels...</div>
+            ) : labels?.length ? (
+              <LabelList
+                labels={labels}
+                currentTime={currentTime}
+                onPlayFromTimestamp={handlePlayFromTimestamp}
+                trackId={id || ''}
+                onPauseAudio={() => {
+                  if (audioRef.current && isPlaying) {
+                    audioRef.current.pause();
+                  }
+                }}
+              />
+            ) : (
+              <div className="text-center text-[hsl(var(--hero-foreground))]/70 py-8">
+                <Plus className="h-12 w-12 text-[hsl(var(--hero-foreground))]/30 mx-auto mb-4" />
+                <p className="text-lg">No labels added yet</p>
+                <p className="text-sm mt-2">Tap "Add Label" to create your first label</p>
+              </div>
+            )}
+          </Card>
+        )}
 
-      {id && (
-        <AddLabelDialog
-          open={addLabelOpen}
-          onOpenChange={setAddLabelOpen}
-          trackId={id}
-          currentTime={currentTime}
-        />
-      )}
+        {/* Delete Track Section - only shown in labels view */}
+        {view === 'list' && (
+          <Card className="p-6 mt-8 bg-red-500/10 backdrop-blur-sm border border-red-500/20 shadow-xl">
+            <div className="text-center space-y-4">
+              <Button
+                variant="destructive"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="w-full sm:w-auto shadow-lg hover:scale-105 transition-transform duration-200"
+                disabled={isDeleting}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Track
+              </Button>
+            </div>
+          </Card>
+        )}
 
-      {trackData && (
-        <EditTrackDialog
-          open={editTrackOpen}
-          onOpenChange={setEditTrackOpen}
-          track={trackData}
-        />
-      )}
-
-      <ABLoopDialog
-        open={showAbLoopDialog}
-        onOpenChange={setShowAbLoopDialog}
-        labels={labels || []}
-        onApplyLoop={handleAbLoopApply}
-        onDisableLoop={handleAbLoopDisable}
-        currentStartMarkerId={abLoopStartMarkerId || undefined}
-        currentEndMarkerId={abLoopEndMarkerId || undefined}
-      />
-
-      {/* Delete confirmation dialog */}
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the track "{trackData?.filename}" and all its associated labels.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+        {mounted && createPortal(
+          <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] md:pb-6">
+            <Button
+              className="pointer-events-auto w-full md:w-auto md:ml-auto md:float-right shadow-xl"
+              size="lg"
+              variant="green"
+              onClick={handleAddLabelClick}
             >
-              {isDeleting ? 'Deleting...' : 'Delete Track'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              <Plus className="mr-2 h-4 w-4" /> Add Label
+            </Button>
+          </div>,
+          document.body
+        )}
 
-      <audio
-        ref={audioRef}
-        src={trackUrl || undefined}
-        onLoadedMetadata={handleLoadedMetadata}
-        onTimeUpdate={handleTimeUpdate}
-        onDurationChange={(e) => setDuration(roundToOneDecimal(e.currentTarget.duration))}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-        onEnded={handleAudioEnded}
-      />
+        {id && (
+          <AddLabelDialog
+            open={addLabelOpen}
+            onOpenChange={setAddLabelOpen}
+            trackId={id}
+            currentTime={currentTime}
+          />
+        )}
+
+        {trackData && (
+          <EditTrackDialog
+            open={editTrackOpen}
+            onOpenChange={setEditTrackOpen}
+            track={trackData}
+          />
+        )}
+
+        <ABLoopDialog
+          open={showAbLoopDialog}
+          onOpenChange={setShowAbLoopDialog}
+          labels={labels || []}
+          onApplyLoop={handleAbLoopApply}
+          onDisableLoop={handleAbLoopDisable}
+          currentStartMarkerId={abLoopStartMarkerId || undefined}
+          currentEndMarkerId={abLoopEndMarkerId || undefined}
+        />
+
+        {/* Delete confirmation dialog */}
+        <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the track "{trackData?.filename}" and all its associated labels.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Track'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <audio
+          ref={audioRef}
+          src={trackUrl || undefined}
+          onLoadedMetadata={handleLoadedMetadata}
+          onTimeUpdate={handleTimeUpdate}
+          onDurationChange={(e) => setDuration(roundToOneDecimal(e.currentTarget.duration))}
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onEnded={handleAudioEnded}
+        />
+      </div>
     </div>
   );
 };
