@@ -358,6 +358,28 @@ const TrackPage = () => {
     setAbLoopEnd(null);
   };
 
+  const handleMarkerDeleted = (deletedMarkerId: string) => {
+    // Check if the deleted marker was part of the AB loop
+    if (abLoopEnabled && (deletedMarkerId === abLoopStartMarkerId || deletedMarkerId === abLoopEndMarkerId)) {
+      // Disable AB loop and clear state
+      setAbLoopEnabled(false);
+      setAbLoopStartMarkerId(null);
+      setAbLoopEndMarkerId(null);
+      setAbLoopStart(null);
+      setAbLoopEnd(null);
+      
+      // Clear from localStorage
+      if (id) {
+        localStorage.removeItem(`track-${id}-abLoop`);
+      }
+      
+      toast({
+        title: "AB Loop Disabled",
+        description: "AB loop was disabled because a marker was deleted"
+      });
+    }
+  };
+
   const handleLoadedMetadata = () => {
     if (audioRef.current) {
       audioRef.current.playbackRate = playbackRate;
@@ -569,6 +591,7 @@ const TrackPage = () => {
                   audioRef.current.pause();
                 }
               }}
+              onMarkerDeleted={handleMarkerDeleted}
             />
           ) : (
             <div className="text-center text-gray-500 py-8">

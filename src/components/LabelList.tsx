@@ -44,6 +44,7 @@ type LabelListProps = {
   onPlayFromTimestamp: (timestamp: number) => void;
   trackId: string;
   onPauseAudio?: () => void;
+  onMarkerDeleted?: (markerId: string) => void;
 };
 
 type LabelItemProps = {
@@ -144,7 +145,7 @@ const LabelItem = ({
   );
 };
 
-export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, onPauseAudio }: LabelListProps) => {
+export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, onPauseAudio, onMarkerDeleted }: LabelListProps) => {
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
   const [editingLabel, setEditingLabel] = useState<Label | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -273,6 +274,9 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
         .eq('id', labelId);
         
       if (error) throw error;
+      
+      // Call the marker deleted callback if provided
+      onMarkerDeleted?.(labelId);
       
       // Refresh the labels list
       queryClient.invalidateQueries({ queryKey: ['track-labels', trackId] });
