@@ -113,16 +113,8 @@ const TrackPage = () => {
         setAutoLoop(true);
       }
 
-      // Load A-B loop settings
-      const savedAbLoop = localStorage.getItem(`track-${id}-abLoop`);
-      if (savedAbLoop) {
-        const abLoopData = JSON.parse(savedAbLoop);
-        if (abLoopData.enabled && abLoopData.startMarkerId && abLoopData.endMarkerId) {
-          setAbLoopEnabled(true);
-          setAbLoopStartMarkerId(abLoopData.startMarkerId);
-          setAbLoopEndMarkerId(abLoopData.endMarkerId);
-        }
-      }
+      // Clean up any existing A-B loop localStorage entries (session-only now)
+      localStorage.removeItem(`track-${id}-abLoop`);
     }
   }, [id]);
 
@@ -151,20 +143,6 @@ const TrackPage = () => {
       }
     }
   }, [id, autoLoop]);
-
-  useEffect(() => {
-    if (id) {
-      if (abLoopEnabled && abLoopStartMarkerId && abLoopEndMarkerId) {
-        localStorage.setItem(`track-${id}-abLoop`, JSON.stringify({
-          enabled: true,
-          startMarkerId: abLoopStartMarkerId,
-          endMarkerId: abLoopEndMarkerId
-        }));
-      } else {
-        localStorage.removeItem(`track-${id}-abLoop`);
-      }
-    }
-  }, [id, abLoopEnabled, abLoopStartMarkerId, abLoopEndMarkerId]);
 
   const { data: trackData } = useQuery({
     queryKey: ['track', id],
@@ -367,11 +345,6 @@ const TrackPage = () => {
       setAbLoopEndMarkerId(null);
       setAbLoopStart(null);
       setAbLoopEnd(null);
-      
-      // Clear from localStorage
-      if (id) {
-        localStorage.removeItem(`track-${id}-abLoop`);
-      }
       
       toast({
         title: "AB Loop Disabled",
