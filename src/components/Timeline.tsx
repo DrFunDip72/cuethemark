@@ -21,9 +21,21 @@ type TimelineProps = {
   duration: number;
   onSeek: (time: number) => void;
   onPlayFromTimestamp: (timestamp: number) => void;
+  abLoopEnabled?: boolean;
+  abLoopStart?: number | null;
+  abLoopEnd?: number | null;
 };
 
-export const Timeline = ({ labels, currentTime, duration, onSeek, onPlayFromTimestamp }: TimelineProps) => {
+export const Timeline = ({ 
+  labels, 
+  currentTime, 
+  duration, 
+  onSeek, 
+  onPlayFromTimestamp,
+  abLoopEnabled = false,
+  abLoopStart = null,
+  abLoopEnd = null 
+}: TimelineProps) => {
   const timelineRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -99,6 +111,33 @@ export const Timeline = ({ labels, currentTime, duration, onSeek, onPlayFromTime
                 style={{ width: `${getPositionPercentage(currentTime)}%` }}
               />
               
+              {/* AB Loop Range Overlay */}
+              {abLoopEnabled && abLoopStart !== null && abLoopEnd !== null && (
+                <>
+                  {/* Grayed out area before loop start */}
+                  <div 
+                    className="absolute top-0 left-0 h-full bg-gray-400/50 rounded-l-lg"
+                    style={{ width: `${getPositionPercentage(abLoopStart)}%` }}
+                  />
+                  {/* Grayed out area after loop end */}
+                  <div 
+                    className="absolute top-0 h-full bg-gray-400/50 rounded-r-lg"
+                    style={{ 
+                      left: `${getPositionPercentage(abLoopEnd)}%`,
+                      width: `${100 - getPositionPercentage(abLoopEnd)}%`
+                    }}
+                  />
+                  {/* Loop range highlight */}
+                  <div 
+                    className="absolute top-0 h-full bg-yellow-300/40 border-2 border-yellow-500/60"
+                    style={{ 
+                      left: `${getPositionPercentage(abLoopStart)}%`,
+                      width: `${getPositionPercentage(abLoopEnd) - getPositionPercentage(abLoopStart)}%`
+                    }}
+                  />
+                </>
+              )}
+              
               {/* Current Time Indicator */}
               <div 
                 className="absolute top-0 w-1 h-full bg-primary rounded-sm transition-all duration-200"
@@ -170,6 +209,12 @@ export const Timeline = ({ labels, currentTime, duration, onSeek, onPlayFromTime
               <div className="w-2 h-3 bg-blue-500 rounded-sm" />
               <span>Markers</span>
             </div>
+            {abLoopEnabled && (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-3 bg-yellow-300 border border-yellow-500 rounded-sm" />
+                <span>AB Loop Range</span>
+              </div>
+            )}
           </div>
 
           {/* Instructions */}

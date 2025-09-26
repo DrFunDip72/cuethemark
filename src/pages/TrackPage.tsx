@@ -233,7 +233,13 @@ const TrackPage = () => {
   // New function to handle seeking from timeline
   const handleSeek = (time: number) => {
     if (audioRef.current) {
-      const roundedTime = roundToOneDecimal(time);
+      let roundedTime = roundToOneDecimal(time);
+      
+      // Constrain seeking within AB loop bounds when enabled
+      if (abLoopEnabled && abLoopStart !== null && abLoopEnd !== null) {
+        roundedTime = Math.max(abLoopStart, Math.min(roundedTime, abLoopEnd));
+      }
+      
       audioRef.current.currentTime = roundedTime;
       setCurrentTime(roundedTime);
     }
@@ -256,7 +262,13 @@ const TrackPage = () => {
   // New function to handle slider change
   const handleSliderChange = (value: number[]) => {
     if (audioRef.current && value.length > 0) {
-      const newTime = roundToOneDecimal((value[0] / 100) * (duration || 1));
+      let newTime = roundToOneDecimal((value[0] / 100) * (duration || 1));
+      
+      // Constrain seeking within AB loop bounds when enabled
+      if (abLoopEnabled && abLoopStart !== null && abLoopEnd !== null) {
+        newTime = Math.max(abLoopStart, Math.min(newTime, abLoopEnd));
+      }
+      
       audioRef.current.currentTime = newTime;
       setCurrentTime(newTime);
     }
@@ -331,9 +343,16 @@ const TrackPage = () => {
 
   const handleAbLoopDisable = () => {
     setAbLoopEnabled(false);
-    // Keep the selected markers but clear the loop bounds
+    // Clear all AB loop state
+    setAbLoopStartMarkerId(null);
+    setAbLoopEndMarkerId(null);
     setAbLoopStart(null);
     setAbLoopEnd(null);
+    
+    toast({
+      title: "AB Loop Disabled",
+      description: "AB loop has been turned off"
+    });
   };
 
   const handleMarkerDeleted = (deletedMarkerId: string) => {
@@ -548,6 +567,9 @@ const TrackPage = () => {
           duration={duration}
           onSeek={handleSeek}
           onPlayFromTimestamp={handlePlayFromTimestamp}
+          abLoopEnabled={abLoopEnabled}
+          abLoopStart={abLoopStart}
+          abLoopEnd={abLoopEnd}
         />
       ) : (
         <Card className="p-6">
@@ -629,6 +651,7 @@ const TrackPage = () => {
         onDisableLoop={handleAbLoopDisable}
         currentStartMarkerId={abLoopStartMarkerId || undefined}
         currentEndMarkerId={abLoopEndMarkerId || undefined}
+        abLoopEnabled={abLoopEnabled}
       />
 
       {/* Delete confirmation dialog */}

@@ -22,6 +22,7 @@ interface ABLoopDialogProps {
   onDisableLoop: () => void;
   currentStartMarkerId?: string;
   currentEndMarkerId?: string;
+  abLoopEnabled?: boolean;
 }
 
 export const ABLoopDialog = ({ 
@@ -31,7 +32,8 @@ export const ABLoopDialog = ({
   onApplyLoop, 
   onDisableLoop,
   currentStartMarkerId,
-  currentEndMarkerId 
+  currentEndMarkerId,
+  abLoopEnabled = false
 }: ABLoopDialogProps) => {
   const [selectedMarkers, setSelectedMarkers] = useState<Set<string>>(new Set());
 
@@ -39,11 +41,14 @@ export const ABLoopDialog = ({
   useEffect(() => {
     if (open) {
       const markers = new Set<string>();
-      if (currentStartMarkerId) markers.add(currentStartMarkerId);
-      if (currentEndMarkerId) markers.add(currentEndMarkerId);
+      // Only initialize with current markers if AB loop is actually enabled
+      if (abLoopEnabled && currentStartMarkerId && currentEndMarkerId) {
+        markers.add(currentStartMarkerId);
+        markers.add(currentEndMarkerId);
+      }
       setSelectedMarkers(markers);
     }
-  }, [open, currentStartMarkerId, currentEndMarkerId]);
+  }, [open, currentStartMarkerId, currentEndMarkerId, abLoopEnabled]);
 
   const handleMarkerToggle = (markerId: string) => {
     const newSelected = new Set(selectedMarkers);
@@ -102,10 +107,12 @@ export const ABLoopDialog = ({
 
   const handleReset = () => {
     setSelectedMarkers(new Set());
+    // Also disable the current AB loop but keep dialog open
+    onDisableLoop();
   };
 
   const canApply = selectedMarkers.size === 2;
-  const hasCurrentLoop = currentStartMarkerId && currentEndMarkerId;
+  const hasCurrentLoop = abLoopEnabled && currentStartMarkerId && currentEndMarkerId;
 
   // Sort labels by timestamp for display
   const sortedLabels = [...labels].sort((a, b) => a.timestamp_seconds - b.timestamp_seconds);
