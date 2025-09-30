@@ -12,6 +12,11 @@ import TrackPage from "./pages/TrackPage";
 import ProfilePage from "./pages/ProfilePage";
 import SuccessPage from "./pages/SuccessPage";
 import AdminPage from "./pages/AdminPage";
+import ErrorDashboardPage from "./pages/admin/ErrorDashboardPage";
+import AnalyticsDashboardPage from "./pages/admin/AnalyticsDashboardPage";
+import ReferralsDashboardPage from "./pages/admin/ReferralsDashboardPage";
+import FeatureTrackerPage from "./pages/admin/FeatureTrackerPage";
+import NotificationsCenterPage from "./pages/admin/NotificationsCenterPage";
 import { AdminRoute } from "./components/AdminRoute";
 import NotFound from "./pages/NotFound";
 import LandingPage from "./pages/LandingPage";
@@ -66,6 +71,46 @@ const App = () => (
                   element={
                     <AdminRoute>
                       <AdminPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/app/admin/errors"
+                  element={
+                    <AdminRoute>
+                      <ErrorDashboardPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/app/admin/analytics"
+                  element={
+                    <AdminRoute>
+                      <AnalyticsDashboardPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/app/admin/referrals"
+                  element={
+                    <AdminRoute>
+                      <ReferralsDashboardPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/app/admin/features"
+                  element={
+                    <AdminRoute>
+                      <FeatureTrackerPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/app/admin/notifications"
+                  element={
+                    <AdminRoute>
+                      <NotificationsCenterPage />
                     </AdminRoute>
                   }
                 />
