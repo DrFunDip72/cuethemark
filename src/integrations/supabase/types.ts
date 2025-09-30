@@ -290,37 +290,52 @@ export type Database = {
       }
       upload_errors: {
         Row: {
+          context: Json | null
           created_at: string
           error_message: string
+          error_number: number
           error_type: string
           file_name: string | null
           file_size: number | null
           file_type: string | null
           id: string
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
           stack_trace: string | null
           step_failed: string
           user_id: string | null
         }
         Insert: {
+          context?: Json | null
           created_at?: string
           error_message: string
+          error_number?: number
           error_type: string
           file_name?: string | null
           file_size?: number | null
           file_type?: string | null
           id?: string
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
           stack_trace?: string | null
           step_failed: string
           user_id?: string | null
         }
         Update: {
+          context?: Json | null
           created_at?: string
           error_message?: string
+          error_number?: number
           error_type?: string
           file_name?: string | null
           file_size?: number | null
           file_type?: string | null
           id?: string
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
           stack_trace?: string | null
           step_failed?: string
           user_id?: string | null
