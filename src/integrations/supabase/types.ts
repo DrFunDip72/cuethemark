@@ -288,6 +288,45 @@ export type Database = {
         }
         Relationships: []
       }
+      upload_errors: {
+        Row: {
+          created_at: string
+          error_message: string
+          error_type: string
+          file_name: string | null
+          file_size: number | null
+          file_type: string | null
+          id: string
+          stack_trace: string | null
+          step_failed: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message: string
+          error_type: string
+          file_name?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          stack_trace?: string | null
+          step_failed: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string
+          error_type?: string
+          file_name?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          stack_trace?: string | null
+          step_failed?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
