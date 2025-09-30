@@ -136,27 +136,36 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          display_name: string | null
           email: string
+          first_name: string | null
           id: string
           is_admin: boolean
+          last_name: string | null
           referred_by: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          display_name?: string | null
           email: string
+          first_name?: string | null
           id?: string
           is_admin?: boolean
+          last_name?: string | null
           referred_by?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          display_name?: string | null
           email?: string
+          first_name?: string | null
           id?: string
           is_admin?: boolean
+          last_name?: string | null
           referred_by?: string | null
           updated_at?: string
           user_id?: string
@@ -347,6 +356,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      backfill_display_names: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       check_is_admin_unchanged: {
         Args: { _new_is_admin: boolean }
         Returns: boolean

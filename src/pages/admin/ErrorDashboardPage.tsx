@@ -34,6 +34,7 @@ interface ErrorData {
   stack_trace: string | null;
   context: any;
   user_email?: string;
+  user_display_name?: string;
 }
 
 const ErrorDashboardPage = () => {
@@ -47,40 +48,59 @@ const ErrorDashboardPage = () => {
     try {
       setLoading(true);
 
-      // Fetch unresolved errors with user email
+      // Fetch unresolved errors
       const { data: unresolvedData, error: unresolvedError } = await supabase
         .from('upload_errors')
-        .select(`
-          *,
-          profiles!upload_errors_user_id_fkey(email)
-        `)
+        .select('*')
         .eq('resolved', false)
         .order('created_at', { ascending: false });
 
       if (unresolvedError) throw unresolvedError;
 
-      // Fetch resolved errors with user email
+      // Fetch resolved errors
       const { data: resolvedData, error: resolvedError } = await supabase
         .from('upload_errors')
-        .select(`
-          *,
-          profiles!upload_errors_user_id_fkey(email)
-        `)
+        .select('*')
         .eq('resolved', true)
         .order('resolved_at', { ascending: false })
         .limit(50);
 
       if (resolvedError) throw resolvedError;
 
-      // Map the data to include user_email
-      const mapErrors = (errors: any[]): ErrorData[] => 
-        errors?.map(error => ({
-          ...error,
-          user_email: error.profiles?.email || 'Unknown User'
-        })) || [];
+      // Get unique user IDs from both sets of errors
+      const allErrors = [...(unresolvedData || []), ...(resolvedData || [])];
+      const userIds = [...new Set(allErrors.map(e => e.user_id).filter(Boolean))];
 
-      setUnresolvedErrors(mapErrors(unresolvedData));
-      setResolvedErrors(mapErrors(resolvedData));
+      // Fetch user profiles for all user IDs
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, email, display_name, first_name, last_name')
+        .in('user_id', userIds);
+
+      // Create a map of user_id to profile data
+      const profilesMap = new Map(
+        (profilesData || []).map(p => [p.user_id, p])
+      );
+
+      // Enrich errors with user profile data
+      const enrichedUnresolved = (unresolvedData || []).map(error => ({
+        ...error,
+        user_email: profilesMap.get(error.user_id)?.email || 'Unknown',
+        user_display_name: profilesMap.get(error.user_id)?.display_name || 
+                           profilesMap.get(error.user_id)?.email || 
+                           'Unknown User',
+      }));
+
+      const enrichedResolved = (resolvedData || []).map(error => ({
+        ...error,
+        user_email: profilesMap.get(error.user_id)?.email || 'Unknown',
+        user_display_name: profilesMap.get(error.user_id)?.display_name || 
+                           profilesMap.get(error.user_id)?.email || 
+                           'Unknown User',
+      }));
+
+      setUnresolvedErrors(enrichedUnresolved);
+      setResolvedErrors(enrichedResolved);
     } catch (error: any) {
       console.error('Error loading errors:', error);
       toast({
@@ -184,7 +204,7 @@ const ErrorDashboardPage = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-1 text-sm text-muted-foreground">
-          <p><strong>User:</strong> {error.user_email}</p>
+          <p><strong>User:</strong> {error.user_display_name || error.user_email}</p>
           <p><strong>When:</strong> {formatDistanceToNow(new Date(error.created_at), { addSuffix: true })}</p>
           {error.step_failed && <p><strong>Step:</strong> {error.step_failed}</p>}
         </div>
@@ -289,6 +309,9 @@ const ErrorDashboardPage = () => {
               <div>
                 <h3 className="font-semibold mb-2">User Information</h3>
                 <div className="text-sm space-y-1">
+                  {selectedError.user_display_name && (
+                    <p><strong>Name:</strong> {selectedError.user_display_name}</p>
+                  )}
                   <p><strong>Email:</strong> {selectedError.user_email}</p>
                   <p><strong>User ID:</strong> {selectedError.user_id || 'Unknown'}</p>
                 </div>
