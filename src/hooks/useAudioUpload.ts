@@ -46,6 +46,29 @@ export const useAudioUpload = () => {
     }
   };
 
+  const sanitizeFilename = (filename: string): string => {
+    // Extract extension
+    const lastDotIndex = filename.lastIndexOf('.');
+    const name = lastDotIndex > 0 ? filename.substring(0, lastDotIndex) : filename;
+    const extension = lastDotIndex > 0 ? filename.substring(lastDotIndex) : '';
+
+    // Sanitize the name part
+    let sanitized = name
+      .replace(/:/g, '-')           // Replace colons with dashes
+      .replace(/,/g, '_')            // Replace commas with underscores
+      .replace(/\s+/g, '_')          // Replace spaces with underscores
+      .replace(/[^\w\-_.]/g, '')     // Remove other special characters
+      .replace(/_+/g, '_')           // Collapse multiple underscores
+      .replace(/^[_\-]+|[_\-]+$/g, ''); // Remove leading/trailing underscores and dashes
+
+    // Limit length (storage has limits)
+    if (sanitized.length > 200) {
+      sanitized = sanitized.substring(0, 200);
+    }
+
+    return sanitized + extension;
+  };
+
   const createError = (
     type: ErrorType,
     step: string,
@@ -114,8 +137,9 @@ export const useAudioUpload = () => {
     setUploadProgress(0);
     
     try {
-      // Upload to Supabase Storage with user folder
-      const filename = `${user.id}/${Date.now()}-${file.name}`;
+      // Upload to Supabase Storage with user folder (sanitized filename for storage)
+      const sanitizedName = sanitizeFilename(file.name);
+      const filename = `${user.id}/${Date.now()}-${sanitizedName}`;
       
       // Simulate progress for file upload since Supabase doesn't provide real progress
       const progressInterval = setInterval(() => {
