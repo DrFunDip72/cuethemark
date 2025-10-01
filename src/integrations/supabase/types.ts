@@ -133,6 +133,116 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_interactions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          dismissed_at: string | null
+          id: string
+          interacted_at: string | null
+          notification_id: string
+          response_data: Json | null
+          response_type: string | null
+          user_id: string
+          viewed_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          dismissed_at?: string | null
+          id?: string
+          interacted_at?: string | null
+          notification_id: string
+          response_data?: Json | null
+          response_type?: string | null
+          user_id: string
+          viewed_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          dismissed_at?: string | null
+          id?: string
+          interacted_at?: string | null
+          notification_id?: string
+          response_data?: Json | null
+          response_type?: string | null
+          user_id?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_interactions_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          custom_user_ids: string[] | null
+          id: string
+          scheduled_for: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["notification_status"]
+          target_audience: Database["public"]["Enums"]["target_audience"]
+          template_data: Json | null
+          template_type: Database["public"]["Enums"]["notification_template"]
+          title: string
+          total_completions: number | null
+          total_dismissals: number | null
+          total_interactions: number | null
+          total_sent: number | null
+          total_views: number | null
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          custom_user_ids?: string[] | null
+          id?: string
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["notification_status"]
+          target_audience?: Database["public"]["Enums"]["target_audience"]
+          template_data?: Json | null
+          template_type: Database["public"]["Enums"]["notification_template"]
+          title: string
+          total_completions?: number | null
+          total_dismissals?: number | null
+          total_interactions?: number | null
+          total_sent?: number | null
+          total_views?: number | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          custom_user_ids?: string[] | null
+          id?: string
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["notification_status"]
+          target_audience?: Database["public"]["Enums"]["target_audience"]
+          template_data?: Json | null
+          template_type?: Database["public"]["Enums"]["notification_template"]
+          title?: string
+          total_completions?: number | null
+          total_dismissals?: number | null
+          total_interactions?: number | null
+          total_sent?: number | null
+          total_views?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -370,7 +480,14 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      notification_status: "draft" | "scheduled" | "sent" | "archived"
+      notification_template: "share" | "feedback" | "rating" | "announcement"
+      target_audience:
+        | "all_users"
+        | "subscribed"
+        | "trial"
+        | "new_users"
+        | "custom"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -497,6 +614,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      notification_status: ["draft", "scheduled", "sent", "archived"],
+      notification_template: ["share", "feedback", "rating", "announcement"],
+      target_audience: [
+        "all_users",
+        "subscribed",
+        "trial",
+        "new_users",
+        "custom",
+      ],
+    },
   },
 } as const

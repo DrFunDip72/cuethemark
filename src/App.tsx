@@ -7,6 +7,8 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { SubscriptionGate } from "./components/SubscriptionGate";
 import { Navigation } from "./components/Navigation";
+import { NotificationModal } from "./components/NotificationModal";
+import { useNotifications } from "./hooks/useNotifications";
 import UploadPage from "./pages/UploadPage";
 import TrackPage from "./pages/TrackPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -29,6 +31,107 @@ import TermsPage from "./pages/TermsPage";
 
 const queryClient = new QueryClient();
 
+const AppContent = () => {
+  const { notification, isOpen, closeNotification } = useNotifications();
+
+  return (
+    <>
+      <div className="min-h-screen flex flex-col">
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/get-started" element={<GetStartedPage />} />
+          <Route path="/signup" element={<GetStartedPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+
+          {/* Protected app and success routes */}
+          <Route
+            element={
+              <ProtectedRoute>
+                <SubscriptionGate>
+                  <Navigation />
+                  <main className="flex-1 bg-gray-50">
+                    <Outlet />
+                  </main>
+                </SubscriptionGate>
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/success" element={<SuccessPage />} />
+            <Route path="/app" element={<UploadPage />} />
+            <Route path="/app/tracks" element={<UploadPage />} />
+            <Route path="/app/tracks/:id" element={<TrackPage />} />
+            <Route path="/tracks/:id" element={<TrackPage />} />
+            <Route path="/app/profile" element={<ProfilePage />} />
+            <Route path="/app/feedback" element={<FeedbackPage />} />
+            <Route
+              path="/app/admin"
+              element={
+                <AdminRoute>
+                  <AdminPage />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/app/admin/errors"
+              element={
+                <AdminRoute>
+                  <ErrorDashboardPage />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/app/admin/analytics"
+              element={
+                <AdminRoute>
+                  <AnalyticsDashboardPage />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/app/admin/referrals"
+              element={
+                <AdminRoute>
+                  <ReferralsDashboardPage />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/app/admin/features"
+              element={
+                <AdminRoute>
+                  <FeatureTrackerPage />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/app/admin/notifications"
+              element={
+                <AdminRoute>
+                  <NotificationsCenterPage />
+                </AdminRoute>
+              }
+            />
+          </Route>
+
+          {/* Fallback */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </div>
+
+      {notification && (
+        <NotificationModal
+          notification={notification}
+          open={isOpen}
+          onClose={closeNotification}
+        />
+      )}
+    </>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -36,90 +139,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <div className="min-h-screen flex flex-col">
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/get-started" element={<GetStartedPage />} />
-              <Route path="/signup" element={<GetStartedPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/privacy" element={<PrivacyPolicyPage />} />
-              <Route path="/terms" element={<TermsPage />} />
-
-              {/* Protected app and success routes */}
-              <Route
-                element={
-                  <ProtectedRoute>
-                    <SubscriptionGate>
-                      <Navigation />
-                      <main className="flex-1 bg-gray-50">
-                        <Outlet />
-                      </main>
-                    </SubscriptionGate>
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="/success" element={<SuccessPage />} />
-                <Route path="/app" element={<UploadPage />} />
-                <Route path="/app/tracks" element={<UploadPage />} />
-                <Route path="/app/tracks/:id" element={<TrackPage />} />
-                <Route path="/tracks/:id" element={<TrackPage />} />
-                <Route path="/app/profile" element={<ProfilePage />} />
-                <Route path="/app/feedback" element={<FeedbackPage />} />
-                <Route
-                  path="/app/admin"
-                  element={
-                    <AdminRoute>
-                      <AdminPage />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/app/admin/errors"
-                  element={
-                    <AdminRoute>
-                      <ErrorDashboardPage />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/app/admin/analytics"
-                  element={
-                    <AdminRoute>
-                      <AnalyticsDashboardPage />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/app/admin/referrals"
-                  element={
-                    <AdminRoute>
-                      <ReferralsDashboardPage />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/app/admin/features"
-                  element={
-                    <AdminRoute>
-                      <FeatureTrackerPage />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/app/admin/notifications"
-                  element={
-                    <AdminRoute>
-                      <NotificationsCenterPage />
-                    </AdminRoute>
-                  }
-                />
-              </Route>
-
-              {/* Fallback */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </div>
+          <AppContent />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
