@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
+import { NotificationModal } from "@/components/NotificationModal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,12 +21,14 @@ const NotificationsCenterPage = () => {
   const [templateType, setTemplateType] = useState<"share" | "feedback" | "rating" | "announcement">("announcement");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [targetAudience, setTargetAudience] = useState<"all_users" | "subscribed" | "trial" | "new_users" | "custom">("all_users");
+  const [targetAudience, setTargetAudience] = useState<"all_users" | "subscribed" | "trial" | "new_users" | "admin" | "custom">("all_users");
   const [scheduledDate, setScheduledDate] = useState<Date>();
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     loadUsers();
@@ -35,7 +38,7 @@ const NotificationsCenterPage = () => {
   const loadUsers = async () => {
     const { data } = await supabase
       .from("profiles")
-      .select("user_id, display_name, email, first_name, last_name")
+      .select("user_id, display_name, email, first_name, last_name, is_admin")
       .order("created_at", { ascending: false });
     
     if (data) setUsers(data);
@@ -125,6 +128,27 @@ const NotificationsCenterPage = () => {
     );
   };
 
+  const getUserDisplayName = (user: any) => {
+    if (user.display_name) return user.display_name;
+    if (user.first_name && user.last_name) return `${user.first_name} ${user.last_name}`.trim();
+    return user.email;
+  };
+
+  const filteredUsers = users.filter(user => {
+    const displayName = getUserDisplayName(user);
+    const email = user.email || "";
+    const search = searchQuery.toLowerCase();
+    return displayName.toLowerCase().includes(search) || email.toLowerCase().includes(search);
+  });
+
+  const handlePreview = () => {
+    if (!title.trim() || !content.trim()) {
+      toast.error("Please fill in title and content to preview");
+      return;
+    }
+    setShowPreview(true);
+  };
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "outline"> = {
       draft: "secondary",
@@ -206,6 +230,7 @@ const NotificationsCenterPage = () => {
                     <SelectItem value="subscribed">Subscribed Users</SelectItem>
                     <SelectItem value="trial">Trial Users</SelectItem>
                     <SelectItem value="new_users">New Users (Last 7 days)</SelectItem>
+                    <SelectItem value="admin">Admin Users</SelectItem>
                     <SelectItem value="custom">Custom Selection</SelectItem>
                   </SelectContent>
                 </Select>
@@ -219,18 +244,31 @@ const NotificationsCenterPage = () => {
                       {selectedUserIds.length} user(s) selected
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="max-h-64 overflow-y-auto space-y-2">
-                    {users.map((user) => (
-                      <div key={user.user_id} className="flex items-center space-x-2">
-                        <Checkbox
-                          checked={selectedUserIds.includes(user.user_id)}
-                          onCheckedChange={() => toggleUserSelection(user.user_id)}
-                        />
-                        <label className="text-sm cursor-pointer flex-1">
-                          {user.display_name || `${user.first_name} ${user.last_name}` || user.email}
-                        </label>
-                      </div>
-                    ))}
+                  <CardContent className="space-y-2">
+                    <Input
+                      placeholder="Search users..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <div className="max-h-64 overflow-y-auto space-y-2 border rounded-md p-2">
+                      {filteredUsers.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-4">
+                          No users found
+                        </p>
+                      ) : (
+                        filteredUsers.map((user) => (
+                          <div key={user.user_id} className="flex items-center space-x-2">
+                            <Checkbox
+                              checked={selectedUserIds.includes(user.user_id)}
+                              onCheckedChange={() => toggleUserSelection(user.user_id)}
+                            />
+                            <label className="text-sm cursor-pointer flex-1">
+                              {getUserDisplayName(user)} {user.is_admin && <Badge variant="secondary" className="ml-1 text-xs">Admin</Badge>}
+                            </label>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               )}
@@ -280,6 +318,13 @@ const NotificationsCenterPage = () => {
                 >
                   <Save className="mr-2 h-4 w-4" />
                   Save Draft
+                </Button>
+                <Button
+                  onClick={handlePreview}
+                  disabled={isSubmitting}
+                  variant="secondary"
+                >
+                  Preview
                 </Button>
               </div>
             </CardContent>
@@ -409,6 +454,17 @@ const NotificationsCenterPage = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <NotificationModal
+        notification={{
+          id: "preview",
+          title,
+          content,
+          template_type: templateType,
+        }}
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+      />
     </AdminLayout>
   );
 };

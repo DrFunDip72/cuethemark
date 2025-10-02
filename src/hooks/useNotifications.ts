@@ -27,7 +27,7 @@ export const useNotifications = () => {
       // Get user's profile for signup date
       const { data: profile } = await supabase
         .from("profiles")
-        .select("created_at")
+        .select("created_at, is_admin")
         .eq("user_id", user.id)
         .single();
 
@@ -35,6 +35,7 @@ export const useNotifications = () => {
       const isNewUser = profile?.created_at 
         ? new Date(profile.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
         : false;
+      const isAdmin = profile?.is_admin || false;
 
       // Get notifications that haven't been viewed yet
       const { data: notifications } = await supabase
@@ -55,6 +56,7 @@ export const useNotifications = () => {
         (notif.target_audience === "subscribed" && subscriber?.subscribed) ||
         (notif.target_audience === "trial" && subscriber?.subscription_tier === "trial") ||
         (notif.target_audience === "new_users" && isNewUser) ||
+        (notif.target_audience === "admin" && isAdmin) ||
         (notif.target_audience === "custom" && notif.custom_user_ids?.includes(user.id));
 
       if (!shouldShow) return;

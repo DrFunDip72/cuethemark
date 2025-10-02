@@ -24,6 +24,8 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleView = async () => {
+    if (notification.id === "preview") return;
+    
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -54,6 +56,8 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
   };
 
   const handleInteraction = async () => {
+    if (notification.id === "preview") return;
+    
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -98,6 +102,12 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
       return;
     }
 
+    if (notification.id === "preview") {
+      toast.success("Preview mode - rating not saved");
+      onClose();
+      return;
+    }
+
     setIsSubmitting(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -123,6 +133,12 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
   const handleFeedbackSubmit = async () => {
     if (!feedback.trim()) {
       toast.error("Please enter your feedback");
+      return;
+    }
+
+    if (notification.id === "preview") {
+      toast.success("Preview mode - feedback not saved");
+      onClose();
       return;
     }
 
@@ -157,19 +173,21 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
   };
 
   const handleDismiss = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    await supabase
-      .from("notification_interactions")
-      .upsert({
-        notification_id: notification.id,
-        user_id: user.id,
-        dismissed_at: new Date().toISOString(),
-      }, {
-        onConflict: "notification_id,user_id",
-        ignoreDuplicates: false,
-      });
+    if (notification.id !== "preview") {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from("notification_interactions")
+          .upsert({
+            notification_id: notification.id,
+            user_id: user.id,
+            dismissed_at: new Date().toISOString(),
+          }, {
+            onConflict: "notification_id,user_id",
+            ignoreDuplicates: false,
+          });
+      }
+    }
 
     onClose();
   };
