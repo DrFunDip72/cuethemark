@@ -197,13 +197,13 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
       case "share":
         return (
           <div className="space-y-4">
-            <p className="text-muted-foreground">{notification.content}</p>
+            <p className="text-white/90">{notification.content}</p>
             <div className="flex gap-2">
-              <Button onClick={handleCopyLink} className="flex-1">
+              <Button onClick={handleCopyLink} className="flex-1 bg-white text-primary hover:bg-white/90">
                 <Copy className="mr-2 h-4 w-4" />
                 Copy Link
               </Button>
-              <Button onClick={handleShare} className="flex-1">
+              <Button onClick={handleShare} className="flex-1 bg-white text-primary hover:bg-white/90">
                 <Share2 className="mr-2 h-4 w-4" />
                 Share
               </Button>
@@ -214,14 +214,15 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
       case "feedback":
         return (
           <div className="space-y-4">
-            <p className="text-muted-foreground">{notification.content}</p>
+            <p className="text-white/90">{notification.content}</p>
             <Textarea
               placeholder="Enter your feedback..."
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               rows={4}
+              className="bg-white/20 border-white/30 text-white placeholder:text-white/60"
             />
-            <Button onClick={handleFeedbackSubmit} disabled={isSubmitting} className="w-full">
+            <Button onClick={handleFeedbackSubmit} disabled={isSubmitting} className="w-full bg-white text-primary hover:bg-white/90">
               <Send className="mr-2 h-4 w-4" />
               Submit Feedback
             </Button>
@@ -231,7 +232,7 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
       case "rating":
         return (
           <div className="space-y-4">
-            <p className="text-muted-foreground">{notification.content}</p>
+            <p className="text-white/90">{notification.content}</p>
             <div className="flex justify-center gap-2">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -244,14 +245,14 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
                   <Star
                     className={`h-8 w-8 ${
                       star <= (hoveredRating || rating)
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-muted-foreground"
+                        ? "fill-yellow-300 text-yellow-300"
+                        : "text-white/40"
                     }`}
                   />
                 </button>
               ))}
             </div>
-            <Button onClick={handleRatingSubmit} disabled={isSubmitting || rating === 0} className="w-full">
+            <Button onClick={handleRatingSubmit} disabled={isSubmitting || rating === 0} className="w-full bg-white text-primary hover:bg-white/90">
               Submit Rating
             </Button>
           </div>
@@ -260,8 +261,8 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
       case "announcement":
         return (
           <div className="space-y-4">
-            <p className="text-muted-foreground whitespace-pre-wrap">{notification.content}</p>
-            <Button onClick={handleDismiss} variant="outline" className="w-full">
+            <p className="text-white/90 whitespace-pre-wrap">{notification.content}</p>
+            <Button onClick={handleDismiss} className="w-full bg-white text-primary hover:bg-white/90">
               Got it
             </Button>
           </div>
@@ -271,21 +272,18 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && handleDismiss()}>
-      <DialogContent className="sm:max-w-md" onOpenAutoFocus={handleView}>
+      <DialogContent 
+        className="sm:max-w-md border-0 bg-gradient-to-br from-[hsl(var(--gradient-hero-start))] via-[hsl(var(--gradient-hero-mid))] to-[hsl(var(--gradient-hero-end))] text-white shadow-2xl" 
+        onOpenAutoFocus={handleView}
+      >
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
+          <DialogTitle className="text-2xl font-bold text-white">
             {notification.title}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDismiss}
-              className="h-6 w-6"
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </DialogTitle>
         </DialogHeader>
-        {renderContent()}
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+          {renderContent()}
+        </div>
       </DialogContent>
     </Dialog>
   );
