@@ -33,6 +33,26 @@ const NotificationsCenterPage = () => {
   useEffect(() => {
     loadUsers();
     loadNotifications();
+
+    // Set up real-time subscription for notifications
+    const channel = supabase
+      .channel('notifications-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications'
+        },
+        () => {
+          loadNotifications();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadUsers = async () => {
@@ -159,8 +179,14 @@ const NotificationsCenterPage = () => {
   };
 
   const calculateEngagementRate = (notif: any) => {
+    if (notif.total_views === 0) return "0%";
+    const rate = ((notif.total_interactions / notif.total_views) * 100).toFixed(1);
+    return `${rate}%`;
+  };
+
+  const calculateViewRate = (notif: any) => {
     if (notif.total_sent === 0) return "0%";
-    const rate = ((notif.total_interactions / notif.total_sent) * 100).toFixed(1);
+    const rate = ((notif.total_views / notif.total_sent) * 100).toFixed(1);
     return `${rate}%`;
   };
 
@@ -332,41 +358,53 @@ const NotificationsCenterPage = () => {
         </TabsContent>
 
         <TabsContent value="history" className="space-y-4">
-          {notifications.map((notif) => (
-            <Card key={notif.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle>{notif.title}</CardTitle>
-                    <CardDescription className="mt-1">
-                      {notif.content}
-                    </CardDescription>
-                  </div>
-                  {getStatusBadge(notif.status)}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div>
-                    <div className="text-muted-foreground">Template</div>
-                    <div className="font-medium capitalize">{notif.template_type}</div>
-                  </div>
-                  <div>
-                    <div className="text-muted-foreground">Audience</div>
-                    <div className="font-medium capitalize">{notif.target_audience.replace("_", " ")}</div>
-                  </div>
-                  <div>
-                    <div className="text-muted-foreground">Sent</div>
-                    <div className="font-medium">{notif.total_sent || 0}</div>
-                  </div>
-                  <div>
-                    <div className="text-muted-foreground">Views</div>
-                    <div className="font-medium">{notif.total_views || 0}</div>
-                  </div>
-                </div>
+          {notifications.length === 0 ? (
+            <Card>
+              <CardContent className="py-8">
+                <p className="text-center text-muted-foreground">No notifications yet</p>
               </CardContent>
             </Card>
-          ))}
+          ) : (
+            notifications.map((notif) => (
+              <Card key={notif.id}>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle>{notif.title}</CardTitle>
+                      <CardDescription className="mt-1">
+                        {notif.content}
+                      </CardDescription>
+                    </div>
+                    {getStatusBadge(notif.status)}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                    <div>
+                      <div className="text-muted-foreground">Template</div>
+                      <div className="font-medium capitalize">{notif.template_type}</div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground">Audience</div>
+                      <div className="font-medium capitalize">{notif.target_audience.replace("_", " ")}</div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground">Audience Size</div>
+                      <div className="font-medium">{notif.total_sent || 0}</div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground">Views</div>
+                      <div className="font-medium">{notif.total_views || 0} ({calculateViewRate(notif)})</div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground">Interactions</div>
+                      <div className="font-medium">{notif.total_interactions || 0} ({calculateEngagementRate(notif)})</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
@@ -404,13 +442,14 @@ const NotificationsCenterPage = () => {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">Avg Engagement</CardTitle>
+                <CardDescription className="text-xs">Interactions / Views</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
                   {(() => {
-                    const totalSent = notifications.reduce((sum, n) => sum + (n.total_sent || 0), 0);
+                    const totalViews = notifications.reduce((sum, n) => sum + (n.total_views || 0), 0);
                     const totalInteractions = notifications.reduce((sum, n) => sum + (n.total_interactions || 0), 0);
-                    return totalSent > 0 ? `${((totalInteractions / totalSent) * 100).toFixed(1)}%` : "0%";
+                    return totalViews > 0 ? `${((totalInteractions / totalViews) * 100).toFixed(1)}%` : "0%";
                   })()}
                 </div>
               </CardContent>
@@ -420,35 +459,51 @@ const NotificationsCenterPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>Notification Performance</CardTitle>
+              <CardDescription>Detailed analytics for sent notifications</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {notifications.filter(n => n.status === "sent").map((notif) => (
-                  <div key={notif.id} className="border-b pb-4 last:border-0">
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="font-medium">{notif.title}</div>
-                      <Badge variant="outline">{calculateEngagementRate(notif)}</Badge>
+                {notifications.filter(n => n.status === "sent").length === 0 ? (
+                  <p className="text-center text-muted-foreground py-4">No sent notifications yet</p>
+                ) : (
+                  notifications.filter(n => n.status === "sent").map((notif) => (
+                    <div key={notif.id} className="border-b pb-4 last:border-0">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <div className="font-medium">{notif.title}</div>
+                          <div className="text-xs text-muted-foreground capitalize">{notif.template_type}</div>
+                        </div>
+                        <Badge variant="outline">
+                          {calculateEngagementRate(notif)} engagement
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                        <div>
+                          <div className="text-muted-foreground">Audience</div>
+                          <div className="font-medium">{notif.total_sent || 0}</div>
+                        </div>
+                        <div>
+                          <div className="text-muted-foreground">Views</div>
+                          <div className="font-medium">{notif.total_views || 0}</div>
+                          <div className="text-xs text-muted-foreground">{calculateViewRate(notif)} view rate</div>
+                        </div>
+                        <div>
+                          <div className="text-muted-foreground">Interactions</div>
+                          <div className="font-medium">{notif.total_interactions || 0}</div>
+                          <div className="text-xs text-muted-foreground">{calculateEngagementRate(notif)} of viewers</div>
+                        </div>
+                        <div>
+                          <div className="text-muted-foreground">Completions</div>
+                          <div className="font-medium">{notif.total_completions || 0}</div>
+                        </div>
+                        <div>
+                          <div className="text-muted-foreground">Dismissals</div>
+                          <div className="font-medium">{notif.total_dismissals || 0}</div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-4 gap-4 text-sm">
-                      <div>
-                        <div className="text-muted-foreground">Sent</div>
-                        <div>{notif.total_sent || 0}</div>
-                      </div>
-                      <div>
-                        <div className="text-muted-foreground">Views</div>
-                        <div>{notif.total_views || 0}</div>
-                      </div>
-                      <div>
-                        <div className="text-muted-foreground">Interactions</div>
-                        <div>{notif.total_interactions || 0}</div>
-                      </div>
-                      <div>
-                        <div className="text-muted-foreground">Completions</div>
-                        <div>{notif.total_completions || 0}</div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>

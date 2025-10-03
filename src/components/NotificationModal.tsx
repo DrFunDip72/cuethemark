@@ -22,13 +22,15 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
   const [hoveredRating, setHoveredRating] = useState(0);
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isPreview = notification.id === "preview";
 
   const handleView = async () => {
-    if (notification.id === "preview") return;
+    if (isPreview) return;
     
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
+    // Upsert interaction with viewed_at - trigger will handle counter increment
     await supabase
       .from("notification_interactions")
       .upsert({
@@ -39,48 +41,32 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
         onConflict: "notification_id,user_id",
         ignoreDuplicates: false,
       });
-
-    // Update view count
-    const { data: notif } = await supabase
-      .from("notifications")
-      .select("total_views")
-      .eq("id", notification.id)
-      .single();
-
-    if (notif) {
-      await supabase
-        .from("notifications")
-        .update({ total_views: (notif.total_views || 0) + 1 })
-        .eq("id", notification.id);
-    }
   };
 
-  const handleInteraction = async () => {
-    if (notification.id === "preview") return;
+  const handleCopyLink = async () => {
+    await navigator.clipboard.writeText(window.location.origin);
+    toast.success("Link copied to clipboard!");
+
+    if (isPreview) return;
     
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
+    // Mark as interacted when user copies link
     await supabase
       .from("notification_interactions")
       .upsert({
         notification_id: notification.id,
         user_id: user.id,
         interacted_at: new Date().toISOString(),
+        response_type: "copy_link",
       }, {
         onConflict: "notification_id,user_id",
         ignoreDuplicates: false,
       });
   };
 
-  const handleCopyLink = async () => {
-    await handleInteraction();
-    await navigator.clipboard.writeText(window.location.origin);
-    toast.success("Link copied to clipboard!");
-  };
-
   const handleShare = async () => {
-    await handleInteraction();
     if (navigator.share) {
       try {
         await navigator.share({
@@ -88,6 +74,24 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
           text: notification.content,
           url: window.location.origin,
         });
+        
+        if (isPreview) return;
+        
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Mark as interacted when user shares
+        await supabase
+          .from("notification_interactions")
+          .upsert({
+            notification_id: notification.id,
+            user_id: user.id,
+            interacted_at: new Date().toISOString(),
+            response_type: "share",
+          }, {
+            onConflict: "notification_id,user_id",
+            ignoreDuplicates: false,
+          });
       } catch (error) {
         console.log("Share cancelled");
       }
@@ -102,7 +106,7 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
       return;
     }
 
-    if (notification.id === "preview") {
+    if (isPreview) {
       toast.success("Preview mode - rating not saved");
       onClose();
       return;
@@ -110,15 +114,20 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
 
     setIsSubmitting(true);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) {
+      setIsSubmitting(false);
+      return;
+    }
 
+    // Mark as both interacted and completed when submitting rating
     await supabase
       .from("notification_interactions")
       .upsert({
         notification_id: notification.id,
         user_id: user.id,
+        interacted_at: new Date().toISOString(),
         completed_at: new Date().toISOString(),
-        response_type: "rating",
+        response_type: "rating_submitted",
         response_data: { rating },
       }, {
         onConflict: "notification_id,user_id",
@@ -136,7 +145,7 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
       return;
     }
 
-    if (notification.id === "preview") {
+    if (isPreview) {
       toast.success("Preview mode - feedback not saved");
       onClose();
       return;
@@ -144,7 +153,10 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
 
     setIsSubmitting(true);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) {
+      setIsSubmitting(false);
+      return;
+    }
 
     // Save to feedback table
     await supabase.from("feedback").insert({
@@ -153,14 +165,15 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
       message: feedback,
     });
 
-    // Track interaction
+    // Mark as both interacted and completed when submitting feedback
     await supabase
       .from("notification_interactions")
       .upsert({
         notification_id: notification.id,
         user_id: user.id,
+        interacted_at: new Date().toISOString(),
         completed_at: new Date().toISOString(),
-        response_type: "feedback",
+        response_type: "feedback_submitted",
         response_data: { feedback },
       }, {
         onConflict: "notification_id,user_id",
@@ -173,16 +186,24 @@ export const NotificationModal = ({ notification, open, onClose }: NotificationM
   };
 
   const handleDismiss = async () => {
-    if (notification.id !== "preview") {
+    if (!isPreview) {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        // For announcements, clicking "Got it" is both an interaction and dismissal
+        const updateData: any = {
+          notification_id: notification.id,
+          user_id: user.id,
+          dismissed_at: new Date().toISOString(),
+        };
+        
+        if (notification.template_type === "announcement") {
+          updateData.interacted_at = new Date().toISOString();
+          updateData.response_type = "dismissed";
+        }
+
         await supabase
           .from("notification_interactions")
-          .upsert({
-            notification_id: notification.id,
-            user_id: user.id,
-            dismissed_at: new Date().toISOString(),
-          }, {
+          .upsert(updateData, {
             onConflict: "notification_id,user_id",
             ignoreDuplicates: false,
           });

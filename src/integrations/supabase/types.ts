@@ -470,6 +470,13 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      calculate_audience_size: {
+        Args: {
+          p_custom_user_ids: string[]
+          p_target_audience: Database["public"]["Enums"]["target_audience"]
+        }
+        Returns: number
+      }
       check_is_admin_unchanged: {
         Args: { _new_is_admin: boolean }
         Returns: boolean
