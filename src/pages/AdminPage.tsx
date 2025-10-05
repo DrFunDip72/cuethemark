@@ -31,7 +31,7 @@ const AdminPage = () => {
     try {
       const [usersRes, errorsRes, tracksRes, labelsRes] = await Promise.all([
         supabase.from('profiles').select('id', { count: 'exact', head: true }),
-        supabase.from('upload_errors').select('id', { count: 'exact', head: true })
+        supabase.from('application_errors').select('id', { count: 'exact', head: true })
           .eq('resolved', false)
           .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
         supabase.from('audio_tracks').select('id', { count: 'exact', head: true }),

@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      application_errors: {
+        Row: {
+          action: string
+          component: string
+          context: Json | null
+          created_at: string
+          error_message: string
+          error_number: number
+          error_type: string
+          id: string
+          request_id: string | null
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          stack_trace: string | null
+          step_failed: string
+          url: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action?: string
+          component?: string
+          context?: Json | null
+          created_at?: string
+          error_message: string
+          error_number?: number
+          error_type: string
+          id?: string
+          request_id?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          stack_trace?: string | null
+          step_failed: string
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          component?: string
+          context?: Json | null
+          created_at?: string
+          error_message?: string
+          error_number?: number
+          error_type?: string
+          id?: string
+          request_id?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          stack_trace?: string | null
+          step_failed?: string
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       audio_labels: {
         Row: {
           created_at: string
@@ -403,60 +463,6 @@ export type Database = {
           subscription_end?: string | null
           subscription_tier?: string | null
           updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      upload_errors: {
-        Row: {
-          context: Json | null
-          created_at: string
-          error_message: string
-          error_number: number
-          error_type: string
-          file_name: string | null
-          file_size: number | null
-          file_type: string | null
-          id: string
-          resolved: boolean
-          resolved_at: string | null
-          resolved_by: string | null
-          stack_trace: string | null
-          step_failed: string
-          user_id: string | null
-        }
-        Insert: {
-          context?: Json | null
-          created_at?: string
-          error_message: string
-          error_number?: number
-          error_type: string
-          file_name?: string | null
-          file_size?: number | null
-          file_type?: string | null
-          id?: string
-          resolved?: boolean
-          resolved_at?: string | null
-          resolved_by?: string | null
-          stack_trace?: string | null
-          step_failed: string
-          user_id?: string | null
-        }
-        Update: {
-          context?: Json | null
-          created_at?: string
-          error_message?: string
-          error_number?: number
-          error_type?: string
-          file_name?: string | null
-          file_size?: number | null
-          file_type?: string | null
-          id?: string
-          resolved?: boolean
-          resolved_at?: string | null
-          resolved_by?: string | null
-          stack_trace?: string | null
-          step_failed?: string
           user_id?: string | null
         }
         Relationships: []
