@@ -27,11 +27,13 @@ interface ErrorData {
   resolved: boolean;
   resolved_at: string | null;
   resolved_by: string | null;
-  file_name: string | null;
-  file_size: number | null;
-  file_type: string | null;
+  component: string;
+  action: string;
   step_failed: string;
   stack_trace: string | null;
+  url: string | null;
+  user_agent: string | null;
+  request_id: string | null;
   context: any;
   user_email?: string;
   user_display_name?: string;
@@ -50,7 +52,7 @@ const ErrorDashboardPage = () => {
 
       // Fetch unresolved errors
       const { data: unresolvedData, error: unresolvedError } = await supabase
-        .from('upload_errors')
+        .from('application_errors')
         .select('*')
         .eq('resolved', false)
         .order('created_at', { ascending: false });
@@ -59,7 +61,7 @@ const ErrorDashboardPage = () => {
 
       // Fetch resolved errors
       const { data: resolvedData, error: resolvedError } = await supabase
-        .from('upload_errors')
+        .from('application_errors')
         .select('*')
         .eq('resolved', true)
         .order('resolved_at', { ascending: false })
@@ -118,7 +120,7 @@ const ErrorDashboardPage = () => {
       setResolving(errorId);
 
       const { error } = await supabase
-        .from('upload_errors')
+        .from('application_errors')
         .update({
           resolved: true,
           resolved_at: new Date().toISOString(),
@@ -152,13 +154,13 @@ const ErrorDashboardPage = () => {
 
     // Set up real-time subscription
     const channel = supabase
-      .channel('upload_errors_changes')
+      .channel('application_errors_changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'upload_errors',
+          table: 'application_errors',
         },
         (payload) => {
           console.log('Error change detected:', payload);
@@ -322,20 +324,20 @@ const ErrorDashboardPage = () => {
                 <h3 className="font-semibold mb-2">Error Details</h3>
                 <div className="text-sm space-y-1">
                   <p><strong>Type:</strong> {selectedError.error_type}</p>
+                  <p><strong>Component:</strong> {selectedError.component}</p>
+                  <p><strong>Action:</strong> {selectedError.action}</p>
                   <p><strong>Step Failed:</strong> {selectedError.step_failed}</p>
                   <p><strong>Timestamp:</strong> {new Date(selectedError.created_at).toLocaleString()}</p>
+                  {selectedError.url && <p><strong>URL:</strong> {selectedError.url}</p>}
+                  {selectedError.request_id && <p><strong>Request ID:</strong> {selectedError.request_id}</p>}
                 </div>
               </div>
 
-              {/* File Info (if available) */}
-              {(selectedError.file_name || selectedError.file_size || selectedError.file_type) && (
+              {/* User Agent (if available) */}
+              {selectedError.user_agent && (
                 <div>
-                  <h3 className="font-semibold mb-2">File Information</h3>
-                  <div className="text-sm space-y-1">
-                    {selectedError.file_name && <p><strong>File Name:</strong> {selectedError.file_name}</p>}
-                    {selectedError.file_size && <p><strong>File Size:</strong> {(selectedError.file_size / 1024 / 1024).toFixed(2)} MB</p>}
-                    {selectedError.file_type && <p><strong>File Type:</strong> {selectedError.file_type}</p>}
-                  </div>
+                  <h3 className="font-semibold mb-2">Browser Information</h3>
+                  <p className="text-sm bg-muted p-3 rounded-md break-all">{selectedError.user_agent}</p>
                 </div>
               )}
 
