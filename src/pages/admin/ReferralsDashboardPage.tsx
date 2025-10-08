@@ -46,7 +46,7 @@ const ReferralsDashboardPage = () => {
           />
           <AnalyticsMetricCard
             title="Referral Rate"
-            value={`${overview?.referralRate.toFixed(1) || 0}%`}
+            value={`${(overview?.referralRate ?? 0).toFixed(1)}%`}
             icon={TrendingUp}
             loading={isLoading}
           />
