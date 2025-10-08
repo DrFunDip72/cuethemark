@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
-import { AnalyticsTimeRangeSelector, TimeRange, Granularity } from "@/components/analytics/AnalyticsTimeRangeSelector";
+import { TimeRange, Granularity } from "@/components/analytics/AnalyticsTimeRangeSelector";
 import { AnalyticsMetricCard } from "@/components/analytics/AnalyticsMetricCard";
 import { UserGrowthChart } from "@/components/analytics/UserGrowthChart";
 import { UploadActivityChart } from "@/components/analytics/UploadActivityChart";
@@ -34,22 +34,23 @@ const AnalyticsDashboardPage = () => {
       title="Analytics Dashboard"
       description="Track user growth, uploads, and engagement metrics"
     >
-      <div className="space-y-6">
-        <AnalyticsTimeRangeSelector
-          timeRange={timeRange}
-          onTimeRangeChange={setTimeRange}
-          granularity={granularity}
-          onGranularityChange={setGranularity}
-          customStartDate={customStartDate}
-          customEndDate={customEndDate}
-          onCustomStartDateChange={setCustomStartDate}
-          onCustomEndDateChange={setCustomEndDate}
-        />
-
+      <div className="space-y-8">
         {/* User Growth Section */}
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold">User Growth</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <UserGrowthChart
+            data={userGrowth?.chartData || []}
+            loading={userGrowthLoading}
+            timeRange={timeRange}
+            onTimeRangeChange={setTimeRange}
+            granularity={granularity}
+            onGranularityChange={setGranularity}
+            customStartDate={customStartDate}
+            customEndDate={customEndDate}
+            onCustomStartDateChange={setCustomStartDate}
+            onCustomEndDateChange={setCustomEndDate}
+          />
+          <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
             <AnalyticsMetricCard
               title="Total Users"
               value={userGrowth?.totalUsers.toLocaleString() || "0"}
@@ -57,15 +58,15 @@ const AnalyticsDashboardPage = () => {
               loading={userGrowthLoading}
             />
             <AnalyticsMetricCard
-              title="New Users (7d)"
+              title="New (7d)"
               value={userGrowth?.newUsersLast7Days.toLocaleString() || "0"}
               change={userGrowth?.growthRate}
-              changeLabel="vs previous week"
+              changeLabel="vs prev"
               icon={TrendingUp}
               loading={userGrowthLoading}
             />
             <AnalyticsMetricCard
-              title="New Users (30d)"
+              title="New (30d)"
               value={userGrowth?.newUsersLast30Days.toLocaleString() || "0"}
               icon={Users}
               loading={userGrowthLoading}
@@ -77,16 +78,24 @@ const AnalyticsDashboardPage = () => {
               loading={userGrowthLoading}
             />
           </div>
-          <UserGrowthChart
-            data={userGrowth?.chartData || []}
-            loading={userGrowthLoading}
-          />
         </div>
 
         {/* Upload Activity Section */}
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold">Upload Activity</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <UploadActivityChart
+            data={uploadActivity?.chartData || []}
+            loading={uploadActivityLoading}
+            timeRange={timeRange}
+            onTimeRangeChange={setTimeRange}
+            granularity={granularity}
+            onGranularityChange={setGranularity}
+            customStartDate={customStartDate}
+            customEndDate={customEndDate}
+            onCustomStartDateChange={setCustomStartDate}
+            onCustomEndDateChange={setCustomEndDate}
+          />
+          <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
             <AnalyticsMetricCard
               title="Total Tracks"
               value={uploadActivity?.totalTracks.toLocaleString() || "0"}
@@ -110,10 +119,6 @@ const AnalyticsDashboardPage = () => {
               loading={uploadActivityLoading}
             />
           </div>
-          <UploadActivityChart
-            data={uploadActivity?.chartData || []}
-            loading={uploadActivityLoading}
-          />
 
           {/* Top Uploaders */}
           <Card>
