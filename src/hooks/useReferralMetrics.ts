@@ -30,7 +30,12 @@ export const useReferralMetrics = () => {
       
       if (error) throw error;
       
-      return data[0] as ReferralOverview;
+      return {
+        totalUsers: data[0].total_users,
+        referredUsers: data[0].referred_users,
+        organicUsers: data[0].organic_users,
+        referralRate: data[0].referral_rate,
+      } as ReferralOverview;
     },
   });
 
@@ -41,7 +46,12 @@ export const useReferralMetrics = () => {
       
       if (error) throw error;
       
-      return data as unknown as TopReferrer[];
+      return data.map(item => ({
+        referrerNormalized: item.referrer_normalized,
+        referrerDisplay: item.referrer_display,
+        referralCount: item.referral_count,
+        percentage: item.percentage,
+      })) as TopReferrer[];
     },
   });
 
