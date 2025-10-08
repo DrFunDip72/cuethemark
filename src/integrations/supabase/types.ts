@@ -487,6 +487,24 @@ export type Database = {
         Args: { _new_is_admin: boolean }
         Returns: boolean
       }
+      get_referral_overview: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          organic_users: number
+          referral_rate: number
+          referred_users: number
+          total_users: number
+        }[]
+      }
+      get_top_referrers: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          percentage: number
+          referral_count: number
+          referrer_display: string
+          referrer_normalized: string
+        }[]
+      }
       user_is_admin: {
         Args: { _user_id: string }
         Returns: boolean

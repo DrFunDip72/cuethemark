@@ -26,7 +26,7 @@ export const useReferralMetrics = () => {
   const overviewQuery = useQuery({
     queryKey: ["referral-overview"],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_referral_overview");
+      const { data, error } = await supabase.rpc("get_referral_overview" as any);
       
       if (error) throw error;
       
@@ -37,11 +37,11 @@ export const useReferralMetrics = () => {
   const topReferrersQuery = useQuery({
     queryKey: ["top-referrers"],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_top_referrers");
+      const { data, error } = await supabase.rpc("get_top_referrers" as any);
       
       if (error) throw error;
       
-      return data as TopReferrer[];
+      return data as unknown as TopReferrer[];
     },
   });
 
