@@ -410,6 +410,27 @@ export type Database = {
         }
         Relationships: []
       }
+      referrer_aliases: {
+        Row: {
+          alias_name: string
+          canonical_name: string
+          created_at: string | null
+          id: string
+        }
+        Insert: {
+          alias_name: string
+          canonical_name: string
+          created_at?: string | null
+          id?: string
+        }
+        Update: {
+          alias_name?: string
+          canonical_name?: string
+          created_at?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
       seeded_templates: {
         Row: {
           created_at: string

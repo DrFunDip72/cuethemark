@@ -15,7 +15,7 @@ export const ReferralBreakdownChart = ({
 }: ReferralBreakdownChartProps) => {
   const data = [
     { name: "Referred Users", value: referredUsers, fill: "hsl(var(--primary))" },
-    { name: "Organic Users", value: organicUsers, fill: "hsl(var(--muted))" },
+    { name: "Organic Users", value: organicUsers, fill: "hsl(180, 60%, 45%)" },
   ];
 
   const chartConfig = {
@@ -25,7 +25,7 @@ export const ReferralBreakdownChart = ({
     },
     organic: {
       label: "Organic Users",
-      color: "hsl(var(--muted))",
+      color: "hsl(180, 60%, 45%)",
     },
   };
 
