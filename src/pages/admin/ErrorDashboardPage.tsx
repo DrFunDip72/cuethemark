@@ -374,7 +374,16 @@ const ErrorDashboardPage = () => {
 
               {/* Actions */}
               {!selectedError.resolved && (
-                <div className="flex justify-end pt-4 border-t">
+                <div className="flex justify-end gap-2 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedError(null);
+                      window.open(`/app/admin/feature-tracker?createFeature=true&errorId=${selectedError.id}&errorMsg=${encodeURIComponent(selectedError.error_message)}`, '_self');
+                    }}
+                  >
+                    Create Feature Fix
+                  </Button>
                   <Button
                     onClick={() => handleResolve(selectedError.id)}
                     disabled={resolving === selectedError.id}

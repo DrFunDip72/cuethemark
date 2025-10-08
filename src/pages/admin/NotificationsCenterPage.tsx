@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { AdminLayout } from "@/components/AdminLayout";
 import { NotificationModal } from "@/components/NotificationModal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,10 +15,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Send, Clock, Save, BarChart3, CalendarIcon, Users } from "lucide-react";
+import { Send, Clock, Save, BarChart3, CalendarIcon, Users, Pencil, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 
 const NotificationsCenterPage = () => {
+  const location = useLocation();
   const [templateType, setTemplateType] = useState<"share" | "feedback" | "rating" | "announcement">("announcement");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -26,9 +28,21 @@ const NotificationsCenterPage = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [draftNotifications, setDraftNotifications] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [linkedFeatureId, setLinkedFeatureId] = useState<string | null>(null);
+  const [editingDraftId, setEditingDraftId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (location.state?.featureId) {
+      setLinkedFeatureId(location.state.featureId);
+      setTitle(location.state.prefilledTitle || "");
+      setContent(location.state.prefilledContent || "");
+      setTemplateType("announcement");
+    }
+  }, [location.state]);
 
   useEffect(() => {
     loadUsers();
@@ -70,7 +84,10 @@ const NotificationsCenterPage = () => {
       .select("*")
       .order("created_at", { ascending: false });
     
-    if (data) setNotifications(data);
+    if (data) {
+      setNotifications(data.filter((n) => n.status !== "draft"));
+      setDraftNotifications(data.filter((n) => n.status === "draft"));
+    }
   };
 
   const handleSend = async (saveAsDraft = false) => {
@@ -88,18 +105,31 @@ const NotificationsCenterPage = () => {
 
     const status = saveAsDraft ? "draft" : scheduledDate ? "scheduled" : "sent";
 
-    const { error } = await supabase
-      .from("notifications")
-      .insert({
-        title,
-        content,
-        template_type: templateType,
-        target_audience: targetAudience,
-        custom_user_ids: targetAudience === "custom" ? selectedUserIds : [],
-        scheduled_for: scheduledDate?.toISOString(),
-        sent_at: !saveAsDraft && !scheduledDate ? new Date().toISOString() : null,
-        status,
-      });
+    const notificationData: any = {
+      title,
+      content,
+      template_type: templateType,
+      target_audience: targetAudience,
+      custom_user_ids: targetAudience === "custom" ? selectedUserIds : [],
+      scheduled_for: scheduledDate?.toISOString(),
+      sent_at: !saveAsDraft && !scheduledDate ? new Date().toISOString() : null,
+      status,
+      linked_feature_id: linkedFeatureId,
+    };
+
+    let error;
+    if (editingDraftId) {
+      const result = await supabase
+        .from("notifications")
+        .update(notificationData)
+        .eq("id", editingDraftId);
+      error = result.error;
+    } else {
+      const result = await supabase
+        .from("notifications")
+        .insert(notificationData);
+      error = result.error;
+    }
 
     if (error) {
       toast.error("Failed to create notification");
@@ -120,6 +150,8 @@ const NotificationsCenterPage = () => {
       setTargetAudience("all_users");
       setScheduledDate(undefined);
       setSelectedUserIds([]);
+      setLinkedFeatureId(null);
+      setEditingDraftId(null);
       
       loadNotifications();
     }
@@ -190,6 +222,46 @@ const NotificationsCenterPage = () => {
     return `${rate}%`;
   };
 
+  const handleEditDraft = (draft: any) => {
+    setTitle(draft.title);
+    setContent(draft.content);
+    setTemplateType(draft.template_type);
+    setTargetAudience(draft.target_audience);
+    setLinkedFeatureId(draft.linked_feature_id);
+    setEditingDraftId(draft.id);
+    if (draft.custom_user_ids) {
+      setSelectedUserIds(draft.custom_user_ids);
+    }
+  };
+
+  const handleDeleteDraft = async (id: string) => {
+    const { error } = await supabase
+      .from("notifications")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      toast.error("Failed to delete draft");
+    } else {
+      toast.success("Draft deleted");
+      loadNotifications();
+    }
+  };
+
+  const handleSendDraft = async (draft: any) => {
+    const { error } = await supabase
+      .from("notifications")
+      .update({ status: "sent", sent_at: new Date().toISOString() })
+      .eq("id", draft.id);
+
+    if (error) {
+      toast.error("Failed to send notification");
+    } else {
+      toast.success("Notification sent");
+      loadNotifications();
+    }
+  };
+
   return (
     <AdminLayout
       title="Notifications Center"
@@ -197,7 +269,10 @@ const NotificationsCenterPage = () => {
     >
       <Tabs defaultValue="create" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="create">Create Notification</TabsTrigger>
+          <TabsTrigger value="create">
+            {editingDraftId ? "Edit Draft" : "Create Notification"}
+          </TabsTrigger>
+          <TabsTrigger value="drafts">Drafts ({draftNotifications.length})</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
@@ -355,6 +430,68 @@ const NotificationsCenterPage = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="drafts" className="space-y-4">
+          {draftNotifications.length === 0 ? (
+            <Card>
+              <CardContent className="py-8">
+                <p className="text-center text-muted-foreground">No draft notifications</p>
+              </CardContent>
+            </Card>
+          ) : (
+            draftNotifications.map((draft) => (
+              <Card key={draft.id}>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle>{draft.title}</CardTitle>
+                      <CardDescription className="mt-1">
+                        {draft.content}
+                      </CardDescription>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditDraft(draft)}
+                      >
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSendDraft(draft)}
+                      >
+                        <Send className="h-4 w-4 mr-2" />
+                        Send
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteDraft(draft.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <div className="text-muted-foreground">Template</div>
+                      <div className="font-medium capitalize">{draft.template_type}</div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground">Audience</div>
+                      <div className="font-medium capitalize">{draft.target_audience.replace("_", " ")}</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </TabsContent>
 
         <TabsContent value="history" className="space-y-4">

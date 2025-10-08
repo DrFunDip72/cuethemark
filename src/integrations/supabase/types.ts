@@ -157,6 +157,63 @@ export type Database = {
         }
         Relationships: []
       }
+      features: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          linked_error_id: string | null
+          order_index: number
+          priority: Database["public"]["Enums"]["feature_priority"]
+          status: Database["public"]["Enums"]["feature_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          linked_error_id?: string | null
+          order_index?: number
+          priority?: Database["public"]["Enums"]["feature_priority"]
+          status?: Database["public"]["Enums"]["feature_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          linked_error_id?: string | null
+          order_index?: number
+          priority?: Database["public"]["Enums"]["feature_priority"]
+          status?: Database["public"]["Enums"]["feature_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "features_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "features_linked_error_id_fkey"
+            columns: ["linked_error_id"]
+            isOneToOne: false
+            referencedRelation: "application_errors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback: {
         Row: {
           app_version: string | null
@@ -247,6 +304,7 @@ export type Database = {
           created_by: string | null
           custom_user_ids: string[] | null
           id: string
+          linked_feature_id: string | null
           scheduled_for: string | null
           sent_at: string | null
           status: Database["public"]["Enums"]["notification_status"]
@@ -267,6 +325,7 @@ export type Database = {
           created_by?: string | null
           custom_user_ids?: string[] | null
           id?: string
+          linked_feature_id?: string | null
           scheduled_for?: string | null
           sent_at?: string | null
           status?: Database["public"]["Enums"]["notification_status"]
@@ -287,6 +346,7 @@ export type Database = {
           created_by?: string | null
           custom_user_ids?: string[] | null
           id?: string
+          linked_feature_id?: string | null
           scheduled_for?: string | null
           sent_at?: string | null
           status?: Database["public"]["Enums"]["notification_status"]
@@ -301,7 +361,15 @@ export type Database = {
           total_views?: number | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notifications_linked_feature_id_fkey"
+            columns: ["linked_feature_id"]
+            isOneToOne: false
+            referencedRelation: "features"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -532,6 +600,8 @@ export type Database = {
       }
     }
     Enums: {
+      feature_priority: "low" | "medium" | "high" | "urgent"
+      feature_status: "not_started" | "in_progress" | "completed"
       notification_status: "draft" | "scheduled" | "sent" | "archived"
       notification_template: "share" | "feedback" | "rating" | "announcement"
       target_audience:
@@ -668,6 +738,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      feature_priority: ["low", "medium", "high", "urgent"],
+      feature_status: ["not_started", "in_progress", "completed"],
       notification_status: ["draft", "scheduled", "sent", "archived"],
       notification_template: ["share", "feedback", "rating", "announcement"],
       target_audience: [
