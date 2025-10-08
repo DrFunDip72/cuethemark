@@ -187,15 +187,13 @@ const FeatureTrackerPage = () => {
           if (!open) setFeatureFromError(null);
         }}
         onSave={async (feature) => {
-          if (feature.title && feature.priority && feature.status !== undefined) {
-            await createFeature({
-              title: feature.title,
-              description: feature.description || null,
-              priority: feature.priority,
-              status: feature.status || "not_started",
-              linked_error_id: feature.linked_error_id || null,
-            });
-          }
+          await createFeature({
+            title: feature.title!,
+            description: feature.description || null,
+            priority: feature.priority!,
+            status: "not_started",
+            linked_error_id: feature.linked_error_id || null,
+          });
           setFeatureFromError(null);
         }}
         initialData={
