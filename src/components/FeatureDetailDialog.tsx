@@ -1,12 +1,24 @@
 import { useState } from "react";
+import * as React from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
@@ -18,14 +30,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Edit, Archive, Bell } from "lucide-react";
-import type { Feature } from "@/hooks/useFeatures";
+import { Archive, Bell } from "lucide-react";
+import type { Feature, FeaturePriority, FeatureStatus } from "@/hooks/useFeatures";
 
 interface FeatureDetailDialogProps {
   feature: Feature | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onEdit: () => void;
+  onSave: (id: string, updates: Partial<Feature>) => Promise<any>;
   onArchive: (id: string) => Promise<void>;
   onCreateAnnouncement: (feature: Feature) => void;
 }
@@ -53,12 +65,45 @@ export const FeatureDetailDialog = ({
   feature,
   open,
   onOpenChange,
-  onEdit,
+  onSave,
   onArchive,
   onCreateAnnouncement,
 }: FeatureDetailDialogProps) => {
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const [archiving, setArchiving] = useState(false);
+  const [title, setTitle] = useState(feature?.title || "");
+  const [description, setDescription] = useState(feature?.description || "");
+  const [priority, setPriority] = useState<FeaturePriority>(feature?.priority || "medium");
+  const [status, setStatus] = useState<FeatureStatus>(feature?.status || "not_started");
+  const [saving, setSaving] = useState(false);
+
+  // Update state when feature changes
+  React.useEffect(() => {
+    if (feature && open) {
+      setTitle(feature.title);
+      setDescription(feature.description || "");
+      setPriority(feature.priority);
+      setStatus(feature.status);
+    }
+  }, [feature, open]);
+
+  const handleSave = async () => {
+    if (!feature || !title.trim()) return;
+    setSaving(true);
+    try {
+      await onSave(feature.id, {
+        title: title.trim(),
+        description: description.trim() || null,
+        priority,
+        status,
+      });
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error saving feature:", error);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleArchive = async () => {
     if (!feature) return;
@@ -74,35 +119,77 @@ export const FeatureDetailDialog = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader className="space-y-4">
-            {/* Title and Status */}
-            <div className="space-y-3">
-              <DialogTitle className="text-3xl font-bold leading-tight">
-                {feature.title}
-              </DialogTitle>
-              <Badge className={`${statusColors[feature.status]} w-fit`}>
-                {statusLabels[feature.status]}
-              </Badge>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Feature Details</DialogTitle>
+            <DialogDescription>
+              View and edit feature information
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Title *</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter feature title"
+              />
             </div>
 
-            {/* Description */}
-            {feature.description && (
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe the feature and its benefits"
+                rows={4}
+              />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                  Description
-                </h4>
-                <div className="p-4 rounded-lg border bg-muted/30">
-                  <p className="text-base leading-relaxed">{feature.description}</p>
-                </div>
+                <Label htmlFor="priority">Priority</Label>
+                <Select value={priority} onValueChange={(v) => setPriority(v as FeaturePriority)}>
+                  <SelectTrigger id="priority">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select value={status} onValueChange={(v) => setStatus(v as FeatureStatus)}>
+                  <SelectTrigger id="status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="not_started">Not Started</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {feature.linked_error_id && (
+              <div className="text-sm text-muted-foreground">
+                This feature is linked to a bug report
               </div>
             )}
 
-            {/* Metadata Grid */}
-            <div className="grid grid-cols-2 gap-4 pt-2">
+            <div className="grid gap-4 sm:grid-cols-2 pt-2">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Created</p>
-                <p className="text-base font-semibold">
+                <p className="text-base">
                   {new Date(feature.created_at).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -114,7 +201,7 @@ export const FeatureDetailDialog = ({
               {feature.completed_at && (
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-muted-foreground">Completed</p>
-                  <p className="text-base font-semibold">
+                  <p className="text-base">
                     {new Date(feature.completed_at).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
@@ -123,26 +210,9 @@ export const FeatureDetailDialog = ({
                   </p>
                 </div>
               )}
-
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Priority</p>
-                <Badge className={priorityColors[feature.priority]}>
-                  {feature.priority.charAt(0).toUpperCase() + feature.priority.slice(1)}
-                </Badge>
-              </div>
-
-              {feature.linked_error_id && (
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Type</p>
-                  <Badge variant="outline" className="border-destructive text-destructive">
-                    Bug Fix
-                  </Badge>
-                </div>
-              )}
             </div>
-          </DialogHeader>
+          </div>
 
-          {/* Action Button for Announcement */}
           {feature.status === "completed" && (
             <div className="pt-4 border-t">
               <Button 
@@ -156,22 +226,17 @@ export const FeatureDetailDialog = ({
             </div>
           )}
 
-          {/* Footer with Edit and Archive */}
-          <DialogFooter className="pt-4 border-t">
-            <div className="flex gap-2 w-full sm:w-auto">
-              <Button variant="outline" size="sm" onClick={onEdit}>
-                <Edit className="w-3 h-3 mr-2" />
-                Edit
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowArchiveDialog(true)}
-              >
-                <Archive className="w-3 h-3 mr-2" />
-                Archive
-              </Button>
-            </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowArchiveDialog(true)}
+            >
+              <Archive className="w-4 h-4 mr-2" />
+              Archive
+            </Button>
+            <Button onClick={handleSave} disabled={!title.trim() || saving}>
+              {saving ? "Saving..." : "Save Changes"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

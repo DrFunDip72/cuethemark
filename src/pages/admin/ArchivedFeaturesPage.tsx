@@ -53,7 +53,7 @@ export default function ArchivedFeaturesPage() {
   const [featureToDelete, setFeatureToDelete] = useState<string | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
-  const { unarchiveFeature } = useFeatures();
+  const { unarchiveFeature, updateFeature } = useFeatures();
 
   const fetchArchivedFeatures = async () => {
     try {
@@ -221,7 +221,9 @@ export default function ArchivedFeaturesPage() {
         feature={selectedFeature}
         open={detailDialogOpen}
         onOpenChange={setDetailDialogOpen}
-        onEdit={() => {}}
+        onSave={async (id, updates) => {
+          await updateFeature(id, updates);
+        }}
         onArchive={async () => {}}
         onCreateAnnouncement={() => {}}
       />
