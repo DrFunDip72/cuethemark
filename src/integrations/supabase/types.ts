@@ -159,6 +159,7 @@ export type Database = {
       }
       features: {
         Row: {
+          archived: boolean
           completed_at: string | null
           created_at: string
           created_by: string | null
@@ -172,6 +173,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived?: boolean
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
@@ -185,6 +187,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived?: boolean
           completed_at?: string | null
           created_at?: string
           created_by?: string | null

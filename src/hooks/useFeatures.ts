@@ -23,12 +23,17 @@ export const useFeatures = () => {
   const [features, setFeatures] = useState<Feature[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchFeatures = async () => {
+  const fetchFeatures = async (includeArchived = false) => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("features")
-        .select("*")
-        .order("order_index", { ascending: true });
+        .select("*");
+      
+      if (!includeArchived) {
+        query = query.eq("archived", false);
+      }
+      
+      const { data, error } = await query.order("order_index", { ascending: true });
 
       if (error) throw error;
       setFeatures(data || []);
@@ -148,6 +153,47 @@ export const useFeatures = () => {
     }
   };
 
+  const archiveFeature = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("features")
+        .update({ archived: true })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setFeatures(features.filter((f) => f.id !== id));
+      toast({ title: "Success", description: "Feature archived successfully" });
+    } catch (error: any) {
+      console.error("Error archiving feature:", error);
+      toast({
+        title: "Error",
+        description: "Failed to archive feature",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const unarchiveFeature = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("features")
+        .update({ archived: false })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast({ title: "Success", description: "Feature unarchived successfully" });
+    } catch (error: any) {
+      console.error("Error unarchiving feature:", error);
+      toast({
+        title: "Error",
+        description: "Failed to unarchive feature",
+        variant: "destructive",
+      });
+    }
+  };
+
   return {
     features,
     loading,
@@ -155,6 +201,8 @@ export const useFeatures = () => {
     updateFeature,
     deleteFeature,
     moveFeature,
+    archiveFeature,
+    unarchiveFeature,
     refetch: fetchFeatures,
   };
 };

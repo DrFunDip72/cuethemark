@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { AdminLayout } from "@/components/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Archive as ArchiveIcon } from "lucide-react";
 import {
   DndContext,
   DragEndEvent,
@@ -13,6 +13,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  useDroppable,
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useFeatures, type Feature, type FeatureStatus } from "@/hooks/useFeatures";
@@ -20,10 +21,16 @@ import { FeatureCard } from "@/components/FeatureCard";
 import { CreateFeatureDialog } from "@/components/CreateFeatureDialog";
 import { FeatureDetailDialog } from "@/components/FeatureDetailDialog";
 
+// Droppable Column Component
+function DroppableColumn({ id, children }: { id: string; children: React.ReactNode }) {
+  const { setNodeRef } = useDroppable({ id });
+  return <div ref={setNodeRef}>{children}</div>;
+}
+
 const FeatureTrackerPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { features, loading, createFeature, updateFeature, deleteFeature, moveFeature } =
+  const { features, loading, createFeature, updateFeature, archiveFeature, moveFeature } =
     useFeatures();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
@@ -122,10 +129,19 @@ const FeatureTrackerPage = () => {
       title="Feature Tracker"
       description="Manage feature development with kanban board"
       action={
-        <Button onClick={() => setCreateDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Feature
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/app/admin/features/archived")}
+          >
+            <ArchiveIcon className="h-4 w-4 mr-2" />
+            Archived
+          </Button>
+          <Button onClick={() => setCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Feature
+          </Button>
+        </div>
       }
     >
       {loading ? (
@@ -149,31 +165,29 @@ const FeatureTrackerPage = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <SortableContext
-                      id={column.status}
-                      items={columnFeatures.map((f) => f.id)}
-                      strategy={verticalListSortingStrategy}
-                    >
-                      <div 
-                        className="space-y-3 min-h-[200px]"
-                        data-status={column.status}
+                    <DroppableColumn id={column.status}>
+                      <SortableContext
                         id={column.status}
+                        items={columnFeatures.map((f) => f.id)}
+                        strategy={verticalListSortingStrategy}
                       >
-                        {columnFeatures.length === 0 ? (
-                          <div className="text-center py-8 text-muted-foreground text-sm">
-                            No features
-                          </div>
-                        ) : (
-                          columnFeatures.map((feature) => (
-                            <FeatureCard
-                              key={feature.id}
-                              feature={feature}
-                              onClick={() => setSelectedFeature(feature)}
-                            />
-                          ))
-                        )}
-                      </div>
-                    </SortableContext>
+                        <div className="space-y-3 min-h-[200px]">
+                          {columnFeatures.length === 0 ? (
+                            <div className="text-center py-8 text-muted-foreground text-sm">
+                              No features
+                            </div>
+                          ) : (
+                            columnFeatures.map((feature) => (
+                              <FeatureCard
+                                key={feature.id}
+                                feature={feature}
+                                onClick={() => setSelectedFeature(feature)}
+                              />
+                            ))
+                          )}
+                        </div>
+                      </SortableContext>
+                    </DroppableColumn>
                   </CardContent>
                 </Card>
               );
@@ -236,7 +250,7 @@ const FeatureTrackerPage = () => {
           setEditingFeature(selectedFeature);
           setSelectedFeature(null);
         }}
-        onDelete={deleteFeature}
+        onArchive={archiveFeature}
         onCreateAnnouncement={handleCreateAnnouncement}
       />
     </AdminLayout>

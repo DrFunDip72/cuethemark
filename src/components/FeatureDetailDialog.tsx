@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -19,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Pencil, Trash2, Megaphone } from "lucide-react";
+import { Edit, Archive, Bell } from "lucide-react";
 import type { Feature } from "@/hooks/useFeatures";
 
 interface FeatureDetailDialogProps {
@@ -27,7 +26,7 @@ interface FeatureDetailDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onEdit: () => void;
-  onDelete: (id: string) => Promise<void>;
+  onArchive: (id: string) => Promise<void>;
   onCreateAnnouncement: (feature: Feature) => void;
 }
 
@@ -39,7 +38,7 @@ const priorityColors = {
 };
 
 const statusColors = {
-  not_started: "bg-muted text-muted-foreground",
+  not_started: "bg-slate-500 text-white",
   in_progress: "bg-blue-500 text-white",
   completed: "bg-green-500 text-white",
 };
@@ -55,115 +54,143 @@ export const FeatureDetailDialog = ({
   open,
   onOpenChange,
   onEdit,
-  onDelete,
+  onArchive,
   onCreateAnnouncement,
 }: FeatureDetailDialogProps) => {
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+  const [archiving, setArchiving] = useState(false);
+
+  const handleArchive = async () => {
+    if (!feature) return;
+    setArchiving(true);
+    await onArchive(feature.id);
+    setArchiving(false);
+    setShowArchiveDialog(false);
+    onOpenChange(false);
+  };
 
   if (!feature) return null;
-
-  const handleDelete = async () => {
-    setDeleting(true);
-    try {
-      await onDelete(feature.id);
-      setShowDeleteDialog(false);
-      onOpenChange(false);
-    } finally {
-      setDeleting(false);
-    }
-  };
 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl">{feature.title}</DialogTitle>
-            <DialogDescription className="text-base">
-              Created {new Date(feature.created_at).toLocaleDateString()}
-              {feature.completed_at &&
-                ` • Completed ${new Date(feature.completed_at).toLocaleDateString()}`}
-            </DialogDescription>
-          </DialogHeader>
+          <DialogHeader className="space-y-4">
+            {/* Title and Status */}
+            <div className="space-y-3">
+              <DialogTitle className="text-3xl font-bold leading-tight">
+                {feature.title}
+              </DialogTitle>
+              <Badge className={`${statusColors[feature.status]} w-fit`}>
+                {statusLabels[feature.status]}
+              </Badge>
+            </div>
 
-          <div className="space-y-6">
-            <div className="flex gap-3">
+            {/* Description */}
+            {feature.description && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                  Description
+                </h4>
+                <div className="p-4 rounded-lg border bg-muted/30">
+                  <p className="text-base leading-relaxed">{feature.description}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Metadata Grid */}
+            <div className="grid grid-cols-2 gap-4 pt-2">
               <div className="space-y-1">
-                <div className="text-xs font-medium text-muted-foreground uppercase">Priority</div>
+                <p className="text-sm font-medium text-muted-foreground">Created</p>
+                <p className="text-base font-semibold">
+                  {new Date(feature.created_at).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </p>
+              </div>
+
+              {feature.completed_at && (
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Completed</p>
+                  <p className="text-base font-semibold">
+                    {new Date(feature.completed_at).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </p>
+                </div>
+              )}
+
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Priority</p>
                 <Badge className={priorityColors[feature.priority]}>
-                  {feature.priority}
+                  {feature.priority.charAt(0).toUpperCase() + feature.priority.slice(1)}
                 </Badge>
               </div>
-              <div className="space-y-1">
-                <div className="text-xs font-medium text-muted-foreground uppercase">Status</div>
-                <Badge className={statusColors[feature.status]}>
-                  {statusLabels[feature.status]}
-                </Badge>
-              </div>
+
               {feature.linked_error_id && (
                 <div className="space-y-1">
-                  <div className="text-xs font-medium text-muted-foreground uppercase">Type</div>
-                  <Badge variant="outline">Bug Fix</Badge>
+                  <p className="text-sm font-medium text-muted-foreground">Type</p>
+                  <Badge variant="outline" className="border-destructive text-destructive">
+                    Bug Fix
+                  </Badge>
                 </div>
               )}
             </div>
+          </DialogHeader>
 
-            {feature.description && (
-              <div className="space-y-3">
-                <h4 className="text-sm font-semibold uppercase text-muted-foreground">Description</h4>
-                <p className="text-sm leading-relaxed whitespace-pre-wrap border-l-2 border-primary pl-4">
-                  {feature.description}
-                </p>
-              </div>
-            )}
-          </div>
-
-          <DialogFooter className="flex-col sm:flex-row gap-2 mt-6">
-            <div className="flex gap-2 flex-1">
-              <Button
-                variant="outline"
-                onClick={onEdit}
-                className="flex-1"
+          {/* Action Button for Announcement */}
+          {feature.status === "completed" && (
+            <div className="pt-4 border-t">
+              <Button 
+                onClick={() => onCreateAnnouncement(feature)}
+                className="w-full"
+                size="lg"
               >
-                <Pencil className="h-4 w-4 mr-2" />
+                <Bell className="w-4 h-4 mr-2" />
+                Create Announcement
+              </Button>
+            </div>
+          )}
+
+          {/* Footer with Edit and Archive */}
+          <DialogFooter className="pt-4 border-t">
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button variant="outline" size="sm" onClick={onEdit}>
+                <Edit className="w-3 h-3 mr-2" />
                 Edit
               </Button>
               <Button
                 variant="outline"
-                onClick={() => setShowDeleteDialog(true)}
-                className="flex-1 text-destructive hover:text-destructive"
+                size="sm"
+                onClick={() => setShowArchiveDialog(true)}
               >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
+                <Archive className="w-3 h-3 mr-2" />
+                Archive
               </Button>
             </div>
-            {feature.status === "completed" && (
-              <Button
-                onClick={() => onCreateAnnouncement(feature)}
-                className="flex-1"
-              >
-                <Megaphone className="h-4 w-4 mr-2" />
-                Create Announcement
-              </Button>
-            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <AlertDialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Feature?</AlertDialogTitle>
+            <AlertDialogTitle>Archive Feature</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              feature "{feature.title}".
+              Are you sure you want to archive "{feature.title}"? You can restore it later from the archived features page.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={deleting}>
-              {deleting ? "Deleting..." : "Delete"}
+            <AlertDialogAction
+              onClick={handleArchive}
+              disabled={archiving}
+            >
+              {archiving ? "Archiving..." : "Archive"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

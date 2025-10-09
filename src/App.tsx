@@ -18,6 +18,7 @@ import ErrorDashboardPage from "./pages/admin/ErrorDashboardPage";
 import AnalyticsDashboardPage from "./pages/admin/AnalyticsDashboardPage";
 import ReferralsDashboardPage from "./pages/admin/ReferralsDashboardPage";
 import FeatureTrackerPage from "./pages/admin/FeatureTrackerPage";
+import ArchivedFeaturesPage from "./pages/admin/ArchivedFeaturesPage";
 import NotificationsCenterPage from "./pages/admin/NotificationsCenterPage";
 import { AdminRoute } from "./components/AdminRoute";
 import NotFound from "./pages/NotFound";
@@ -103,6 +104,14 @@ const AppContent = () => {
               element={
                 <AdminRoute>
                   <FeatureTrackerPage />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/app/admin/features/archived"
+              element={
+                <AdminRoute>
+                  <ArchivedFeaturesPage />
                 </AdminRoute>
               }
             />
