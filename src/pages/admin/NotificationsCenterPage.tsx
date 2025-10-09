@@ -34,6 +34,7 @@ const NotificationsCenterPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [linkedFeatureId, setLinkedFeatureId] = useState<string | null>(null);
   const [editingDraftId, setEditingDraftId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("create");
 
   useEffect(() => {
     if (location.state?.featureId) {
@@ -232,6 +233,7 @@ const NotificationsCenterPage = () => {
     if (draft.custom_user_ids) {
       setSelectedUserIds(draft.custom_user_ids);
     }
+    setActiveTab("create");
   };
 
   const handleDeleteDraft = async (id: string) => {
@@ -267,7 +269,7 @@ const NotificationsCenterPage = () => {
       title="Notifications Center"
       description="Send announcements and updates to users"
     >
-      <Tabs defaultValue="create" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
           <TabsTrigger value="create">
             {editingDraftId ? "Edit Draft" : "Create Notification"}
