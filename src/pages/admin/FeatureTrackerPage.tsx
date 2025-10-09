@@ -213,7 +213,7 @@ const FeatureTrackerPage = () => {
             title: feature.title!,
             description: feature.description || null,
             priority: feature.priority!,
-            status: feature.status || "not_started",
+            status: "not_started",
             linked_error_id: feature.linked_error_id || null,
           });
           setFeatureFromError(null);

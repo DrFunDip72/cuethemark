@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -45,16 +45,6 @@ export const CreateFeatureDialog = ({
   );
   const [saving, setSaving] = useState(false);
 
-  // Update state when initialData or open changes
-  useEffect(() => {
-    if (open) {
-      setTitle(initialData?.title || "");
-      setDescription(initialData?.description || "");
-      setPriority(initialData?.priority || "medium");
-      setStatus(initialData?.status || "not_started");
-    }
-  }, [initialData, open]);
-
   const handleSave = async () => {
     if (!title.trim()) return;
 
@@ -64,7 +54,7 @@ export const CreateFeatureDialog = ({
         title: title.trim(),
         description: description.trim() || null,
         priority,
-        status,
+        ...(mode === "edit" && { status }),
         ...(initialData?.linked_error_id && {
           linked_error_id: initialData.linked_error_id,
         }),
@@ -132,19 +122,21 @@ export const CreateFeatureDialog = ({
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select value={status} onValueChange={(v) => setStatus(v as FeatureStatus)}>
-                <SelectTrigger id="status">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="not_started">Not Started</SelectItem>
-                  <SelectItem value="in_progress">In Progress</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {mode === "edit" && (
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select value={status} onValueChange={(v) => setStatus(v as FeatureStatus)}>
+                  <SelectTrigger id="status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="not_started">Not Started</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           {initialData?.linked_error_id && (

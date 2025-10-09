@@ -11,22 +11,10 @@ interface FeatureCardProps {
 }
 
 const priorityColors = {
-  urgent: "bg-red-500 text-white",
-  high: "bg-orange-500 text-white",
-  medium: "bg-yellow-500 text-white",
-  low: "bg-blue-500 text-white",
-};
-
-const statusColors = {
-  not_started: "bg-slate-500 text-white",
-  in_progress: "bg-blue-500 text-white",
-  completed: "bg-green-500 text-white",
-};
-
-const statusLabels = {
-  not_started: "Not Started",
-  in_progress: "In Progress",
-  completed: "Completed",
+  urgent: "bg-red-500 hover:bg-red-600",
+  high: "bg-orange-500 hover:bg-orange-600",
+  medium: "bg-yellow-500 hover:bg-yellow-600",
+  low: "bg-blue-500 hover:bg-blue-600",
 };
 
 export const FeatureCard = ({ feature, onClick }: FeatureCardProps) => {
@@ -61,48 +49,25 @@ export const FeatureCard = ({ feature, onClick }: FeatureCardProps) => {
             >
               <GripVertical className="h-4 w-4 text-muted-foreground" />
             </button>
-            <div className="flex-1 space-y-3">
-              {/* Title and Status */}
-              <div className="space-y-2">
-                <h4 className="font-semibold text-base leading-tight">
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <h4 className="font-semibold text-sm line-clamp-1">
                   {feature.title}
                 </h4>
-                <Badge className={`${statusColors[feature.status]} text-xs`}>
-                  {statusLabels[feature.status]}
+                <Badge className={priorityColors[feature.priority]}>
+                  {feature.priority}
                 </Badge>
               </div>
-
-              {/* Description */}
               {feature.description && (
-                <div className="p-3 rounded-md border bg-muted/30">
-                  <p className="text-sm text-muted-foreground line-clamp-3">
-                    {feature.description}
-                  </p>
-                </div>
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {feature.description}
+                </p>
               )}
-
-              {/* Metadata */}
-              <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
-                <span>
-                  Created {new Date(feature.created_at).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                  })}
-                </span>
-                <span>•</span>
-                <Badge className={priorityColors[feature.priority]} variant="secondary">
-                  {feature.priority.charAt(0).toUpperCase() + feature.priority.slice(1)}
+              {feature.linked_error_id && (
+                <Badge variant="outline" className="text-xs">
+                  Bug Fix
                 </Badge>
-                {feature.linked_error_id && (
-                  <>
-                    <span>•</span>
-                    <Badge variant="outline" className="text-xs border-destructive text-destructive">
-                      Bug Fix
-                    </Badge>
-                  </>
-                )}
-              </div>
+              )}
             </div>
           </div>
         </CardContent>
