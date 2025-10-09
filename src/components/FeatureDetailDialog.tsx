@@ -32,10 +32,16 @@ interface FeatureDetailDialogProps {
 }
 
 const priorityColors = {
-  urgent: "bg-red-500",
-  high: "bg-orange-500",
-  medium: "bg-yellow-500",
-  low: "bg-blue-500",
+  urgent: "bg-red-500 text-white",
+  high: "bg-orange-500 text-white",
+  medium: "bg-yellow-500 text-white",
+  low: "bg-blue-500 text-white",
+};
+
+const statusColors = {
+  not_started: "bg-muted text-muted-foreground",
+  in_progress: "bg-blue-500 text-white",
+  completed: "bg-green-500 text-white",
 };
 
 const statusLabels = {
@@ -71,50 +77,52 @@ export const FeatureDetailDialog = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <DialogTitle className="text-2xl mb-2">
-                  {feature.title}
-                </DialogTitle>
-                <DialogDescription>
-                  Created {new Date(feature.created_at).toLocaleDateString()}
-                  {feature.completed_at &&
-                    ` • Completed ${new Date(feature.completed_at).toLocaleDateString()}`}
-                </DialogDescription>
-              </div>
-              <div className="flex items-center gap-2">
+            <DialogTitle className="text-2xl">{feature.title}</DialogTitle>
+            <DialogDescription className="text-base">
+              Created {new Date(feature.created_at).toLocaleDateString()}
+              {feature.completed_at &&
+                ` • Completed ${new Date(feature.completed_at).toLocaleDateString()}`}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <div className="flex gap-3">
+              <div className="space-y-1">
+                <div className="text-xs font-medium text-muted-foreground uppercase">Priority</div>
                 <Badge className={priorityColors[feature.priority]}>
                   {feature.priority}
                 </Badge>
-                <Badge variant="outline">{statusLabels[feature.status]}</Badge>
               </div>
+              <div className="space-y-1">
+                <div className="text-xs font-medium text-muted-foreground uppercase">Status</div>
+                <Badge className={statusColors[feature.status]}>
+                  {statusLabels[feature.status]}
+                </Badge>
+              </div>
+              {feature.linked_error_id && (
+                <div className="space-y-1">
+                  <div className="text-xs font-medium text-muted-foreground uppercase">Type</div>
+                  <Badge variant="outline">Bug Fix</Badge>
+                </div>
+              )}
             </div>
-          </DialogHeader>
 
-          <div className="space-y-4">
             {feature.description && (
-              <div>
-                <h4 className="font-semibold mb-2">Description</h4>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold uppercase text-muted-foreground">Description</h4>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap border-l-2 border-primary pl-4">
                   {feature.description}
                 </p>
               </div>
             )}
-
-            {feature.linked_error_id && (
-              <div>
-                <Badge variant="outline">Bug Fix Feature</Badge>
-              </div>
-            )}
           </div>
 
-          <DialogFooter className="flex-col sm:flex-row gap-2">
+          <DialogFooter className="flex-col sm:flex-row gap-2 mt-6">
             <div className="flex gap-2 flex-1">
               <Button
                 variant="outline"
-                size="sm"
                 onClick={onEdit}
                 className="flex-1"
               >
@@ -123,9 +131,8 @@ export const FeatureDetailDialog = ({
               </Button>
               <Button
                 variant="outline"
-                size="sm"
                 onClick={() => setShowDeleteDialog(true)}
-                className="flex-1"
+                className="flex-1 text-destructive hover:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
@@ -133,7 +140,6 @@ export const FeatureDetailDialog = ({
             </div>
             {feature.status === "completed" && (
               <Button
-                size="sm"
                 onClick={() => onCreateAnnouncement(feature)}
                 className="flex-1"
               >

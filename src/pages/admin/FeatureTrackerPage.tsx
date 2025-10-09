@@ -73,9 +73,11 @@ const FeatureTrackerPage = () => {
     const overId = over.id as string;
     let newStatus: FeatureStatus = activeFeature.status;
 
+    // Check if dropped on a column container
     if (["not_started", "in_progress", "completed"].includes(overId)) {
       newStatus = overId as FeatureStatus;
     } else {
+      // Check if dropped on another feature card
       const overFeature = features.find((f) => f.id === overId);
       if (overFeature) {
         newStatus = overFeature.status;
@@ -85,6 +87,8 @@ const FeatureTrackerPage = () => {
     if (activeFeature.status !== newStatus) {
       const featuresInNewStatus = getFeaturesByStatus(newStatus);
       const newOrderIndex = featuresInNewStatus.length;
+      
+      // Update locally first for immediate feedback
       await moveFeature(activeFeature.id, newStatus, newOrderIndex);
 
       if (newStatus === "completed") {
@@ -150,7 +154,11 @@ const FeatureTrackerPage = () => {
                       items={columnFeatures.map((f) => f.id)}
                       strategy={verticalListSortingStrategy}
                     >
-                      <div className="space-y-3 min-h-[200px]">
+                      <div 
+                        className="space-y-3 min-h-[200px]"
+                        data-status={column.status}
+                        id={column.status}
+                      >
                         {columnFeatures.length === 0 ? (
                           <div className="text-center py-8 text-muted-foreground text-sm">
                             No features
@@ -213,6 +221,7 @@ const FeatureTrackerPage = () => {
           if (editingFeature) {
             await updateFeature(editingFeature.id, updates);
             setEditingFeature(null);
+            setSelectedFeature(null);
           }
         }}
         initialData={editingFeature || undefined}

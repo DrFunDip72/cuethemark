@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Feature, FeaturePriority } from "@/hooks/useFeatures";
+import type { Feature, FeaturePriority, FeatureStatus } from "@/hooks/useFeatures";
 
 interface CreateFeatureDialogProps {
   open: boolean;
@@ -40,6 +40,9 @@ export const CreateFeatureDialog = ({
   const [priority, setPriority] = useState<FeaturePriority>(
     initialData?.priority || "medium"
   );
+  const [status, setStatus] = useState<FeatureStatus>(
+    initialData?.status || "not_started"
+  );
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -51,6 +54,7 @@ export const CreateFeatureDialog = ({
         title: title.trim(),
         description: description.trim() || null,
         priority,
+        ...(mode === "edit" && { status }),
         ...(initialData?.linked_error_id && {
           linked_error_id: initialData.linked_error_id,
         }),
@@ -102,19 +106,37 @@ export const CreateFeatureDialog = ({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="priority">Priority</Label>
-            <Select value={priority} onValueChange={(v) => setPriority(v as FeaturePriority)}>
-              <SelectTrigger id="priority">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="urgent">Urgent</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="priority">Priority</Label>
+              <Select value={priority} onValueChange={(v) => setPriority(v as FeaturePriority)}>
+                <SelectTrigger id="priority">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {mode === "edit" && (
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select value={status} onValueChange={(v) => setStatus(v as FeatureStatus)}>
+                  <SelectTrigger id="status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="not_started">Not Started</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           {initialData?.linked_error_id && (
