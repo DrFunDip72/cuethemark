@@ -564,7 +564,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      backfill_display_names: { Args: never; Returns: undefined }
+      backfill_display_names: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       calculate_audience_size: {
         Args: {
           p_custom_user_ids: string[]
@@ -577,7 +580,7 @@ export type Database = {
         Returns: boolean
       }
       get_referral_overview: {
-        Args: never
+        Args: Record<PropertyKey, never>
         Returns: {
           organic_users: number
           referral_rate: number
@@ -586,7 +589,7 @@ export type Database = {
         }[]
       }
       get_top_referrers: {
-        Args: never
+        Args: Record<PropertyKey, never>
         Returns: {
           percentage: number
           referral_count: number
@@ -594,7 +597,10 @@ export type Database = {
           referrer_normalized: string
         }[]
       }
-      user_is_admin: { Args: { _user_id: string }; Returns: boolean }
+      user_is_admin: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       feature_priority: "low" | "medium" | "high" | "urgent"
