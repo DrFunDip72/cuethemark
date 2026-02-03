@@ -273,7 +273,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
                 
                 <p className="text-xl md:text-2xl opacity-90 leading-relaxed">
                   {isTrialExpired 
-                    ? `Your free trial was pretty great, wasn't it? 🎵 Ready to keep the music flowing for just $1.99/month?`
+                    ? `Your free trial was pretty great, wasn't it? 🎵 Ready to keep the music flowing for just $6.99/month?`
                     : `Time to get back to making those perfect cues! Your subscription expired, but we've saved all your work. 🎯`
                   }
                 </p>
@@ -298,7 +298,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
                   size="lg"
                   className="rounded-full px-8 py-6 text-lg font-semibold w-full max-w-sm"
                 >
-                  {isTrialExpired ? 'Continue for $1.99/month' : 'Renew Subscription'}
+                  {isTrialExpired ? 'Continue for $6.99/month' : 'Renew Subscription'}
                 </Button>
                 
                 <Button 
@@ -342,7 +342,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
               </h1>
               
               <p className="text-xl md:text-2xl opacity-90 leading-relaxed">
-                Ready to unlock all the power of CueTheMark? 🎵 Start your subscription for just $1.99/month!
+                Ready to unlock all the power of CueTheMark? 🎵 Start your subscription for just $6.99/month!
               </p>
               
               <div className="flex items-center justify-center gap-2 mt-4 text-sm opacity-70">
@@ -374,7 +374,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
                 className="rounded-full px-8 py-6 text-lg font-semibold w-full max-w-sm"
                 disabled={authLoading}
               >
-                {authLoading ? 'Setting up payment...' : 'Subscribe for $1.99/month'}
+                {authLoading ? 'Setting up payment...' : 'Subscribe for $6.99/month'}
               </Button>
               
               <div className="flex gap-2 justify-center">

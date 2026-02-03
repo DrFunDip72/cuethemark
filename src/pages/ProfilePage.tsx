@@ -201,7 +201,7 @@ const ProfilePage = () => {
                   <div>
                     <Label>Plan</Label>
                     <Input 
-                      value={subscription.subscription_tier === 'lifetime' ? 'Lifetime Access' : (isDemo() ? 'Demo (1 day trial)' : 'Monthly ($1.99/month)')} 
+                      value={subscription.subscription_tier === 'lifetime' ? 'Lifetime Access' : (isDemo() ? 'Demo (1 day trial)' : 'Monthly ($6.99/month)')} 
                       disabled 
                       className="bg-white/20 border-white/30 text-foreground font-medium"
                     />
