@@ -93,7 +93,7 @@ serve(async (req) => {
           price_data: {
             currency: "usd",
             product_data: { name: "Audio Labeling Tool" },
-            unit_amount: 199, // $1.99
+            unit_amount: 699, // $6.99
             recurring: { interval: "month" },
           },
           quantity: 1,
@@ -112,7 +112,7 @@ serve(async (req) => {
           price_data: {
             currency: "usd",
             product_data: { name: "Audio Labeling Tool" },
-            unit_amount: 199, // $1.99
+            unit_amount: 699, // $6.99
             recurring: { interval: "month" },
           },
           quantity: 1,

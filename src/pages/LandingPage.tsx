@@ -12,7 +12,7 @@ export default function LandingPage() {
     if (meta) {
       meta.setAttribute(
         "content",
-        "CueTheMark: Practice smarter, not longer — set your marks and hit your cue every time. $1.99/month. Beta code BETA2025."
+        "CueTheMark: Practice smarter, not longer — set your marks and hit your cue every time. $6.99/month. Beta code BETA2025."
       );
     }
   }, []);
