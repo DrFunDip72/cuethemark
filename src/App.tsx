@@ -7,6 +7,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { SubscriptionGate } from "./components/SubscriptionGate";
 import { Navigation } from "./components/Navigation";
+import { BottomNav } from "./components/BottomNav";
 import { NotificationModal } from "./components/NotificationModal";
 import { useNotifications } from "./hooks/useNotifications";
 import UploadPage from "./pages/UploadPage";
@@ -54,9 +55,10 @@ const AppContent = () => {
                 <SubscriptionGate>
                   <div className="landing-theme min-h-screen flex flex-col" data-theme="landing">
                     <Navigation />
-                    <main className="flex-1 bg-background text-foreground">
+                    <main className="flex-1 bg-background text-foreground pb-20 md:pb-0">
                       <Outlet />
                     </main>
+                    <BottomNav />
                   </div>
                 </SubscriptionGate>
               </ProtectedRoute>

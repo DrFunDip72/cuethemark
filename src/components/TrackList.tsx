@@ -64,7 +64,7 @@ const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onMo
             size="icon"
             variant="ghost"
             onClick={(e) => onNavigate(track.id, e)}
-            className="text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
+            className="min-h-[44px] min-w-[44px] md:min-h-9 md:min-w-9 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
           >
             <Pencil className="h-4 w-4" />
           </Button>
@@ -74,7 +74,7 @@ const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onMo
               variant="ghost"
               onClick={() => onMoveUp(track.id)}
               disabled={!canMoveUp}
-              className="h-8 w-8 p-0 disabled:opacity-50 md:h-6 md:w-6 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
+              className="min-h-[44px] min-w-[44px] p-0 disabled:opacity-50 md:h-6 md:w-6 md:min-h-0 md:min-w-0 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
             >
               <ArrowUp className="h-4 w-4 md:h-3 md:w-3" />
             </Button>
@@ -83,7 +83,7 @@ const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onMo
               variant="ghost"
               onClick={() => onMoveDown(track.id)}
               disabled={!canMoveDown}
-              className="h-8 w-8 p-0 disabled:opacity-50 md:h-6 md:w-6 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
+              className="min-h-[44px] min-w-[44px] p-0 disabled:opacity-50 md:h-6 md:w-6 md:min-h-0 md:min-w-0 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
             >
               <ArrowDown className="h-4 w-4 md:h-3 md:w-3" />
             </Button>

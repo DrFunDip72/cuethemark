@@ -86,10 +86,12 @@ const LabelItem = ({
     >
       <div className="flex items-center justify-between">
         <div
-          className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
+          className="flex min-h-[44px] items-center gap-3 cursor-pointer flex-1 min-w-0"
           onClick={() => onPlayFromLabel(label)}
         >
-          <Play className="h-4 w-4 flex-shrink-0 text-white" />
+          <div className="flex min-h-[44px] min-w-[44px] items-center justify-center md:min-h-0 md:min-w-0">
+            <Play className="h-4 w-4 flex-shrink-0 text-white" />
+          </div>
           <div className="min-w-0 flex-1">
             <h3 className="font-medium truncate text-white">{label.label_name}</h3>
             <Badge
@@ -110,17 +112,17 @@ const LabelItem = ({
             size="icon"
             variant="ghost"
             onClick={() => onEdit(label)}
-            className="text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
+            className="min-h-[44px] min-w-[44px] md:min-h-9 md:min-w-9 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
           >
             <Pencil className="h-4 w-4" />
           </Button>
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-1">
             <Button
               size="sm"
               variant="ghost"
               onClick={() => onMoveUp(label.id)}
               disabled={!canMoveUp}
-              className="h-6 w-6 p-0 disabled:opacity-50 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
+              className="min-h-[44px] min-w-[44px] p-0 disabled:opacity-50 md:h-6 md:w-6 md:min-h-0 md:min-w-0 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
             >
               <ArrowUp className="h-3 w-3" />
             </Button>
@@ -129,7 +131,7 @@ const LabelItem = ({
               variant="ghost"
               onClick={() => onMoveDown(label.id)}
               disabled={!canMoveDown}
-              className="h-6 w-6 p-0 disabled:opacity-50 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
+              className="min-h-[44px] min-w-[44px] p-0 disabled:opacity-50 md:h-6 md:w-6 md:min-h-0 md:min-w-0 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
             >
               <ArrowDown className="h-3 w-3" />
             </Button>

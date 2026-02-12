@@ -1,4 +1,3 @@
-import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAudioUpload } from '@/hooks/useAudioUpload';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,12 +5,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from "@/components/ui/button";
 import { TrackList } from '@/components/TrackList';
 import { Progress } from '@/components/ui/progress';
-import { Upload, MessageSquare } from 'lucide-react';
+import { Upload } from 'lucide-react';
 
 const UploadPage = () => {
   const { user } = useAuth();
   const { uploadAudio, isUploading, uploadProgress } = useAudioUpload();
-  const location = useLocation();
 
   const { data: tracks = [] } = useQuery({
     queryKey: ['tracks'],
@@ -36,7 +34,7 @@ const UploadPage = () => {
   const showFirstTimePrompt = tracks.length === 0;
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 pt-6 pb-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">My Tracks</h1>
         <div className="flex items-center gap-4">
@@ -90,13 +88,6 @@ const UploadPage = () => {
       )}
 
       <TrackList />
-
-      <Link to={`/app/feedback?from=${encodeURIComponent(location.pathname + location.search + location.hash)}`} className="fixed bottom-6 right-6 z-50">
-        <Button className="shadow-lg" style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}>
-          <MessageSquare className="h-4 w-4 mr-2" />
-          Send Feedback
-        </Button>
-      </Link>
     </div>
   );
 };
