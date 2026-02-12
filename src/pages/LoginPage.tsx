@@ -70,40 +70,71 @@ export default function LoginPage() {
     <AuthLayout>
       <h1 className="sr-only">Login to CueTheMark</h1>
       <div className="w-full max-w-md animate-enter">
-        <div
-          className="rounded-2xl p-[1.5px] shadow-xl"
+        <Card
+          className="rounded-2xl shadow-xl border-0"
           style={{
-            backgroundImage:
-              "linear-gradient(135deg, hsl(var(--gradient-hero-start)), hsl(var(--gradient-hero-mid)) 40%, hsl(var(--gradient-hero-end)))",
+            backgroundColor: "hsl(var(--landing-surface))",
+            border: "1px solid hsl(var(--landing-border))",
           }}
         >
-          <Card className="rounded-2xl bg-card/80 backdrop-blur-md border border-border/40">
-            <CardHeader className="text-center">
-              <CardTitle className="text-foreground">Welcome back</CardTitle>
-              <CardDescription>
-                Ready to level up your practice and perform with confidence?
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
-              </div>
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" />
-              </div>
-              <div className="space-y-2">
-                <Button className="w-full" disabled={loading} onClick={handleLogin}>
-                  {loading ? "Signing in..." : "Login"}
-                </Button>
-                <Button className="w-full" variant="ghost" onClick={() => navigate("/signup")}>Need an account? Sign up</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+          <CardHeader className="text-center">
+            <CardTitle style={{ color: "hsl(var(--landing-text))" }}>Welcome back</CardTitle>
+            <CardDescription style={{ color: "hsl(var(--landing-text-muted))" }}>
+              Ready to level up your practice and perform with confidence?
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="email" style={{ color: "hsl(var(--landing-text))" }}>Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                style={{ backgroundColor: "hsl(var(--landing-bg))", borderColor: "hsl(var(--landing-border))", color: "hsl(var(--landing-text))" }}
+              />
+            </div>
+            <div>
+              <Label htmlFor="password" style={{ color: "hsl(var(--landing-text))" }}>Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Your password"
+                style={{ backgroundColor: "hsl(var(--landing-bg))", borderColor: "hsl(var(--landing-border))", color: "hsl(var(--landing-text))" }}
+              />
+            </div>
+            <div className="space-y-2">
+              <Button
+                className="w-full rounded-full"
+                style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}
+                disabled={loading}
+                onClick={handleLogin}
+              >
+                {loading ? "Signing in..." : "Login"}
+              </Button>
+              <Button
+                className="w-full rounded-full"
+                variant="ghost"
+                style={{ color: "hsl(var(--landing-text-muted))" }}
+                onClick={() => navigate("/get-started")}
+              >
+                Need an account? Sign up
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
         <div className="mt-4 flex justify-center">
-          <Button variant="ghost" onClick={() => navigate('/')}>Return Home</Button>
+          <Button
+            variant="ghost"
+            className="rounded-full"
+            style={{ color: "hsl(var(--landing-text-muted))" }}
+            onClick={() => navigate("/")}
+          >
+            Return Home
+          </Button>
         </div>
       </div>
     </AuthLayout>
