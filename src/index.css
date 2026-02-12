@@ -26,10 +26,21 @@
     --ring: 255 67% 56%;
 
     /* Hero gradient tokens */
-    --gradient-hero-start: 230 92% 58%; /* royal blue */
-    --gradient-hero-mid: 278 87% 60%;   /* purple */
-    --gradient-hero-end: 330 85% 60%;   /* pink */
-    --hero-foreground: 0 0% 100%;       /* on-hero text */
+    --gradient-hero-start: 230 92% 58%;
+    --gradient-hero-mid: 278 87% 60%;
+    --gradient-hero-end: 330 85% 60%;
+    --hero-foreground: 0 0% 100%;
+
+    /* Landing page dark theme */
+    --landing-bg: 228 14% 8%;
+    --landing-surface: 228 14% 12%;
+    --landing-surface-hover: 228 14% 16%;
+    --landing-border: 228 14% 20%;
+    --landing-text: 0 0% 96%;
+    --landing-text-muted: 220 10% 60%;
+    --landing-accent: 255 80% 64%;
+    --landing-accent-hover: 255 80% 72%;
+    --landing-accent-glow: 255 80% 64%;
 
     --radius: 0.5rem;
   }
@@ -46,4 +57,31 @@
     overscroll-behavior-x: none;
     touch-action: manipulation;
   }
+}
+
+/* Waveform animations */
+@keyframes waveform-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+@keyframes marker-glow {
+  0%, 100% { box-shadow: 0 0 4px hsl(255 80% 64% / 0.3); }
+  50% { box-shadow: 0 0 16px hsl(255 80% 64% / 0.7); }
+}
+@keyframes float-up {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-float-up {
+  animation: float-up 0.7s ease-out both;
+}
+.animate-float-up-1 { animation-delay: 0.1s; }
+.animate-float-up-2 { animation-delay: 0.2s; }
+.animate-float-up-3 { animation-delay: 0.3s; }
+.animate-float-up-4 { animation-delay: 0.4s; }
+.waveform-bar {
+  animation: waveform-pulse 1.5s ease-in-out infinite;
+}
+.marker-dot {
+  animation: marker-glow 2s ease-in-out infinite;
 }
