@@ -18,7 +18,7 @@ export const AdminLayout = ({ title, description, children, action }: AdminLayou
         <Button
           variant="ghost"
           onClick={() => navigate('/app/admin')}
-          className="mb-4"
+          className="mb-4 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Admin Tools
@@ -28,7 +28,7 @@ export const AdminLayout = ({ title, description, children, action }: AdminLayou
           <div>
             <h1 className="text-4xl font-bold mb-2">{title}</h1>
             {description && (
-              <p className="text-muted-foreground">{description}</p>
+              <p className="text-[hsl(var(--landing-text-muted))]">{description}</p>
             )}
           </div>
           {action && <div>{action}</div>}

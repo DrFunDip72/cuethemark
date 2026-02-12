@@ -81,14 +81,18 @@ export const CreateFeatureDialog = ({
     }
   };
 
+  const darkInput = "border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white placeholder:text-white/50";
+  const darkSelectContent = "border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface))] text-white [&_[data-highlighted]]:bg-[hsl(var(--landing-surface-hover))] [&_[data-highlighted]]:text-white";
+  const darkSelectTrigger = "border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white [&>svg]:text-white/70";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface))] text-white [&>button]:text-white">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-white">
             {mode === "create" ? "Create Feature" : "Edit Feature"}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-white/80">
             {mode === "create"
               ? "Add a new feature to track its development"
               : "Update the feature details"}
@@ -97,34 +101,36 @@ export const CreateFeatureDialog = ({
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
+            <Label htmlFor="title" className="text-white">Title *</Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter feature title"
+              className={darkInput}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" className="text-white">Description</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe the feature and its benefits"
               rows={4}
+              className={darkInput}
             />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="priority">Priority</Label>
+              <Label htmlFor="priority" className="text-white">Priority</Label>
               <Select value={priority} onValueChange={(v) => setPriority(v as FeaturePriority)}>
-                <SelectTrigger id="priority">
+                <SelectTrigger id="priority" className={darkSelectTrigger}>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={darkSelectContent}>
                   <SelectItem value="low">Low</SelectItem>
                   <SelectItem value="medium">Medium</SelectItem>
                   <SelectItem value="high">High</SelectItem>
@@ -134,12 +140,12 @@ export const CreateFeatureDialog = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status" className="text-white">Status</Label>
               <Select value={status} onValueChange={(v) => setStatus(v as FeatureStatus)}>
-                <SelectTrigger id="status">
+                <SelectTrigger id="status" className={darkSelectTrigger}>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={darkSelectContent}>
                   <SelectItem value="not_started">Not Started</SelectItem>
                   <SelectItem value="in_progress">In Progress</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
@@ -149,17 +155,21 @@ export const CreateFeatureDialog = ({
           </div>
 
           {initialData?.linked_error_id && (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-white/80">
               This feature is linked to a bug report
             </div>
           )}
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white"
+          >
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={!title.trim() || saving}>
+          <Button onClick={handleSave} disabled={!title.trim() || saving} style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}>
             {saving ? "Saving..." : mode === "create" ? "Create" : "Save"}
           </Button>
         </DialogFooter>

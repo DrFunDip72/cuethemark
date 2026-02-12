@@ -73,11 +73,11 @@ export const PromoGate = ({ onSuccess }: PromoGateProps) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: "hsl(var(--landing-bg))", color: "hsl(var(--landing-text))" }}>
+      <Card className="w-full max-w-md border-0 shadow-xl" style={{ backgroundColor: "hsl(var(--landing-surface))", border: "1px solid hsl(var(--landing-border))" }}>
         <CardHeader className="text-center">
-          <CardTitle>Welcome to Audio Labeling Tool</CardTitle>
-          <CardDescription>
+          <CardTitle style={{ color: "hsl(var(--landing-text))" }}>Welcome to Audio Labeling Tool</CardTitle>
+          <CardDescription style={{ color: "hsl(var(--landing-text-muted))" }}>
             Enter a valid promo code to get started
           </CardDescription>
         </CardHeader>
@@ -92,17 +92,19 @@ export const PromoGate = ({ onSuccess }: PromoGateProps) => {
                 disabled={loading}
                 className="text-center"
                 autoFocus
+                style={{ backgroundColor: "hsl(var(--landing-bg))", borderColor: "hsl(var(--landing-border))", color: "hsl(var(--landing-text))" }}
               />
             </div>
             <Button 
               type="submit" 
               className="w-full" 
               disabled={loading || !promoCode.trim()}
+              style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}
             >
               {loading ? 'Validating...' : 'Activate Access'}
             </Button>
           </form>
-          <div className="mt-6 space-y-2 text-sm text-muted-foreground">
+          <div className="mt-6 space-y-2 text-sm" style={{ color: "hsl(var(--landing-text-muted))" }}>
             <p className="text-center font-medium">Access Types:</p>
             <ul className="space-y-1">
               <li>• <strong>Demo codes:</strong> 1-day trial</li>

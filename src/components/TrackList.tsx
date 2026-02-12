@@ -39,44 +39,51 @@ const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onMo
   canMoveDown: boolean;
 }) => {
   return (
-    <div className="p-4 rounded-lg border border-gray-200 hover:border-primary transition-colors bg-white">
+    <div
+      className="p-4 rounded-lg border transition-colors hover:border-[hsl(var(--landing-accent))]"
+      style={{
+        backgroundColor: "hsl(var(--landing-surface))",
+        borderColor: "hsl(var(--landing-border))",
+      }}
+    >
       <div className="flex justify-between items-center">
         <Link
           to={`/app/tracks/${track.id}`}
           className="block flex-1 min-w-0"
         >
           <div className="min-w-0 flex-1">
-            <h3 className="font-medium truncate">{track.filename}</h3>
-            <p className="text-sm text-gray-500">
+            <h3 className="font-medium truncate text-white">{track.filename}</h3>
+            <p className="text-sm text-white/80">
               {new Date(track.uploaded_at).toLocaleDateString()}
             </p>
           </div>
         </Link>
         
         <div className="flex gap-2 flex-shrink-0 items-center">
-          <Button 
-            size="icon" 
-            variant="ghost" 
+          <Button
+            size="icon"
+            variant="ghost"
             onClick={(e) => onNavigate(track.id, e)}
+            className="text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
           >
             <Pencil className="h-4 w-4" />
           </Button>
           <div className="flex flex-col gap-1">
-            <Button 
+            <Button
               size="sm"
-              variant="ghost" 
+              variant="ghost"
               onClick={() => onMoveUp(track.id)}
               disabled={!canMoveUp}
-              className="h-8 w-8 p-0 disabled:opacity-50 md:h-6 md:w-6"
+              className="h-8 w-8 p-0 disabled:opacity-50 md:h-6 md:w-6 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
             >
               <ArrowUp className="h-4 w-4 md:h-3 md:w-3" />
             </Button>
-            <Button 
+            <Button
               size="sm"
-              variant="ghost" 
+              variant="ghost"
               onClick={() => onMoveDown(track.id)}
               disabled={!canMoveDown}
-              className="h-8 w-8 p-0 disabled:opacity-50 md:h-6 md:w-6"
+              className="h-8 w-8 p-0 disabled:opacity-50 md:h-6 md:w-6 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
             >
               <ArrowDown className="h-4 w-4 md:h-3 md:w-3" />
             </Button>
@@ -86,18 +93,23 @@ const TrackItem = ({ track, notes, saveTimeouts, onNotesChange, onNavigate, onMo
 
       <Accordion type="single" collapsible className="w-full mt-2">
         <AccordionItem value={`notes-${track.id}`} className="border-0">
-          <AccordionTrigger className="py-2 px-0">
-            <span className="text-sm text-gray-500">Notes</span>
+          <AccordionTrigger className="py-2 px-0 text-white hover:no-underline [&_svg]:text-white">
+            <span className="text-sm">Notes</span>
           </AccordionTrigger>
           <AccordionContent>
             <div className="space-y-2">
-              <Textarea 
-                value={notes[track.id] || ''} 
+              <Textarea
+                value={notes[track.id] || ''}
                 onChange={(e) => onNotesChange(track.id, e.target.value)}
                 placeholder="Add notes about this track... (auto-saves)"
                 className="min-h-[100px] text-sm"
+                style={{
+                  backgroundColor: "hsl(var(--landing-bg))",
+                  borderColor: "hsl(var(--landing-border))",
+                  color: "hsl(var(--landing-text))",
+                }}
               />
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-white/80">
                 {saveTimeouts[track.id] ? '⏳ Saving...' : '✓ Auto-saved'}
               </div>
             </div>
@@ -244,7 +256,7 @@ export const TrackList = () => {
   };
 
   if (!user) {
-    return <div className="text-center py-4 text-gray-500">Please log in to view your tracks</div>;
+    return <div className="text-center py-4 text-white/80">Please log in to view your tracks</div>;
   }
 
   if (isLoading) {
@@ -256,7 +268,7 @@ export const TrackList = () => {
   }
 
   if (!tracks?.length) {
-    return <div className="text-center py-4 text-gray-500">No tracks uploaded yet</div>;
+    return <div className="text-center py-4 text-white/80">No tracks uploaded yet</div>;
   }
 
   return (

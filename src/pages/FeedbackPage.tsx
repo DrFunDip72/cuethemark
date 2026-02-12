@@ -90,7 +90,12 @@ const FeedbackPage = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-2xl mx-auto">
-        <Card>
+        <Card
+          style={{
+            backgroundColor: "hsl(var(--landing-surface))",
+            borderColor: "hsl(var(--landing-border))",
+          }}
+        >
           <CardHeader>
             <CardTitle>Send Feedback</CardTitle>
           </CardHeader>
@@ -105,7 +110,9 @@ const FeedbackPage = () => {
                       <FormLabel>Feedback type</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                        <SelectTrigger
+                          className="bg-[hsl(var(--landing-bg))] border-[hsl(var(--landing-border))] text-[hsl(var(--landing-text))]"
+                        >
                             <SelectValue placeholder="Select a type" />
                           </SelectTrigger>
                         </FormControl>
@@ -126,8 +133,13 @@ const FeedbackPage = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Message</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Tell us what's on your mind..." rows={6} {...field} />
+                        <FormControl>
+                        <Textarea
+                          placeholder="Tell us what's on your mind..."
+                          rows={6}
+                          {...field}
+                          className="bg-[hsl(var(--landing-bg))] border-[hsl(var(--landing-border))] text-[hsl(var(--landing-text))]"
+                        />
                       </FormControl>
                       <FormDescription>Include steps to reproduce for bugs if possible.</FormDescription>
                       <FormMessage />
@@ -141,8 +153,13 @@ const FeedbackPage = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Contact email (optional)</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="you@example.com" {...field} />
+                        <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="you@example.com"
+                          {...field}
+                          className="bg-[hsl(var(--landing-bg))] border-[hsl(var(--landing-border))] text-[hsl(var(--landing-text))]"
+                        />
                       </FormControl>
                       <FormDescription>Provide an email if you want us to follow up.</FormDescription>
                       <FormMessage />
@@ -151,8 +168,8 @@ const FeedbackPage = () => {
                 />
 
                 <div className="flex items-center gap-3">
-                  <Button type="submit">Submit Feedback</Button>
-                  <Button type="button" variant="outline" onClick={() => navigate(-1)}>Cancel</Button>
+                  <Button type="submit" style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}>Submit Feedback</Button>
+                  <Button type="button" variant="outline" onClick={() => navigate(-1)} className="border-[hsl(var(--landing-border))] text-[hsl(var(--landing-text-muted))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]">Cancel</Button>
                 </div>
               </form>
             </Form>

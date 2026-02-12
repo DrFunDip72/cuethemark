@@ -52,10 +52,12 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <SubscriptionGate>
-                  <Navigation />
-                  <main className="flex-1 bg-gray-50">
-                    <Outlet />
-                  </main>
+                  <div className="landing-theme min-h-screen flex flex-col" data-theme="landing">
+                    <Navigation />
+                    <main className="flex-1 bg-background text-foreground">
+                      <Outlet />
+                    </main>
+                  </div>
                 </SubscriptionGate>
               </ProtectedRoute>
             }

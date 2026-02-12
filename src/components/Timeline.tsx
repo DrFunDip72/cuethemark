@@ -87,12 +87,25 @@ export const Timeline = ({
 
   return (
     <TooltipProvider>
-      <Card className="p-6">
+      <Card
+        className="p-6"
+        style={{
+          backgroundColor: "hsl(var(--landing-surface))",
+          borderColor: "hsl(var(--landing-border))",
+        }}
+      >
         <div className="space-y-4">
           {/* Timeline Header */}
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Timeline View</h3>
-            <Badge variant="secondary">
+            <h3 className="text-lg font-semibold text-white">Timeline View</h3>
+            <Badge
+              variant="secondary"
+              className="text-white"
+              style={{
+                backgroundColor: "hsl(var(--landing-surface-hover))",
+                borderColor: "hsl(var(--landing-border))",
+              }}
+            >
               {labels.length} marker{labels.length !== 1 ? 's' : ''}
             </Badge>
           </div>
@@ -100,31 +113,45 @@ export const Timeline = ({
           {/* Main Timeline */}
           <div className="relative">
             {/* Timeline Background and Progress */}
-            <div 
+            <div
               ref={timelineRef}
-              className="relative h-12 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-250 transition-colors"
+              className="relative h-12 rounded-lg cursor-pointer transition-colors"
+              style={{ backgroundColor: "hsl(var(--landing-border))" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "hsl(var(--landing-surface-hover))";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "hsl(var(--landing-border))";
+              }}
               onClick={handleTimelineClick}
             >
               {/* Progress Bar */}
-              <div 
-                className="absolute top-0 left-0 h-full bg-primary/30 rounded-lg transition-all duration-200"
-                style={{ width: `${getPositionPercentage(currentTime)}%` }}
+              <div
+                className="absolute top-0 left-0 h-full rounded-lg transition-all duration-200"
+                style={{
+                  width: `${getPositionPercentage(currentTime)}%`,
+                  backgroundColor: "hsl(var(--landing-accent) / 0.45)",
+                }}
               />
               
               {/* AB Loop Range Overlay */}
               {abLoopEnabled && abLoopStart !== null && abLoopEnd !== null && (
                 <>
                   {/* Grayed out area before loop start */}
-                  <div 
-                    className="absolute top-0 left-0 h-full bg-gray-400/50 rounded-l-lg"
-                    style={{ width: `${getPositionPercentage(abLoopStart)}%` }}
+                  <div
+                    className="absolute top-0 left-0 h-full rounded-l-lg"
+                    style={{
+                      width: `${getPositionPercentage(abLoopStart)}%`,
+                      backgroundColor: "hsl(var(--landing-bg) / 0.5)",
+                    }}
                   />
                   {/* Grayed out area after loop end */}
-                  <div 
-                    className="absolute top-0 h-full bg-gray-400/50 rounded-r-lg"
-                    style={{ 
+                  <div
+                    className="absolute top-0 h-full rounded-r-lg"
+                    style={{
                       left: `${getPositionPercentage(abLoopEnd)}%`,
-                      width: `${100 - getPositionPercentage(abLoopEnd)}%`
+                      width: `${100 - getPositionPercentage(abLoopEnd)}%`,
+                      backgroundColor: "hsl(var(--landing-bg) / 0.5)",
                     }}
                   />
                   {/* Loop range highlight */}
@@ -138,33 +165,41 @@ export const Timeline = ({
                 </>
               )}
               
-              {/* Current Time Indicator */}
-              <div 
-                className="absolute top-0 w-1 h-full bg-primary rounded-sm transition-all duration-200"
-                style={{ left: `${getPositionPercentage(currentTime)}%` }}
+              {/* Current Time Indicator (playhead) - white for maximum contrast on dark track */}
+              <div
+                className="absolute top-0 w-2.5 h-full rounded-sm transition-all duration-200 z-20"
+                style={{
+                  left: `${getPositionPercentage(currentTime)}%`,
+                  transform: 'translateX(-50%)',
+                  backgroundColor: '#fff',
+                  boxShadow: '0 0 0 1px rgba(0,0,0,0.4), 0 0 8px rgba(255,255,255,0.3)',
+                }}
               />
 
-              {/* Label Markers */}
+              {/* Label Markers - accent with light border for contrast */}
               {labels.map((label) => (
                 <Tooltip key={label.id}>
                   <TooltipTrigger asChild>
                     <div
-                      className="absolute top-1 w-2 h-10 bg-blue-500 hover:bg-blue-600 rounded-sm cursor-pointer transition-colors shadow-sm z-10"
-                      style={{ 
+                      className="absolute top-1 w-2.5 h-10 rounded-sm cursor-pointer transition-colors z-10 hover:brightness-110"
+                      style={{
+                        backgroundColor: "hsl(var(--landing-accent))",
+                        border: '1.5px solid rgba(255,255,255,0.5)',
+                        boxShadow: '0 0 4px rgba(0,0,0,0.3)',
                         left: `${getPositionPercentage(label.timestamp_seconds)}%`,
-                        transform: 'translateX(-50%)'
+                        transform: 'translateX(-50%)',
                       }}
                       onClick={(e) => handleMarkerClick(e, label)}
                     />
                   </TooltipTrigger>
-                  <TooltipContent side="top" className="max-w-xs">
+                  <TooltipContent side="top" className="max-w-xs bg-[hsl(var(--landing-surface))] border-[hsl(var(--landing-border))] text-white">
                     <div className="text-center">
                       <div className="font-medium">{label.label_name}</div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-white/80">
                         {formatTimeForDisplay(label.timestamp_seconds)}
                       </div>
                       {label.notes && (
-                        <div className="text-xs text-gray-400 mt-1 truncate">
+                        <div className="text-xs text-white/70 mt-1 truncate">
                           {label.notes.substring(0, 50)}
                           {label.notes.length > 50 ? '...' : ''}
                         </div>
@@ -181,13 +216,13 @@ export const Timeline = ({
                 <div
                   key={time}
                   className="absolute flex flex-col items-center"
-                  style={{ 
+                  style={{
                     left: `${getPositionPercentage(time)}%`,
                     transform: 'translateX(-50%)'
                   }}
                 >
-                  <div className="w-px h-2 bg-gray-400" />
-                  <span className="text-xs text-gray-500 mt-1">
+                  <div className="w-px h-2" style={{ backgroundColor: "hsl(var(--landing-border))" }} />
+                  <span className="text-xs text-white mt-1">
                     {formatTimeForDisplay(time)}
                   </span>
                 </div>
@@ -196,17 +231,17 @@ export const Timeline = ({
           </div>
 
           {/* Legend */}
-          <div className="flex items-center gap-4 text-sm text-gray-600">
+          <div className="flex items-center gap-4 text-sm text-white">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-3 bg-primary/30 rounded-sm" />
+              <div className="w-4 h-3 rounded-sm" style={{ backgroundColor: "hsl(var(--landing-accent) / 0.45)" }} />
               <span>Played</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-1 h-3 bg-primary rounded-sm" />
+              <div className="w-2.5 h-3 rounded-sm bg-white shadow-sm" style={{ boxShadow: '0 0 0 1px rgba(0,0,0,0.3)' }} />
               <span>Current Position</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-3 bg-blue-500 rounded-sm" />
+              <div className="w-2.5 h-3 rounded-sm border border-white/50" style={{ backgroundColor: "hsl(var(--landing-accent))" }} />
               <span>Markers</span>
             </div>
             {abLoopEnabled && (
@@ -218,7 +253,7 @@ export const Timeline = ({
           </div>
 
           {/* Instructions */}
-          <div className="text-sm text-gray-500 italic">
+          <div className="text-sm text-white/80 italic">
             Click anywhere on the timeline to seek, or click markers to jump to labeled sections
           </div>
         </div>
