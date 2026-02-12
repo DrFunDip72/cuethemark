@@ -52,9 +52,9 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "hsl(var(--landing-bg))", color: "hsl(var(--landing-text))" }}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto mb-4" style={{ borderColor: "hsl(var(--landing-accent))" }}></div>
           <p>Loading subscription status...</p>
         </div>
       </div>
@@ -95,9 +95,9 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
   // While subscription is being resolved, avoid showing the paywall
   if (user && !isAdmin && subscription === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "hsl(var(--landing-bg))", color: "hsl(var(--landing-text))" }}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto mb-4" style={{ borderColor: "hsl(var(--landing-accent))" }}></div>
           <p>Checking your access…</p>
         </div>
       </div>

@@ -96,18 +96,24 @@ export default function ContactPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen" style={{ backgroundColor: "hsl(var(--landing-bg))", color: "hsl(var(--landing-text))" }}>
         <main className="max-w-2xl mx-auto px-6 py-10">
-          <article className="rounded-lg border border-border bg-background p-6 shadow-sm">
+          <article
+            className="rounded-lg border p-6 shadow-sm"
+            style={{
+              backgroundColor: "hsl(var(--landing-surface))",
+              borderColor: "hsl(var(--landing-border))",
+            }}
+          >
             <h1 className="text-3xl font-bold mb-2">Thank you!</h1>
-            <p className="text-muted-foreground mb-6">
+            <p className="mb-6 text-[hsl(var(--landing-text-muted))]">
               We've received your message and we'll get back to you shortly.
             </p>
             <div className="flex gap-3">
               {user ? (
-                <Button onClick={() => navigate("/app/tracks")}>Back to App</Button>
+                <Button onClick={() => navigate("/app/tracks")} style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}>Back to App</Button>
               ) : (
-                <Button variant="secondary" onClick={() => navigate("/")}>Return Home</Button>
+                <Button variant="outline" onClick={() => navigate("/")} className="border-[hsl(var(--landing-border))] text-[hsl(var(--landing-text-muted))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]">Return Home</Button>
               )}
             </div>
           </article>
@@ -117,21 +123,26 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={{ backgroundColor: "hsl(var(--landing-bg))", color: "hsl(var(--landing-text))" }}>
       <main className="max-w-2xl mx-auto px-6 py-10">
         <header className="mb-6">
           <h1 className="text-3xl font-bold">Contact Us</h1>
-          <p className="text-muted-foreground mt-1">Have a question or feedback? Send us a message.</p>
+          <p className="mt-1 text-[hsl(var(--landing-text-muted))]">Have a question or feedback? Send us a message.</p>
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div>
-            <label className="block text-sm font-medium mb-1">Name {user ? <span className="text-muted-foreground">(optional)</span> : null}</label>
+            <label className="block text-sm font-medium mb-1">Name {user ? <span className="text-[hsl(var(--landing-text-muted))]">(optional)</span> : null}</label>
             <Input
               placeholder="Your name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoComplete="name"
+              style={{
+                backgroundColor: "hsl(var(--landing-surface))",
+                borderColor: "hsl(var(--landing-border))",
+                color: "hsl(var(--landing-text))",
+              }}
             />
           </div>
 
@@ -144,6 +155,11 @@ export default function ContactPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
+              style={{
+                backgroundColor: "hsl(var(--landing-surface))",
+                borderColor: "hsl(var(--landing-border))",
+                color: "hsl(var(--landing-text))",
+              }}
             />
           </div>
 
@@ -155,6 +171,11 @@ export default function ContactPage() {
               onChange={(e) => setMessage(e.target.value)}
               required
               rows={6}
+              style={{
+                backgroundColor: "hsl(var(--landing-surface))",
+                borderColor: "hsl(var(--landing-border))",
+                color: "hsl(var(--landing-text))",
+              }}
             />
           </div>
 
@@ -163,7 +184,7 @@ export default function ContactPage() {
           <input type="hidden" name="device" value={JSON.stringify(deviceInfo)} readOnly />
 
           <div className="pt-2">
-            <Button type="submit" disabled={submitting}>
+            <Button type="submit" disabled={submitting} style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}>
               {submitting ? "Sending..." : "Send Message"}
             </Button>
           </div>

@@ -136,17 +136,25 @@ export const ABLoopDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent
+        className="max-w-md border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface))] text-white [&>button]:text-white"
+      >
         <DialogHeader>
-          <DialogTitle>A-B Loop Setup</DialogTitle>
+          <DialogTitle className="text-white">A-B Loop Setup</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           {hasCurrentLoop && (
-            <Card className="p-3 bg-muted">
-              <div className="text-sm text-muted-foreground mb-2">Current Loop:</div>
+            <Card
+              className="p-3"
+              style={{
+                backgroundColor: "hsl(var(--landing-bg))",
+                borderColor: "hsl(var(--landing-border))",
+              }}
+            >
+              <div className="text-sm text-white/80 mb-2">Current Loop:</div>
               <div className="flex justify-between items-center">
-                <div className="text-sm">
+                <div className="text-sm text-white">
                   <div>A: {labels.find(l => l.id === currentStartMarkerId)?.label_name}</div>
                   <div>B: {labels.find(l => l.id === currentEndMarkerId)?.label_name}</div>
                 </div>
@@ -154,6 +162,7 @@ export const ABLoopDialog = ({
                   variant="outline"
                   size="sm"
                   onClick={handleDisableLoop}
+                  className="border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white"
                 >
                   Turn Off
                 </Button>
@@ -163,7 +172,7 @@ export const ABLoopDialog = ({
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <div className="text-sm font-medium">
+              <div className="text-sm font-medium text-white">
                 Select any two markers for A-B loop
               </div>
               {selectedMarkers.size > 0 && (
@@ -171,6 +180,7 @@ export const ABLoopDialog = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleReset}
+                  className="text-white hover:bg-[hsl(var(--landing-surface-hover))] hover:text-white"
                 >
                   <RotateCcw className="h-3 w-3 mr-1" />
                   Reset
@@ -179,7 +189,7 @@ export const ABLoopDialog = ({
             </div>
 
             {selectedMarkers.size === 2 && (
-              <div className="text-xs text-muted-foreground space-y-1">
+              <div className="text-xs text-white/80 space-y-1">
                 <div>A (start): {labels.find(l => l.id === startMarkerId)?.label_name}</div>
                 <div>B (end): {labels.find(l => l.id === endMarkerId)?.label_name}</div>
               </div>
@@ -187,7 +197,7 @@ export const ABLoopDialog = ({
 
             <div className="max-h-48 overflow-y-auto space-y-1">
               {sortedLabels.length === 0 ? (
-                <div className="text-center text-muted-foreground py-4">
+                <div className="text-center text-white/80 py-4">
                   No markers available. Add markers to use A-B loop.
                 </div>
               ) : (
@@ -200,17 +210,25 @@ export const ABLoopDialog = ({
                     <Button
                       key={label.id}
                       variant={isSelected ? "default" : "outline"}
-                      className="w-full justify-between text-left h-auto p-2"
+                      className={`w-full justify-between text-left h-auto p-2 ${
+                        isSelected
+                          ? ''
+                          : 'border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white'
+                      }`}
+                      style={isSelected ? { backgroundColor: "hsl(var(--landing-accent))", color: "#fff" } : undefined}
                       onClick={() => handleMarkerToggle(label.id)}
                     >
                       <div className="flex flex-col items-start">
                         <div className="font-medium">{label.label_name}</div>
-                        <div className={`text-xs ${isSelected ? 'text-white' : 'text-muted-foreground'}`}>
+                        <div className={`text-xs ${isSelected ? 'text-white' : 'text-white/80'}`}>
                           {formatTime(label.timestamp_seconds)}
                         </div>
                       </div>
                       {isSelected && (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge
+                          variant="secondary"
+                          className="text-xs bg-white/20 text-white border-white/30"
+                        >
                           {isStart ? 'A' : isEnd ? 'B' : '•'}
                         </Badge>
                       )}
@@ -224,13 +242,14 @@ export const ABLoopDialog = ({
           <div className="flex gap-2 pt-2">
             <Button
               variant="outline"
-              className="flex-1"
+              className="flex-1 border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white"
               onClick={() => onOpenChange(false)}
             >
               Cancel
             </Button>
             <Button
               className="flex-1"
+              style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}
               onClick={handleApplyLoop}
               disabled={!canApply}
             >

@@ -116,47 +116,53 @@ export const FeatureDetailDialog = ({
 
   if (!feature) return null;
 
+  const darkInput = "border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white placeholder:text-white/50";
+  const darkSelectContent = "border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface))] text-white [&_[data-highlighted]]:bg-[hsl(var(--landing-surface-hover))] [&_[data-highlighted]]:text-white";
+  const darkSelectTrigger = "border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white [&>svg]:text-white/70";
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent>
+        <DialogContent className="border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface))] text-white [&>button]:text-white">
           <DialogHeader>
-            <DialogTitle>Feature Details</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-white">Feature Details</DialogTitle>
+            <DialogDescription className="text-white/80">
               View and edit feature information
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
+              <Label htmlFor="title" className="text-white">Title *</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter feature title"
+                className={darkInput}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description" className="text-white">Description</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe the feature and its benefits"
                 rows={4}
+                className={darkInput}
               />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="priority">Priority</Label>
+                <Label htmlFor="priority" className="text-white">Priority</Label>
                 <Select value={priority} onValueChange={(v) => setPriority(v as FeaturePriority)}>
-                  <SelectTrigger id="priority">
+                  <SelectTrigger id="priority" className={darkSelectTrigger}>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className={darkSelectContent}>
                     <SelectItem value="low">Low</SelectItem>
                     <SelectItem value="medium">Medium</SelectItem>
                     <SelectItem value="high">High</SelectItem>
@@ -166,12 +172,12 @@ export const FeatureDetailDialog = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
+                <Label htmlFor="status" className="text-white">Status</Label>
                 <Select value={status} onValueChange={(v) => setStatus(v as FeatureStatus)}>
-                  <SelectTrigger id="status">
+                  <SelectTrigger id="status" className={darkSelectTrigger}>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className={darkSelectContent}>
                     <SelectItem value="not_started">Not Started</SelectItem>
                     <SelectItem value="in_progress">In Progress</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
@@ -181,15 +187,15 @@ export const FeatureDetailDialog = ({
             </div>
 
             {feature.linked_error_id && (
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-white/80">
                 This feature is linked to a bug report
               </div>
             )}
 
             <div className="grid gap-4 sm:grid-cols-2 pt-2">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Created</p>
-                <p className="text-base">
+                <p className="text-sm font-medium text-white/80">Created</p>
+                <p className="text-base text-white">
                   {new Date(feature.created_at).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -200,8 +206,8 @@ export const FeatureDetailDialog = ({
 
               {feature.completed_at && (
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Completed</p>
-                  <p className="text-base">
+                  <p className="text-sm font-medium text-white/80">Completed</p>
+                  <p className="text-base text-white">
                     {new Date(feature.completed_at).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
@@ -214,11 +220,12 @@ export const FeatureDetailDialog = ({
           </div>
 
           {feature.status === "completed" && (
-            <div className="pt-4 border-t">
+            <div className="pt-4 border-t border-[hsl(var(--landing-border))]">
               <Button 
                 onClick={() => onCreateAnnouncement(feature)}
                 className="w-full"
                 size="lg"
+                style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}
               >
                 <Bell className="w-4 h-4 mr-2" />
                 Create Announcement
@@ -230,11 +237,12 @@ export const FeatureDetailDialog = ({
             <Button
               variant="outline"
               onClick={() => setShowArchiveDialog(true)}
+              className="border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white"
             >
               <Archive className="w-4 h-4 mr-2" />
               Archive
             </Button>
-            <Button onClick={handleSave} disabled={!title.trim() || saving}>
+            <Button onClick={handleSave} disabled={!title.trim() || saving} style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}>
               {saving ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
@@ -242,18 +250,19 @@ export const FeatureDetailDialog = ({
       </Dialog>
 
       <AlertDialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface))] text-white">
           <AlertDialogHeader>
-            <AlertDialogTitle>Archive Feature</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-white">Archive Feature</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/80">
               Are you sure you want to archive "{feature.title}"? You can restore it later from the archived features page.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleArchive}
               disabled={archiving}
+              style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}
             >
               {archiving ? "Archiving..." : "Archive"}
             </AlertDialogAction>

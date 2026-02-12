@@ -157,32 +157,32 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface))] text-white [&>button]:text-white">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Add New Label</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-white">Add New Label</DialogTitle>
+            <DialogDescription className="text-white/80">
               Create a new label at the current playback position or specify a custom time.
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="label-name" className="text-right">
+              <Label htmlFor="label-name" className="text-right text-white">
                 Label
               </Label>
               <Input
                 id="label-name"
                 value={labelName}
                 onChange={(e) => setLabelName(e.target.value)}
-                className="col-span-3"
+                className="col-span-3 bg-[hsl(var(--landing-bg))] border-[hsl(var(--landing-border))] text-white placeholder:text-white/50"
                 placeholder="e.g., Chorus, Verse, Drop"
                 autoFocus
               />
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="timestamp" className="text-right">
+              <Label htmlFor="timestamp" className="text-right text-white">
                 Timestamp (s)
               </Label>
               <Input
@@ -191,13 +191,13 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
                 step="0.1"
                 value={timestamp}
                 onChange={handleTimestampChange}
-                className="col-span-3"
+                className="col-span-3 bg-[hsl(var(--landing-bg))] border-[hsl(var(--landing-border))] text-white placeholder:text-white/50"
                 placeholder="0"
               />
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="playback-offset" className="text-right">
+              <Label htmlFor="playback-offset" className="text-right text-white">
                 Start Offset (s)
               </Label>
               <div className="col-span-3 flex items-center gap-2">
@@ -207,10 +207,10 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
                   step="0.1"
                   value={playbackOffset}
                   onChange={handleOffsetChange}
-                  className="flex-1"
+                  className="flex-1 bg-[hsl(var(--landing-bg))] border-[hsl(var(--landing-border))] text-white placeholder:text-white/50"
                   placeholder="3"
                 />
-                <span className="text-sm text-gray-500 text-xs">
+                <span className="text-sm text-white/70 text-xs">
                   seconds before
                 </span>
               </div>
@@ -219,10 +219,16 @@ export function AddLabelDialog({ open, onOpenChange, trackId, currentTime }: Add
 
           <DialogFooter>
             <div className="flex gap-2 justify-center">
-              <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => onOpenChange(false)}
+                className="border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white"
+              >
                 <X className="h-4 w-4" />
               </Button>
-              <Button type="submit" disabled={isSubmitting} size="sm">
+              <Button type="submit" disabled={isSubmitting} size="sm" style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}>
                 <Plus className="h-4 w-4" />
               </Button>
             </div>

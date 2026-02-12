@@ -451,11 +451,11 @@ const TrackPage = () => {
           <h1 className="text-xl sm:text-2xl font-bold leading-tight break-words">
             {trackData?.filename || "Track Name"}
           </h1>
-          <Button 
-            size="icon" 
+          <Button
+            size="icon"
             variant="ghost"
             onClick={() => setEditTrackOpen(true)}
-            className="flex-shrink-0 mt-1"
+            className="flex-shrink-0 mt-1 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
           >
             <Pen className="h-4 w-4" />
           </Button>
@@ -467,7 +467,8 @@ const TrackPage = () => {
             variant={view === 'timeline' ? 'default' : 'outline'}
             onClick={() => setView('timeline')}
             size="sm"
-            className="flex-1 sm:flex-none"
+            className={`flex-1 sm:flex-none ${view === 'timeline' ? '' : 'border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white'}`}
+            style={view === 'timeline' ? { backgroundColor: "hsl(var(--landing-accent))", color: "#fff" } : undefined}
           >
             Timeline
           </Button>
@@ -475,7 +476,8 @@ const TrackPage = () => {
             variant={view === 'list' ? 'default' : 'outline'}
             onClick={() => setView('list')}
             size="sm"
-            className="flex-1 sm:flex-none"
+            className={`flex-1 sm:flex-none ${view === 'list' ? '' : 'border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white'}`}
+            style={view === 'list' ? { backgroundColor: "hsl(var(--landing-accent))", color: "#fff" } : undefined}
           >
             Labels
           </Button>
@@ -483,15 +485,21 @@ const TrackPage = () => {
       </div>
 
       {/* Audio player controls */}
-      <Card className="p-6 mb-6">
+      <Card
+        className="p-6 mb-6"
+        style={{
+          backgroundColor: "hsl(var(--landing-surface))",
+          borderColor: "hsl(var(--landing-border))",
+        }}
+      >
         {/* First row: Play button, slider, and timestamp */}
         <div className="flex items-center gap-4 mb-4">
-          <Button 
-            size="icon" 
+          <Button
+            size="icon"
             variant="outline"
             onClick={handlePlayPause}
             disabled={isLoading || !trackUrl}
-            className="flex-shrink-0"
+            className="flex-shrink-0 border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white [&_svg]:text-white"
           >
             {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </Button>
@@ -506,7 +514,7 @@ const TrackPage = () => {
             disabled={isLoading || !trackUrl}
           />
           
-          <div className="text-sm font-medium text-muted-foreground flex-shrink-0">
+          <div className="text-sm font-medium text-[hsl(var(--landing-text-muted))] flex-shrink-0">
             {formatTimeForDisplay(currentTime)} / {formatTimeForDisplay(duration)}
           </div>
         </div>
@@ -514,7 +522,7 @@ const TrackPage = () => {
         {/* Second row: Controls */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <Gauge className="h-4 w-4 text-muted-foreground" />
+            <Gauge className="h-4 w-4 text-[hsl(var(--landing-text-muted))]" />
             <div className="flex items-center">
               <Input
                 type="number"
@@ -526,8 +534,13 @@ const TrackPage = () => {
                 step="0.05"
                 className="w-16 h-8 text-center text-sm"
                 disabled={isLoading || !trackUrl}
+                style={{
+                  backgroundColor: "hsl(var(--landing-bg))",
+                  borderColor: "hsl(var(--landing-border))",
+                  color: "hsl(var(--landing-text))",
+                }}
               />
-              <span className="text-sm text-muted-foreground ml-1">x</span>
+              <span className="text-sm text-[hsl(var(--landing-text-muted))] ml-1">x</span>
             </div>
           </div>
 
@@ -536,7 +549,8 @@ const TrackPage = () => {
             variant={autoLoop ? "default" : "outline"}
             onClick={handleAutoLoopToggle}
             disabled={isLoading || !trackUrl}
-            className="h-8"
+            className={`h-8 [&_svg]:text-current ${!autoLoop ? 'border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white' : ''}`}
+            style={autoLoop ? { backgroundColor: "hsl(var(--landing-accent))", color: "#fff" } : undefined}
           >
             <RotateCcw className="h-4 w-4" />
           </Button>
@@ -551,7 +565,8 @@ const TrackPage = () => {
               setShowAbLoopDialog(true);
             }}
             disabled={isLoading || !trackUrl}
-            className="h-8"
+            className={`h-8 [&_svg]:text-current ${!abLoopEnabled ? 'border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white' : ''}`}
+            style={abLoopEnabled ? { backgroundColor: "hsl(var(--landing-accent))", color: "#fff" } : undefined}
           >
             <span className="text-sm font-medium">A</span>
             <RotateCcw className="h-3 w-3 mx-1" />
@@ -572,7 +587,13 @@ const TrackPage = () => {
           abLoopEnd={abLoopEnd}
         />
       ) : (
-        <Card className="p-6">
+        <Card
+          className="p-6"
+          style={{
+            backgroundColor: "hsl(var(--landing-surface))",
+            borderColor: "hsl(var(--landing-border))",
+          }}
+        >
           {labelsLoading ? (
             <div className="text-center py-4">Loading labels...</div>
           ) : labels?.length ? (
@@ -589,7 +610,7 @@ const TrackPage = () => {
               onMarkerDeleted={handleMarkerDeleted}
             />
           ) : (
-            <div className="text-center text-gray-500 py-8">
+            <div className="text-center text-[hsl(var(--landing-text-muted))] py-8">
               No labels added yet
             </div>
           )}
@@ -598,7 +619,13 @@ const TrackPage = () => {
 
       {/* Delete Track Section - only shown in labels view */}
       {view === 'list' && (
-        <Card className="p-6 mt-8 border-destructive/20">
+        <Card
+          className="p-6 mt-8"
+          style={{
+            backgroundColor: "hsl(var(--landing-surface))",
+            borderColor: "hsl(var(--destructive) / 0.3)",
+          }}
+        >
           <div className="text-center space-y-4">
             <Button
               variant="destructive"
@@ -619,6 +646,7 @@ const TrackPage = () => {
             className="pointer-events-auto w-full md:w-auto md:ml-auto md:float-right"
             size="lg"
             onClick={handleAddLabelClick}
+            style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}
           >
             <Plus className="mr-2 h-4 w-4" /> Add Label
           </Button>
@@ -656,15 +684,15 @@ const TrackPage = () => {
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent>
+        <AlertDialogContent className="border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface))] text-white">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-white">Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/80">
               This action cannot be undone. This will permanently delete the track "{trackData?.filename}" and all its associated labels.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting} className="border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white">Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDelete}
               disabled={isDeleting}

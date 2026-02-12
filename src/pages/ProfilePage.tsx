@@ -127,196 +127,204 @@ const ProfilePage = () => {
 
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden">
-      {/* Vibrant gradient backdrop */}
-      <div 
-        className="absolute inset-0 -z-10"
-        style={{
-          backgroundImage: "linear-gradient(135deg, hsl(var(--gradient-hero-start)), hsl(var(--gradient-hero-mid)) 40%, hsl(var(--gradient-hero-end)))"
-        }}
-      />
-      
-      <div className="container mx-auto px-6 pt-4 pb-8 max-w-4xl text-white">
+    <div className="min-h-screen w-full relative overflow-hidden" style={{ backgroundColor: "hsl(var(--landing-bg))", color: "hsl(var(--landing-text))" }}>
+      <div className="container mx-auto px-6 pt-4 pb-8 max-w-4xl">
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-black/10 backdrop-blur-sm mb-4">
-            <User className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style={{ backgroundColor: "hsl(var(--landing-surface))", border: "1px solid hsl(var(--landing-border))" }}>
+            <User className="w-8 h-8" style={{ color: "hsl(var(--landing-text))" }} />
           </div>
-          <h1 className="text-4xl font-bold mb-2 text-black">Account Profile</h1>
-          <p className="text-xl opacity-90 text-black">Manage your CueTheMark account</p>
+          <h1 className="text-4xl font-bold mb-2">Account Profile</h1>
+          <p className="text-xl" style={{ color: "hsl(var(--landing-text-muted))" }}>Manage your CueTheMark account</p>
         </div>
         
         <div className="grid gap-6 md:grid-cols-2">
           {/* Account Information */}
-          <div
-            className="rounded-2xl p-[1.5px] shadow-xl"
+          <Card
+            className="rounded-2xl"
             style={{
-              backgroundImage:
-                "linear-gradient(135deg, hsl(var(--gradient-hero-start)), hsl(var(--gradient-hero-mid)) 40%, hsl(var(--gradient-hero-end)))",
+              backgroundColor: "hsl(var(--landing-surface))",
+              borderColor: "hsl(var(--landing-border))",
             }}
           >
-            <Card className="rounded-2xl bg-card/80 backdrop-blur-md border border-border/40">
-              <CardHeader>
-                <CardTitle className="text-foreground">Account Information</CardTitle>
-                <CardDescription>Your basic account details</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label>Email</Label>
-                  <Input value={user?.email || ''} disabled className="bg-white/20 border-white/30 text-foreground font-medium" />
-                </div>
-                <div>
-                  <Label>Account Created</Label>
-                  <Input 
-                    value={user?.created_at ? format(new Date(user.created_at), 'PPP') : ''} 
-                    disabled 
-                    className="bg-white/20 border-white/30 text-foreground font-medium"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+            <CardHeader>
+              <CardTitle>Account Information</CardTitle>
+              <CardDescription className="text-[hsl(var(--landing-text-muted))]">Your basic account details</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label>Email</Label>
+                <Input
+                  value={user?.email || ''}
+                  disabled
+                  style={{
+                    backgroundColor: "hsl(var(--landing-bg))",
+                    borderColor: "hsl(var(--landing-border))",
+                    color: "hsl(var(--landing-text))",
+                  }}
+                />
+              </div>
+              <div>
+                <Label>Account Created</Label>
+                <Input
+                  value={user?.created_at ? format(new Date(user.created_at), 'PPP') : ''}
+                  disabled
+                  style={{
+                    backgroundColor: "hsl(var(--landing-bg))",
+                    borderColor: "hsl(var(--landing-border))",
+                    color: "hsl(var(--landing-text))",
+                  }}
+                />
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Subscription Status */}
-          <div
-            className="rounded-2xl p-[1.5px] shadow-xl"
+          <Card
+            className="rounded-2xl"
             style={{
-              backgroundImage:
-                "linear-gradient(135deg, hsl(var(--gradient-hero-start)), hsl(var(--gradient-hero-mid)) 40%, hsl(var(--gradient-hero-end)))",
+              backgroundColor: "hsl(var(--landing-surface))",
+              borderColor: "hsl(var(--landing-border))",
             }}
           >
-            <Card className="rounded-2xl bg-card/80 backdrop-blur-md border border-border/40">
-              <CardHeader>
-                <CardTitle className="text-foreground">Subscription Status</CardTitle>
-                <CardDescription>Manage your subscription and billing</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Label>Status:</Label>
-                  <Badge variant={getSubscriptionBadgeVariant()}>
-                    {getSubscriptionStatus()}
-                  </Badge>
+            <CardHeader>
+              <CardTitle>Subscription Status</CardTitle>
+              <CardDescription className="text-[hsl(var(--landing-text-muted))]">Manage your subscription and billing</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Label>Status:</Label>
+                <Badge variant={getSubscriptionBadgeVariant()}>
+                  {getSubscriptionStatus()}
+                </Badge>
+              </div>
+              
+              {subscription?.subscription_tier && (
+                <div>
+                  <Label>Plan</Label>
+                  <Input
+                    value={subscription.subscription_tier === 'lifetime' ? 'Lifetime Access' : (isDemo() ? 'Demo (1 day trial)' : 'Monthly ($6.99/month)')}
+                    disabled
+                    style={{
+                      backgroundColor: "hsl(var(--landing-bg))",
+                      borderColor: "hsl(var(--landing-border))",
+                      color: "hsl(var(--landing-text))",
+                    }}
+                  />
                 </div>
-                
-                {subscription?.subscription_tier && (
-                  <div>
-                    <Label>Plan</Label>
-                    <Input 
-                      value={subscription.subscription_tier === 'lifetime' ? 'Lifetime Access' : (isDemo() ? 'Demo (1 day trial)' : 'Monthly ($6.99/month)')} 
-                      disabled 
-                      className="bg-white/20 border-white/30 text-foreground font-medium"
-                    />
-                  </div>
-                )}
-                
-                {subscription?.subscription_end && subscription.subscription_tier !== 'lifetime' && (
-                  <div>
-                    <Label>{isDemo() ? 'Demo ends on' : 'Next Billing Date'}</Label>
-                    <Input 
-                      value={format(new Date(subscription.subscription_end), 'PPP')} 
-                      disabled 
-                      className="bg-white/20 border-white/30 text-foreground font-medium"
-                    />
-                  </div>
-                )}
-
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={checkSubscription} 
-                    variant="purple"
-                    size="sm"
-                    disabled={loading}
-                  >
-                    Refresh Status
-                  </Button>
-                  
-                  {subscription?.subscribed && subscription.subscription_tier !== 'lifetime' && !isDemo() && subscriber?.stripe_customer_id && (
-                    <Button 
-                      onClick={handleManageBilling}
-                      disabled={loading}
-                      size="sm"
-                      variant="green"
-                    >
-                      Manage Billing
-                    </Button>
-                  )}
+              )}
+              
+              {subscription?.subscription_end && subscription.subscription_tier !== 'lifetime' && (
+                <div>
+                  <Label>{isDemo() ? 'Demo ends on' : 'Next Billing Date'}</Label>
+                  <Input
+                    value={format(new Date(subscription.subscription_end), 'PPP')}
+                    disabled
+                    style={{
+                      backgroundColor: "hsl(var(--landing-bg))",
+                      borderColor: "hsl(var(--landing-border))",
+                      color: "hsl(var(--landing-text))",
+                    }}
+                  />
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              )}
 
-          {/* Security Settings */}
-          <div
-            className="rounded-2xl p-[1.5px] shadow-xl"
-            style={{
-              backgroundImage:
-                "linear-gradient(135deg, hsl(var(--gradient-hero-start)), hsl(var(--gradient-hero-mid)) 40%, hsl(var(--gradient-hero-end)))",
-            }}
-          >
-            <Card className="rounded-2xl bg-card/80 backdrop-blur-md border border-border/40">
-              <CardHeader>
-                <CardTitle className="text-foreground">Security</CardTitle>
-                <CardDescription>Update your account security settings</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleUpdatePassword} className="space-y-4">
-                  <div>
-                    <Label htmlFor="newPassword">New Password</Label>
-                    <Input
-                      id="newPassword"
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Enter new password"
-                      disabled={loading}
-                      className="bg-white/20 border-white/30 placeholder:opacity-70 text-foreground"
-                    />
-                  </div>
-                  <Button 
-                    type="submit" 
-                    disabled={loading || !newPassword.trim()}
-                    className="w-full"
-                    variant="default"
-                  >
-                    {loading ? 'Updating...' : 'Update Password'}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Account Actions */}
-          <div
-            className="rounded-2xl p-[1.5px] shadow-xl"
-            style={{
-              backgroundImage:
-                "linear-gradient(135deg, hsl(var(--gradient-hero-start)), hsl(var(--gradient-hero-mid)) 40%, hsl(var(--gradient-hero-end)))",
-            }}
-          >
-            <Card className="rounded-2xl bg-card/80 backdrop-blur-md border border-border/40">
-              <CardHeader>
-                <CardTitle className="text-foreground">Account Actions</CardTitle>
-                <CardDescription>Manage your account preferences</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button 
-                  onClick={() => handleLogout(navigate)} 
-                  variant="destructive"
-                  className="w-full"
+              <div className="flex gap-2">
+                <Button
+                  onClick={checkSubscription}
+                  size="sm"
+                  disabled={loading}
+                  style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}
                 >
-                  Sign Out
+                  Refresh Status
                 </Button>
                 
-                <div className="pt-4 border-t border-white/20">
-                  <p className="text-sm opacity-70 mb-2">
-                    Need to cancel your subscription or delete your account? Use the "Manage Billing" button above to access all account management options.
-                  </p>
+                {subscription?.subscribed && subscription.subscription_tier !== 'lifetime' && !isDemo() && subscriber?.stripe_customer_id && (
+                  <Button
+                    onClick={handleManageBilling}
+                    disabled={loading}
+                    size="sm"
+                    variant="green"
+                  >
+                    Manage Billing
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Security Settings */}
+          <Card
+            className="rounded-2xl"
+            style={{
+              backgroundColor: "hsl(var(--landing-surface))",
+              borderColor: "hsl(var(--landing-border))",
+            }}
+          >
+            <CardHeader>
+              <CardTitle>Security</CardTitle>
+              <CardDescription className="text-[hsl(var(--landing-text-muted))]">Update your account security settings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleUpdatePassword} className="space-y-4">
+                <div>
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter new password"
+                    disabled={loading}
+                    style={{
+                      backgroundColor: "hsl(var(--landing-bg))",
+                      borderColor: "hsl(var(--landing-border))",
+                      color: "hsl(var(--landing-text))",
+                    }}
+                  />
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+                <Button
+                  type="submit"
+                  disabled={loading || !newPassword.trim()}
+                  className="w-full"
+                  style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}
+                >
+                  {loading ? 'Updating...' : 'Update Password'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Account Actions */}
+          <Card
+            className="rounded-2xl"
+            style={{
+              backgroundColor: "hsl(var(--landing-surface))",
+              borderColor: "hsl(var(--landing-border))",
+            }}
+          >
+            <CardHeader>
+              <CardTitle>Account Actions</CardTitle>
+              <CardDescription className="text-[hsl(var(--landing-text-muted))]">Manage your account preferences</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button
+                onClick={() => handleLogout(navigate)}
+                variant="destructive"
+                className="w-full"
+              >
+                Sign Out
+              </Button>
+              
+              <div className="pt-4" style={{ borderTop: "1px solid hsl(var(--landing-border))" }}>
+                <p className="text-sm mb-2" style={{ color: "hsl(var(--landing-text-muted))" }}>
+                  Need to cancel your subscription or delete your account? Use the "Manage Billing" button above to access all account management options.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
-  </div>
   );
 };
 

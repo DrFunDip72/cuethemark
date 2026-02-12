@@ -37,7 +37,7 @@
     --landing-surface-hover: 228 14% 16%;
     --landing-border: 228 14% 20%;
     --landing-text: 0 0% 96%;
-    --landing-text-muted: 220 10% 60%;
+    --landing-text-muted: 220 10% 75%;
     --landing-accent: 255 80% 64%;
     --landing-accent-hover: 255 80% 72%;
     --landing-accent-glow: 255 80% 64%;
@@ -84,4 +84,32 @@
 }
 .marker-dot {
   animation: marker-glow 2s ease-in-out infinite;
+}
+
+/* Shared dark theme wrapper: maps shadcn tokens to landing theme for app shell */
+.landing-theme,
+[data-theme="landing"] {
+  --background: var(--landing-bg);
+  --foreground: var(--landing-text);
+  --card: var(--landing-surface);
+  --card-foreground: var(--landing-text);
+  --popover: var(--landing-surface);
+  --popover-foreground: var(--landing-text);
+  --primary: var(--landing-accent);
+  --primary-foreground: 0 0% 100%;
+  --secondary: var(--landing-surface-hover);
+  --secondary-foreground: var(--landing-text);
+  --muted: var(--landing-surface-hover);
+  --muted-foreground: var(--landing-text-muted);
+  --accent: var(--landing-surface-hover);
+  --accent-foreground: var(--landing-text);
+  --border: var(--landing-border);
+  --input: var(--landing-border);
+  --ring: var(--landing-accent);
+}
+
+/* Slider thumb: ensure visible on dark track */
+.landing-theme [role="slider"] {
+  background-color: white;
+  border-color: hsl(var(--landing-accent));
 }

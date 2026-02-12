@@ -43,13 +43,14 @@ const UploadPage = () => {
           {isUploading && (
             <div className="flex items-center gap-2">
               <Progress value={uploadProgress} className="w-24" />
-              <span className="text-sm text-gray-500">{uploadProgress}%</span>
+              <span className="text-sm text-white/80">{uploadProgress}%</span>
             </div>
           )}
           <Button
             onClick={() => document.getElementById('fileInput')?.click()}
             disabled={isUploading}
             className="flex items-center gap-2"
+            style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}
           >
             <Upload className="h-4 w-4" />
             Upload Track
@@ -65,15 +66,22 @@ const UploadPage = () => {
       </div>
 
       {showFirstTimePrompt && (
-        <div className="mb-6 rounded-lg border border-primary/20 bg-primary/5 p-6">
+        <div
+          className="mb-6 rounded-lg border p-6"
+          style={{
+            backgroundColor: "hsl(var(--landing-surface))",
+            borderColor: "hsl(var(--landing-border))",
+          }}
+        >
           <p className="text-lg font-medium mb-2">Upload your first track to get started</p>
-          <p className="text-muted-foreground mb-4">
+          <p className="mb-4 text-white/80">
             Add markers to jump to any section in seconds. Drag and drop your team&apos;s audio file to begin.
           </p>
           <Button
             onClick={() => document.getElementById('fileInput')?.click()}
             disabled={isUploading}
             className="gap-2"
+            style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}
           >
             <Upload className="h-4 w-4" />
             Upload Track
@@ -84,7 +92,7 @@ const UploadPage = () => {
       <TrackList />
 
       <Link to={`/app/feedback?from=${encodeURIComponent(location.pathname + location.search + location.hash)}`} className="fixed bottom-6 right-6 z-50">
-        <Button className="shadow-lg">
+        <Button className="shadow-lg" style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}>
           <MessageSquare className="h-4 w-4 mr-2" />
           Send Feedback
         </Button>

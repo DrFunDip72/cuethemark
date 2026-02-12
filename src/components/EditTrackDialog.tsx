@@ -94,25 +94,25 @@ export function EditTrackDialog({ open, onOpenChange, track }: EditTrackDialogPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface))] text-white [&>button]:text-white">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Edit Track Name</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-white">Edit Track Name</DialogTitle>
+            <DialogDescription className="text-white/80">
               Change the display name of your audio track.
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-track-name" className="text-right">
+              <Label htmlFor="edit-track-name" className="text-right text-white">
                 Track Name
               </Label>
               <Input
                 id="edit-track-name"
                 value={filename}
                 onChange={(e) => setFilename(e.target.value)}
-                className="col-span-3"
+                className="col-span-3 bg-[hsl(var(--landing-bg))] border-[hsl(var(--landing-border))] text-white placeholder:text-white/50"
                 placeholder="e.g., Piano Concerto in C"
                 autoFocus
               />
@@ -120,10 +120,15 @@ export function EditTrackDialog({ open, onOpenChange, track }: EditTrackDialogPr
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}>
               {isSubmitting ? 'Saving...' : 'Save Changes'}
             </Button>
           </DialogFooter>

@@ -76,44 +76,60 @@ const LabelItem = ({
 }: LabelItemProps) => {
   return (
     <Card
-      className={`p-4 hover:bg-accent transition-colors ${
-        activeLabel === label.id ? 'border-primary' : ''
+      className={`p-4 transition-colors hover:bg-[hsl(var(--landing-surface-hover))] ${
+        activeLabel === label.id ? '' : ''
       }`}
+      style={{
+        backgroundColor: "hsl(var(--landing-surface))",
+        borderColor: activeLabel === label.id ? "hsl(var(--landing-accent))" : "hsl(var(--landing-border))",
+      }}
     >
-      <div className="flex items-center justify-between">        
-        <div 
+      <div className="flex items-center justify-between">
+        <div
           className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
           onClick={() => onPlayFromLabel(label)}
         >
-          <Play className="h-4 w-4 text-primary flex-shrink-0" />
+          <Play className="h-4 w-4 flex-shrink-0 text-white" />
           <div className="min-w-0 flex-1">
-            <h3 className="font-medium truncate">{label.label_name}</h3>
-            <Badge variant="secondary">
+            <h3 className="font-medium truncate text-white">{label.label_name}</h3>
+            <Badge
+              variant="secondary"
+              className="text-white/90"
+              style={{
+                backgroundColor: "hsl(var(--landing-surface-hover))",
+                borderColor: "hsl(var(--landing-border))",
+              }}
+            >
               {formatTime(label.timestamp_seconds)}
             </Badge>
           </div>
         </div>
         
         <div className="flex items-center gap-2 flex-shrink-0">
-          <Button size="icon" variant="ghost" onClick={() => onEdit(label)}>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => onEdit(label)}
+            className="text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
+          >
             <Pencil className="h-4 w-4" />
           </Button>
           <div className="flex flex-col">
-            <Button 
+            <Button
               size="sm"
-              variant="ghost" 
+              variant="ghost"
               onClick={() => onMoveUp(label.id)}
               disabled={!canMoveUp}
-              className="h-6 w-6 p-0 disabled:opacity-50"
+              className="h-6 w-6 p-0 disabled:opacity-50 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
             >
               <ArrowUp className="h-3 w-3" />
             </Button>
-            <Button 
+            <Button
               size="sm"
-              variant="ghost" 
+              variant="ghost"
               onClick={() => onMoveDown(label.id)}
               disabled={!canMoveDown}
-              className="h-6 w-6 p-0 disabled:opacity-50"
+              className="h-6 w-6 p-0 disabled:opacity-50 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
             >
               <ArrowDown className="h-3 w-3" />
             </Button>
@@ -123,18 +139,23 @@ const LabelItem = ({
 
       <Accordion type="single" collapsible className="w-full mt-2">
         <AccordionItem value={`notes-${label.id}`} className="border-0">
-          <AccordionTrigger className="py-2 px-0">
-            <span className="text-sm text-gray-500">Notes</span>
+          <AccordionTrigger className="py-2 px-0 text-white hover:no-underline [&_svg]:text-white">
+            <span className="text-sm">Notes</span>
           </AccordionTrigger>
           <AccordionContent>
             <div className="space-y-2">
-              <Textarea 
-                value={notes[label.id] || ''} 
+              <Textarea
+                value={notes[label.id] || ''}
                 onChange={(e) => onNotesChange(label.id, e.target.value)}
                 placeholder="Add notes about this section... (auto-saves)"
                 className="min-h-[100px] text-sm"
+                style={{
+                  backgroundColor: "hsl(var(--landing-bg))",
+                  borderColor: "hsl(var(--landing-border))",
+                  color: "hsl(var(--landing-text))",
+                }}
               />
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-white/80">
                 {saveTimeouts[label.id] ? '⏳ Saving...' : '✓ Auto-saved'}
               </div>
             </div>

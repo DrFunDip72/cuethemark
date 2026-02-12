@@ -8,12 +8,12 @@ export default function TermsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen" style={{ backgroundColor: "hsl(var(--landing-bg))", color: "hsl(var(--landing-text))" }}>
       <main className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-4xl font-extrabold mb-6 text-center bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+        <h1 className="text-4xl font-extrabold mb-6 text-center" style={{ color: "hsl(var(--landing-accent))" }}>
           Terms of Service
         </h1>
-        <section className="prose prose-neutral dark:prose-invert max-w-none">
+        <section className="prose prose-invert max-w-none [&>*]:text-[hsl(var(--landing-text))] [&_a]:text-[hsl(var(--landing-accent))] [&_a:hover]:opacity-90 [&_strong]:text-[hsl(var(--landing-text))] [&_h2]:text-[hsl(var(--landing-text))] [&_li]:text-[hsl(var(--landing-text-muted))] [&_p]:text-[hsl(var(--landing-text-muted))]">
           <p>
             <strong>Last updated:</strong> August 9, 2025
           </p>
