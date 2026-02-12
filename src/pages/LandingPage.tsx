@@ -104,7 +104,7 @@ export default function LandingPage() {
               { icon: Share2, step: "03", title: "Share with your team", desc: "Everyone gets the same marked-up track instantly." },
             ].map(({ icon: Icon, step, title, desc }, i) => (
               <div key={step} className={`relative text-center space-y-4 animate-float-up animate-float-up-${i + 1}`}>
-                <div className="text-5xl font-black" style={{ color: "hsl(var(--landing-accent) / 0.4)" }}>{step}</div>
+                <div className="text-5xl font-black" style={{ color: "hsl(var(--landing-accent))" }}>{step}</div>
                 <div className="w-12 h-12 rounded-xl mx-auto flex items-center justify-center" style={{ backgroundColor: "hsl(var(--landing-surface))", border: "1px solid hsl(var(--landing-border))" }}>
                   <Icon className="w-5 h-5" style={{ color: "hsl(var(--landing-accent))" }} />
                 </div>
@@ -211,7 +211,7 @@ export default function LandingPage() {
               </div>
               <p className="text-sm" style={{ color: "hsl(var(--landing-text-muted))" }}>For dedicated dancers mastering solo or assigned parts.</p>
               <ul className="space-y-2 text-sm pt-2">
-                {["Unlimited MP3 uploads", "Precision markers", "Tempo control", "14-day free trial"].map((f) => (
+                {["Unlimited MP3 uploads", "Precision markers", "Tempo control", "7-day free trial"].map((f) => (
                   <li key={f} className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 shrink-0" style={{ color: "hsl(var(--landing-accent))" }} />{f}</li>
                 ))}
               </ul>
@@ -229,7 +229,7 @@ export default function LandingPage() {
               </div>
               <p className="text-sm" style={{ color: "hsl(var(--landing-text-muted))" }}>Shared routines, team sync, unlimited markers.</p>
               <ul className="space-y-2 text-sm pt-2">
-                {["Everything in Individual", "Shared team routines", "Automatic team sync", "Unlimited markers", "14-day free trial"].map((f) => (
+                {["Everything in Individual", "Shared team routines", "Automatic team sync", "Unlimited markers", "7-day free trial"].map((f) => (
                   <li key={f} className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 shrink-0" style={{ color: "hsl(var(--landing-accent))" }} />{f}</li>
                 ))}
               </ul>
@@ -238,7 +238,7 @@ export default function LandingPage() {
               </Button>
             </div>
           </div>
-          <p className="text-sm" style={{ color: "hsl(var(--landing-text-muted))" }}>14-day free trial · Cancel anytime · No credit card required</p>
+          <p className="text-sm" style={{ color: "hsl(var(--landing-text-muted))" }}>7-day free trial · Cancel anytime · No credit card required</p>
         </div>
       </section>
 
