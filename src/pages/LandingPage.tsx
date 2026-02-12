@@ -91,7 +91,7 @@ export default function LandingPage() {
       </section>
 
       {/* 3. How It Works */}
-      <section className="px-6 py-20 md:py-28">
+      <section className="px-6 py-20 md:py-28" style={{ backgroundColor: "hsl(var(--landing-surface))" }}>
         <div className="max-w-5xl mx-auto text-center space-y-14">
           <div>
             <p className="text-sm font-semibold uppercase tracking-widest mb-3" style={{ color: "hsl(var(--landing-accent))" }}>Simple Workflow</p>
@@ -104,7 +104,7 @@ export default function LandingPage() {
               { icon: Share2, step: "03", title: "Share with your team", desc: "Everyone gets the same marked-up track instantly." },
             ].map(({ icon: Icon, step, title, desc }, i) => (
               <div key={step} className={`relative text-center space-y-4 animate-float-up animate-float-up-${i + 1}`}>
-                <div className="text-5xl font-black" style={{ color: "hsl(var(--landing-accent) / 0.15)" }}>{step}</div>
+                <div className="text-5xl font-black" style={{ color: "hsl(var(--landing-accent) / 0.4)" }}>{step}</div>
                 <div className="w-12 h-12 rounded-xl mx-auto flex items-center justify-center" style={{ backgroundColor: "hsl(var(--landing-surface))", border: "1px solid hsl(var(--landing-border))" }}>
                   <Icon className="w-5 h-5" style={{ color: "hsl(var(--landing-accent))" }} />
                 </div>
@@ -133,8 +133,8 @@ export default function LandingPage() {
                 key={title}
                 className={`p-6 rounded-xl transition-all animate-float-up animate-float-up-${i + 1}`}
                 style={{
-                  backgroundColor: highlight ? "hsl(var(--landing-accent) / 0.08)" : "hsl(var(--landing-bg))",
-                  border: highlight ? "1px solid hsl(var(--landing-accent) / 0.4)" : "1px solid hsl(var(--landing-border))",
+                  backgroundColor: "hsl(var(--landing-bg))",
+                  border: "1px solid hsl(var(--landing-border))",
                 }}
               >
                 <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4" style={{ backgroundColor: "hsl(var(--landing-accent) / 0.15)" }}>
@@ -142,11 +142,6 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{title}</h3>
                 <p style={{ color: "hsl(var(--landing-text-muted))" }}>{desc}</p>
-                {highlight && (
-                  <span className="inline-block mt-3 text-xs font-semibold px-2 py-1 rounded-full" style={{ backgroundColor: "hsl(var(--landing-accent) / 0.2)", color: "hsl(var(--landing-accent))" }}>
-                    Viral Loop
-                  </span>
-                )}
               </div>
             ))}
           </div>
@@ -220,7 +215,7 @@ export default function LandingPage() {
                   <li key={f} className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 shrink-0" style={{ color: "hsl(var(--landing-accent))" }} />{f}</li>
                 ))}
               </ul>
-              <Button asChild className="w-full rounded-full mt-4" variant="outline" style={{ borderColor: "hsl(var(--landing-border))", color: "hsl(var(--landing-text))" }}>
+              <Button asChild className="w-full rounded-full mt-4" style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}>
                 <Link to="/get-started">Get Started</Link>
               </Button>
             </div>
