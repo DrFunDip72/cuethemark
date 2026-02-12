@@ -37,9 +37,9 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    // Create 30-day trial subscription
-    const thirtyDaysFromNow = new Date();
-    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+    // Create 14-day trial subscription
+    const fourteenDaysFromNow = new Date();
+    fourteenDaysFromNow.setDate(fourteenDaysFromNow.getDate() + 14);
 
     const { error: upsertError } = await supabaseClient
       .from("subscribers")
@@ -49,7 +49,7 @@ serve(async (req) => {
         stripe_customer_id: null,
         subscribed: true,
         subscription_tier: "Trial",
-        subscription_end: thirtyDaysFromNow.toISOString(),
+        subscription_end: fourteenDaysFromNow.toISOString(),
         updated_at: new Date().toISOString(),
       }, { onConflict: 'email' });
 
@@ -61,12 +61,12 @@ serve(async (req) => {
     logStep("Trial subscription created successfully", { 
       userId: user.id, 
       email: user.email,
-      expiresAt: thirtyDaysFromNow.toISOString()
+      expiresAt: fourteenDaysFromNow.toISOString()
     });
 
     return new Response(JSON.stringify({ 
       success: true, 
-      subscription_end: thirtyDaysFromNow.toISOString(),
+      subscription_end: fourteenDaysFromNow.toISOString(),
       subscription_tier: "Trial"
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -118,7 +118,7 @@ serve(async (req) => {
           quantity: 1,
         }],
         subscription_data: {
-          trial_period_days: 30,
+          trial_period_days: 14,
         },
       };
     }

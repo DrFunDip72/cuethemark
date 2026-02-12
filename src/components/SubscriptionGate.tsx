@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Link } from 'react-router-dom';
 import { PromoGate } from './PromoGate';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +16,6 @@ interface SubscriptionGateProps {
 
 export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
   const { user, session, subscription, loading, checkSubscription, isAdmin } = useAuth();
-  const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
@@ -60,68 +60,6 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
       </div>
     );
   }
-
-  const handleSignUp = async () => {
-    if (!email || !password) {
-      toast({
-        title: "Error",
-        description: "Please enter email and password",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setAuthLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`
-        }
-      });
-      
-      if (error) throw error;
-      
-      if (data.session) {
-        const { error: trialError } = await supabase.functions.invoke('create-trial-subscription', {
-          headers: {
-            Authorization: `Bearer ${data.session.access_token}`,
-          },
-        });
-
-        if (trialError) {
-          console.error('Trial creation error:', trialError);
-          toast({
-            title: "Trial Setup Failed",
-            description: "Account created but trial setup failed. Please try again from your profile.",
-            variant: "destructive"
-          });
-          return;
-        }
-
-        toast({
-          title: "Welcome to CueTheMark!",
-          description: "Your 30-day free trial has started. Enjoy full access!",
-        });
-        await checkSubscription();
-      } else {
-        toast({
-          title: "Welcome to CueTheMark!",
-          description: "Please check your email to confirm your account, then sign in to start your trial.",
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -168,22 +106,17 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: "hsl(var(--landing-bg))", color: "hsl(var(--landing-text))" }}>
+        <Card className="w-full max-w-md border-0 shadow-xl" style={{ backgroundColor: "hsl(var(--landing-surface))", border: "1px solid hsl(var(--landing-border))" }}>
           <CardHeader className="text-center">
-            <CardTitle>
-              {isLogin ? 'Welcome Back to CueTheMark!' : 'Welcome to CueTheMark'}
-            </CardTitle>
-            <CardDescription>
-              {isLogin 
-                ? 'Sign in to continue using the application'
-                : 'Sign up to start your 30-day free trial'
-              }
+            <CardTitle style={{ color: "hsl(var(--landing-text))" }}>Welcome Back to CueTheMark!</CardTitle>
+            <CardDescription style={{ color: "hsl(var(--landing-text-muted))" }}>
+              Sign in to continue using the application
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" style={{ color: "hsl(var(--landing-text))" }}>Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -191,10 +124,11 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 disabled={authLoading}
+                style={{ backgroundColor: "hsl(var(--landing-bg))", borderColor: "hsl(var(--landing-border))", color: "hsl(var(--landing-text))" }}
               />
             </div>
             <div>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" style={{ color: "hsl(var(--landing-text))" }}>Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -203,38 +137,22 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
                 placeholder="Enter your password"
                 disabled={authLoading}
                 minLength={6}
+                style={{ backgroundColor: "hsl(var(--landing-bg))", borderColor: "hsl(var(--landing-border))", color: "hsl(var(--landing-text))" }}
               />
             </div>
             
-            {isLogin ? (
-              <Button 
-                onClick={handleLogin}
-                className="w-full"
-                disabled={authLoading}
-              >
-                {authLoading ? 'Signing in...' : 'Sign In'}
-              </Button>
-            ) : (
-              <Button 
-                onClick={handleSignUp}
-                className="w-full"
-                disabled={authLoading}
-              >
-                {authLoading ? 'Creating account...' : 'Start 30-Day Free Trial'}
-              </Button>
-            )}
+            <Button 
+              onClick={handleLogin}
+              className="w-full rounded-full"
+              style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}
+              disabled={authLoading}
+            >
+              {authLoading ? 'Signing in...' : 'Sign In'}
+            </Button>
             
             <div className="text-center">
-              <Button 
-                variant="link"
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-lg font-medium"
-                disabled={authLoading}
-              >
-                {isLogin 
-                  ? 'New here? Create an account' 
-                  : 'Already have an account? Sign in'
-                }
+              <Button asChild variant="link" className="text-lg font-medium rounded-full" style={{ color: "hsl(var(--landing-text-muted))" }}>
+                <Link to="/get-started">New here? Start your free trial</Link>
               </Button>
             </div>
           </CardContent>
@@ -256,22 +174,20 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
       const displayName = userName || 'friend';
       
       return (
-        <div className="min-h-screen relative overflow-hidden text-[hsl(var(--hero-foreground))]">
-          {/* Vibrant gradient backdrop matching landing page */}
-          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[hsl(var(--gradient-hero-start))] via-[hsl(var(--gradient-hero-mid))] to-[hsl(var(--gradient-hero-end))]" />
+        <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: "hsl(var(--landing-bg))", color: "hsl(var(--landing-text))" }}>
           
           <div className="min-h-screen flex items-center justify-center px-6">
             <div className="w-full max-w-lg text-center space-y-8 animate-enter">
               <div className="space-y-4">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm mb-4">
-                  <Sparkles className="w-8 h-8" />
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style={{ backgroundColor: "hsl(var(--landing-surface))", border: "1px solid hsl(var(--landing-border))" }}>
+                  <Sparkles className="w-8 h-8" style={{ color: "hsl(var(--landing-accent))" }} />
                 </div>
                 
-                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight" style={{ color: "hsl(var(--landing-text))" }}>
                   {isTrialExpired ? `Hey ${displayName}!` : `Welcome back, ${displayName}!`}
                 </h1>
                 
-                <p className="text-xl md:text-2xl opacity-90 leading-relaxed">
+                <p className="text-xl md:text-2xl leading-relaxed" style={{ color: "hsl(var(--landing-text-muted))" }}>
                   {isTrialExpired 
                     ? `Your free trial was pretty great, wasn't it? 🎵 Ready to keep the music flowing for just $6.99/month?`
                     : `Time to get back to making those perfect cues! Your subscription expired, but we've saved all your work. 🎯`
@@ -297,6 +213,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
                   }} 
                   size="lg"
                   className="rounded-full px-8 py-6 text-lg font-semibold w-full max-w-sm"
+                  style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}
                 >
                   {isTrialExpired ? 'Continue for $6.99/month' : 'Renew Subscription'}
                 </Button>
@@ -305,13 +222,14 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
                   variant="outline"
                   onClick={checkSubscription}
                   size="lg"
-                  className="rounded-full px-8 py-3 w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20"
+                  className="rounded-full px-8 py-3 w-full max-w-sm"
+                  style={{ borderColor: "hsl(var(--landing-border))", color: "hsl(var(--landing-text-muted))", backgroundColor: "hsl(var(--landing-surface))" }}
                 >
                   Check Status Again
                 </Button>
               </div>
 
-              <p className="text-sm opacity-70 mt-8">
+              <p className="text-sm mt-8" style={{ color: "hsl(var(--landing-text-muted))" }}>
                 Questions? We're here to help! 💙
               </p>
             </div>
@@ -326,26 +244,23 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
     const displayName = userName || 'friend';
     
     return (
-      <div className="min-h-screen relative overflow-hidden text-[hsl(var(--hero-foreground))]">
-        {/* Vibrant gradient backdrop matching landing page */}
-        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[hsl(var(--gradient-hero-start))] via-[hsl(var(--gradient-hero-mid))] to-[hsl(var(--gradient-hero-end))]" />
-        
+      <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: "hsl(var(--landing-bg))", color: "hsl(var(--landing-text))" }}>
         <div className="min-h-screen flex items-center justify-center px-6">
           <div className="w-full max-w-lg text-center space-y-8 animate-enter">
             <div className="space-y-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm mb-4">
-                <Sparkles className="w-8 h-8" />
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style={{ backgroundColor: "hsl(var(--landing-surface))", border: "1px solid hsl(var(--landing-border))" }}>
+                <Sparkles className="w-8 h-8" style={{ color: "hsl(var(--landing-accent))" }} />
               </div>
               
-              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight" style={{ color: "hsl(var(--landing-text))" }}>
                 Hey {displayName}!
               </h1>
               
-              <p className="text-xl md:text-2xl opacity-90 leading-relaxed">
+              <p className="text-xl md:text-2xl leading-relaxed" style={{ color: "hsl(var(--landing-text-muted))" }}>
                 Ready to unlock all the power of CueTheMark? 🎵 Start your subscription for just $6.99/month!
               </p>
               
-              <div className="flex items-center justify-center gap-2 mt-4 text-sm opacity-70">
+              <div className="flex items-center justify-center gap-2 mt-4 text-sm" style={{ color: "hsl(var(--landing-text-muted))" }}>
                 <User className="h-4 w-4" />
                 <span>Logged in as: {user?.email}</span>
               </div>
@@ -372,6 +287,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
                 }} 
                 size="lg"
                 className="rounded-full px-8 py-6 text-lg font-semibold w-full max-w-sm"
+                style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}
                 disabled={authLoading}
               >
                 {authLoading ? 'Setting up payment...' : 'Subscribe for $6.99/month'}
@@ -382,7 +298,8 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
                   variant="outline"
                   onClick={checkSubscription}
                   size="lg"
-                  className="rounded-full px-8 py-3 bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20"
+                  className="rounded-full px-8 py-3"
+                  style={{ borderColor: "hsl(var(--landing-border))", color: "hsl(var(--landing-text-muted))", backgroundColor: "hsl(var(--landing-surface))" }}
                 >
                   Check Status Again
                 </Button>
@@ -396,7 +313,8 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
                       description: "You've been logged out successfully."
                     });
                   }}
-                  className="rounded-full px-8 py-3 bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20"
+                  className="rounded-full px-8 py-3"
+                  style={{ borderColor: "hsl(var(--landing-border))", color: "hsl(var(--landing-text-muted))", backgroundColor: "hsl(var(--landing-surface))" }}
                 >
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
@@ -404,7 +322,7 @@ export const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
               </div>
             </div>
 
-            <p className="text-sm opacity-70 mt-8">
+            <p className="text-sm mt-8" style={{ color: "hsl(var(--landing-text-muted))" }}>
               Questions? We're here to help! 💙
             </p>
           </div>
