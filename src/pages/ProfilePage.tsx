@@ -8,9 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { handleLogout } from '@/lib/utils';
-import { User } from 'lucide-react';
+import { User, MessageSquare } from 'lucide-react';
 
 const ProfilePage = () => {
   const { user, session, subscription, checkSubscription } = useAuth();
@@ -128,13 +128,13 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden" style={{ backgroundColor: "hsl(var(--landing-bg))", color: "hsl(var(--landing-text))" }}>
-      <div className="container mx-auto px-6 pt-4 pb-8 max-w-4xl">
+      <div className="container mx-auto px-4 pt-6 pb-8 max-w-4xl">
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style={{ backgroundColor: "hsl(var(--landing-surface))", border: "1px solid hsl(var(--landing-border))" }}>
             <User className="w-8 h-8" style={{ color: "hsl(var(--landing-text))" }} />
           </div>
-          <h1 className="text-4xl font-bold mb-2">Account Profile</h1>
-          <p className="text-xl" style={{ color: "hsl(var(--landing-text-muted))" }}>Manage your CueTheMark account</p>
+          <h1 className="text-2xl font-bold mb-2">Account Profile</h1>
+          <p className="text-base" style={{ color: "hsl(var(--landing-text-muted))" }}>Manage your CueTheMark account</p>
         </div>
         
         <div className="grid gap-6 md:grid-cols-2">
@@ -307,6 +307,16 @@ const ProfilePage = () => {
               <CardDescription className="text-[hsl(var(--landing-text-muted))]">Manage your account preferences</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <Button
+                asChild
+                variant="outline"
+                className="w-full border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-border))] hover:text-[hsl(var(--landing-text))]"
+              >
+                <Link to={`/app/feedback?from=${encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)}`}>
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Send Feedback
+                </Link>
+              </Button>
               <Button
                 onClick={() => handleLogout(navigate)}
                 variant="destructive"

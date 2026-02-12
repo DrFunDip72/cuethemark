@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Play, Pause, Plus, Pen, RotateCcw, Repeat, Gauge, Trash2 } from 'lucide-react';
 import { useTrackLabels } from '@/hooks/useTrackLabels';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { LabelList } from '@/components/LabelList';
 import { Timeline } from '@/components/Timeline';
 import { AddLabelDialog } from '@/components/AddLabelDialog';
@@ -13,6 +14,7 @@ import { ABLoopDialog } from '@/components/ABLoopDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatTime, roundToOneDecimal, formatTimeForDisplay } from '@/lib/formatTime';
+import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 import { EditTrackDialog } from '@/components/EditTrackDialog';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -60,6 +62,7 @@ const TrackPage = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -443,7 +446,10 @@ const TrackPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
+    <div className={cn(
+      "container mx-auto px-4 pt-6",
+      isMobile ? "pb-44" : "pb-24 md:pb-8"
+    )}>
       {/* Track title and view controls */}
       <div className="mb-6">
         {/* Title row - right aligned on mobile and desktop */}
@@ -455,7 +461,7 @@ const TrackPage = () => {
             size="icon"
             variant="ghost"
             onClick={() => setEditTrackOpen(true)}
-            className="flex-shrink-0 mt-1 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
+            className="flex-shrink-0 mt-1 min-h-[44px] min-w-[44px] md:min-h-9 md:min-w-9 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
           >
             <Pen className="h-4 w-4" />
           </Button>
@@ -499,7 +505,7 @@ const TrackPage = () => {
             variant="outline"
             onClick={handlePlayPause}
             disabled={isLoading || !trackUrl}
-            className="flex-shrink-0 border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white [&_svg]:text-white"
+            className="flex-shrink-0 min-h-[44px] min-w-[44px] md:min-h-9 md:min-w-9 border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white [&_svg]:text-white"
           >
             {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </Button>
@@ -549,7 +555,7 @@ const TrackPage = () => {
             variant={autoLoop ? "default" : "outline"}
             onClick={handleAutoLoopToggle}
             disabled={isLoading || !trackUrl}
-            className={`h-8 [&_svg]:text-current ${!autoLoop ? 'border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white' : ''}`}
+            className={`min-h-[44px] md:h-8 md:min-h-0 [&_svg]:text-current ${!autoLoop ? 'border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white' : ''}`}
             style={autoLoop ? { backgroundColor: "hsl(var(--landing-accent))", color: "#fff" } : undefined}
           >
             <RotateCcw className="h-4 w-4" />
@@ -565,7 +571,7 @@ const TrackPage = () => {
               setShowAbLoopDialog(true);
             }}
             disabled={isLoading || !trackUrl}
-            className={`h-8 [&_svg]:text-current ${!abLoopEnabled ? 'border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white' : ''}`}
+            className={`min-h-[44px] md:h-8 md:min-h-0 [&_svg]:text-current ${!abLoopEnabled ? 'border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white' : ''}`}
             style={abLoopEnabled ? { backgroundColor: "hsl(var(--landing-accent))", color: "#fff" } : undefined}
           >
             <span className="text-sm font-medium">A</span>
@@ -641,7 +647,14 @@ const TrackPage = () => {
       )}
 
       {mounted && createPortal(
-        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] md:pb-6">
+        <div
+          className="pointer-events-none fixed inset-x-0 z-50 p-4"
+          style={
+            isMobile
+              ? { bottom: 'calc(3.5rem + env(safe-area-inset-bottom, 0px))' }
+              : { bottom: 0, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }
+          }
+        >
           <Button
             className="pointer-events-auto w-full md:w-auto md:ml-auto md:float-right"
             size="lg"

@@ -1,4 +1,3 @@
-
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -9,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAudioUpload } from '@/hooks/useAudioUpload';
 import { useRef } from 'react';
 import { handleLogout } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const Navigation = () => {
   const { toast } = useToast();
@@ -16,6 +16,7 @@ export const Navigation = () => {
   const { uploadAudio } = useAudioUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const homePath = user ? "/app/tracks" : "/";
   
   const handleUploadClick = () => {
@@ -26,7 +27,6 @@ export const Navigation = () => {
     const file = event.target.files?.[0];
     if (file) {
       uploadAudio(file);
-      // Reset the input so the same file can be selected again
       event.target.value = '';
     }
   };
@@ -49,12 +49,14 @@ export const Navigation = () => {
             CueTheMark
           </Link>
           <div className="flex items-center space-x-4">
-            <Link
-              to="/app/tracks"
-              className="text-sm font-medium transition-colors text-[hsl(var(--landing-text-muted))] hover:text-[hsl(var(--landing-accent))]"
-            >
-              My Tracks
-            </Link>
+            {!isMobile && (
+              <Link
+                to="/app/tracks"
+                className="text-sm font-medium transition-colors text-[hsl(var(--landing-text-muted))] hover:text-[hsl(var(--landing-accent))]"
+              >
+                My Tracks
+              </Link>
+            )}
             <div className="flex items-center space-x-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
