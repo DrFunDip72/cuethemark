@@ -182,7 +182,7 @@ serve(async (req) => {
       limit: 10,
     });
 
-    const activeOrTrial = subs.data.find((s) => s.status === "active" || s.status === "trialing");
+    const activeOrTrial = subs.data.find((s: { status: string }) => s.status === "active" || s.status === "trialing");
     const hasActiveOrTrial = !!activeOrTrial;
     let subscriptionTier = null;
     let subscriptionEnd = null;
