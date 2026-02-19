@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { EditLabelDialog } from './EditLabelDialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useQueryClient } from '@tanstack/react-query';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -72,16 +74,18 @@ const LabelItem = ({
   onMoveUp,
   onMoveDown,
   canMoveUp,
-  canMoveDown
+  canMoveDown,
 }: LabelItemProps) => {
+  const isActive = activeLabel === label.id;
   return (
     <Card
-      className={`p-4 transition-colors hover:bg-[hsl(var(--landing-surface-hover))] ${
-        activeLabel === label.id ? '' : ''
-      }`}
+      className={cn(
+        "transition-colors hover:bg-[hsl(var(--landing-surface-hover))]",
+        "p-5 md:p-4"
+      )}
       style={{
-        backgroundColor: "hsl(var(--landing-surface))",
-        borderColor: activeLabel === label.id ? "hsl(var(--landing-accent))" : "hsl(var(--landing-border))",
+        backgroundColor: isActive ? "hsl(var(--landing-accent) / 0.08)" : "hsl(var(--landing-surface))",
+        borderColor: isActive ? "hsl(var(--landing-accent))" : "hsl(var(--landing-border))",
       }}
     >
       <div className="flex items-center justify-between">
@@ -373,9 +377,11 @@ export const LabelList = ({ labels, currentTime, onPlayFromTimestamp, trackId, o
     }
   };
 
+  const isMobile = useIsMobile();
+
   return (
     <>
-      <div className="space-y-3">
+      <div className={cn("space-y-3", isMobile && "space-y-4")}>
         {localLabels.map((label, index) => (
           <LabelItem
             key={label.id}
