@@ -1,7 +1,7 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { LogOut, User, Shield, MessageSquare } from 'lucide-react';
+import { LogOut, User, Shield, MessageSquare, ChevronLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,8 +16,10 @@ export const Navigation = () => {
   const { uploadAudio } = useAudioUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = useIsMobile();
   const homePath = user ? "/app/tracks" : "/";
+  const isOnTrackDetail = location.pathname.match(/^\/app\/tracks\/[^/]+$/) || location.pathname.match(/^\/tracks\/[^/]+$/);
   
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -41,13 +43,25 @@ export const Navigation = () => {
     >
       <div className="container mx-auto px-4">
         <div className="h-16 flex items-center justify-between">
-          <Link
-            to={homePath}
-            className="text-xl font-semibold transition-colors hover:opacity-90"
-            style={{ color: "hsl(var(--landing-text))" }}
-          >
-            CueTheMark
-          </Link>
+          {isMobile && isOnTrackDetail ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/app/tracks')}
+              className="flex items-center gap-1 -ml-2 text-[hsl(var(--landing-text))] hover:bg-[hsl(var(--landing-surface-hover))] hover:text-[hsl(var(--landing-text))]"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Back
+            </Button>
+          ) : (
+            <Link
+              to={homePath}
+              className="text-xl font-semibold transition-colors hover:opacity-90"
+              style={{ color: "hsl(var(--landing-text))" }}
+            >
+              CueTheMark
+            </Link>
+          )}
           <div className="flex items-center space-x-4">
             {!isMobile && (
               <Link

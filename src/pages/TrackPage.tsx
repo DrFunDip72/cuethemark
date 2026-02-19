@@ -29,6 +29,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 type TrackData = {
   id: string;
@@ -448,7 +454,7 @@ const TrackPage = () => {
   return (
     <div className={cn(
       "container mx-auto px-4 pt-6",
-      isMobile ? "pb-44" : "pb-24 md:pb-8"
+      isMobile ? "pb-28" : "pb-24 md:pb-8"
     )}>
       {/* Track title and view controls */}
       <div className="mb-6">
@@ -490,11 +496,14 @@ const TrackPage = () => {
         </div>
       </div>
 
-      {/* Audio player controls */}
+      {/* Audio player controls - sticky on scroll */}
       <Card
-        className="p-6 mb-6"
+        className={cn(
+          "mb-6 border-b shadow-sm",
+          isMobile ? "p-4 md:p-6 sticky top-0 z-30 bg-[hsl(var(--landing-bg))]" : "p-6"
+        )}
         style={{
-          backgroundColor: "hsl(var(--landing-surface))",
+          backgroundColor: isMobile ? "hsl(var(--landing-bg))" : "hsl(var(--landing-surface))",
           borderColor: "hsl(var(--landing-border))",
         }}
       >
@@ -505,13 +514,18 @@ const TrackPage = () => {
             variant="outline"
             onClick={handlePlayPause}
             disabled={isLoading || !trackUrl}
-            className="flex-shrink-0 min-h-[44px] min-w-[44px] md:min-h-9 md:min-w-9 border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white [&_svg]:text-white"
+            className={cn(
+              "flex-shrink-0 border-[hsl(var(--landing-border))] bg-[hsl(var(--landing-surface-hover))] text-white hover:bg-[hsl(var(--landing-border))] hover:text-white [&_svg]:text-white",
+              isMobile
+                ? "min-h-[56px] min-w-[56px] bg-[hsl(var(--landing-accent))] hover:bg-[hsl(var(--landing-accent))]/90 border-[hsl(var(--landing-accent))]"
+                : "min-h-[44px] min-w-[44px] md:min-h-9 md:min-w-9"
+            )}
           >
             {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </Button>
           
           <Slider 
-            className="flex-1" 
+            className={cn("flex-1", isMobile && "min-h-[44px] py-5")} 
             value={[duration ? (currentTime / duration) * 100 : 0]} 
             onValueChange={handleSliderChange}
             min={0}
@@ -625,43 +639,61 @@ const TrackPage = () => {
 
       {/* Delete Track Section - only shown in labels view */}
       {view === 'list' && (
-        <Card
-          className="p-6 mt-8"
-          style={{
-            backgroundColor: "hsl(var(--landing-surface))",
-            borderColor: "hsl(var(--destructive) / 0.3)",
-          }}
+        <Accordion
+          type="single"
+          collapsible
+          defaultValue={isMobile ? "" : "danger-zone"}
+          className="mt-8 border rounded-lg border-[hsl(var(--destructive)/0.3)] overflow-hidden"
+          style={{ backgroundColor: "hsl(var(--landing-surface))" }}
         >
-          <div className="text-center space-y-4">
-            <Button
-              variant="destructive"
-              onClick={() => setShowDeleteConfirm(true)}
-              className="w-full sm:w-auto"
-              disabled={isDeleting}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete Track
-            </Button>
-          </div>
-        </Card>
+          <AccordionItem value="danger-zone" className="border-0">
+            <AccordionTrigger className="px-6 py-4 text-destructive hover:no-underline hover:text-destructive/90 [&_svg]:text-destructive">
+              Danger zone
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="px-6 pb-6 text-center">
+                <Button
+                  variant="destructive"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="w-full sm:w-auto"
+                  disabled={isDeleting}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Track
+                </Button>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       )}
 
       {mounted && createPortal(
         <div
-          className="pointer-events-none fixed inset-x-0 z-50 p-4"
+          className={cn(
+            "pointer-events-none fixed z-50",
+            isMobile
+              ? "right-4"
+              : "inset-x-0 p-4"
+          )}
           style={
             isMobile
-              ? { bottom: 'calc(3.5rem + env(safe-area-inset-bottom, 0px))' }
+              ? { bottom: 'calc(3.5rem + env(safe-area-inset-bottom, 0px) + 0.5rem)' }
               : { bottom: 0, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }
           }
         >
           <Button
-            className="pointer-events-auto w-full md:w-auto md:ml-auto md:float-right"
-            size="lg"
+            className={cn(
+              "pointer-events-auto",
+              isMobile
+                ? "h-14 w-14 rounded-full size-14"
+                : "w-full md:w-auto md:ml-auto md:float-right"
+            )}
+            size={isMobile ? "icon" : "lg"}
             onClick={handleAddLabelClick}
             style={{ backgroundColor: "hsl(var(--landing-accent))", color: "#fff" }}
           >
-            <Plus className="mr-2 h-4 w-4" /> Add Label
+            <Plus className={isMobile ? "h-6 w-6" : "mr-2 h-4 w-4"} />
+            {!isMobile && "Add Label"}
           </Button>
         </div>,
         document.body
