@@ -1,73 +1,46 @@
-# Welcome to your Lovable project
+# CueTheMark
 
-## Project info
+Mark the routine once. Every dancer practices the right section.
 
-**URL**: https://lovable.dev/projects/e21cf7ec-ebe8-4425-b60d-470039b3b59c
+Instructors upload a rehearsal track, tap to mark sections while it plays, and share one link or QR code. Dancers open it on their phones — no account — and tap a section, loop it with a count-in, or slow it down. Edits (and re-cut music) reach everyone on the same link.
 
-## How can I edit this code?
+See [REVIVAL_PLAN.md](./REVIVAL_PLAN.md) and [BUSINESS-MODEL.md](./BUSINESS-MODEL.md) for strategy.
 
-There are several ways of editing your application.
+## Stack
 
-**Use Lovable**
+- React + Vite + Tailwind/shadcn, deployed on Vercel as a static SPA (`vercel.json` rewrites all routes to `index.html`)
+- Supabase (`cuethemark`, ref `icjveadwjulpmkcahcok`): auth, Postgres, private `audio` storage bucket
+- Schema: [`supabase/migrations/20260921000000_init_routines.sql`](./supabase/migrations/20260921000000_init_routines.sql)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/e21cf7ec-ebe8-4425-b60d-470039b3b59c) and start prompting.
+## Routes
 
-Changes made via Lovable will be committed automatically to this repo.
+| Path | What |
+|---|---|
+| `/` | Landing page |
+| `/login` | Instructor sign up / sign in |
+| `/app` | Your routines (upload a track to create one) |
+| `/app/routines/:id` | Editor: mark sections, rename/nudge, share, replace audio |
+| `/r/:shareId` | Public dancer practice view |
 
-**Use your preferred IDE**
+## How sharing stays private
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Audio lives in a private bucket. `get_shared_routine(share_id)` returns a routine only while `sharing_enabled` is on, and a storage policy lets anyone create a signed URL only for audio belonging to a currently shared routine. Turning sharing off or generating a new link cuts off old links.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Funnel events
 
-Follow these steps:
+`public.events` records `signup_completed`, `routine_created`, `marker_created`, `marker_played`, `share_link_copied`, `shared_routine_opened`, and `shared_marker_played` (the primary activation metric). Query it in the Supabase SQL editor:
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```sql
+select name, count(*), count(distinct coalesce(user_id::text, visitor_id)) as people
+from events where created_at > now() - interval '7 days' group by name order by 2 desc;
 ```
 
-**Edit a file directly in GitHub**
+## Local development
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```sh
+cp .env.example .env   # fill in the Supabase URL + publishable key
+npm install
+npm run dev            # http://localhost:8080
+```
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/e21cf7ec-ebe8-4425-b60d-470039b3b59c) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+`npm run build`, `npm run typecheck`, and `npm run lint` should all pass before deploying.

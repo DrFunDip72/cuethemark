@@ -1,0 +1,10 @@
+{
+  "name": "CueTheMark",
+  "short_name": "CueTheMark",
+  "description": "Rehearsal tracks your whole team can practice from.",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#121419",
+  "theme_color": "#121419",
+  "icons": [{ "src": "/favicon.ico", "sizes": "64x64", "type": "image/x-icon" }]
+}
