@@ -20,11 +20,23 @@ See [REVIVAL_PLAN.md](./REVIVAL_PLAN.md) and [BUSINESS-MODEL.md](./BUSINESS-MODE
 | `/login` | Instructor sign up / sign in |
 | `/app` | Your routines (upload a track to create one) |
 | `/app/routines/:id` | Editor: mark sections, rename/nudge, share, replace audio |
+| `/demo` | Live demo — seeded markers, static audio, no account or database |
 | `/r/:shareId` | Public dancer practice view |
 
 ## How sharing stays private
 
 Audio lives in a private bucket. `get_shared_routine(share_id)` returns a routine only while `sharing_enabled` is on, and a storage policy lets anyone create a signed URL only for audio belonging to a currently shared routine. Turning sharing off or generating a new link cuts off old links.
+
+## Keeping the database awake
+
+Supabase pauses free-tier projects after 7 days of inactivity, which takes sign-in and
+every share link down until it is manually restored. A Vercel cron calls
+[`api/keep-alive.ts`](./api/keep-alive.ts) once a day; it writes a heartbeat row, which
+counts as activity and resets the idle clock. `/demo` is deliberately database-free so
+the site still demos even if the project is cold.
+
+Check it with `select * from public.heartbeats;` — `last_ping` should be under ~48 hours
+old. Details and gotchas are in [CLAUDE.md](./CLAUDE.md#database-read-this-before-touching-supabase-or-the-cron).
 
 ## Funnel events
 
