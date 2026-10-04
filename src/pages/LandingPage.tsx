@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Flag, Gauge, Repeat, Share2, Smartphone, Upload } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Flag, Gauge, PlayCircle, Repeat, Share2, Smartphone, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/Logo';
 import WaveformVisual from '@/components/WaveformVisual';
@@ -48,7 +48,9 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
         <Logo />
-        <nav className="flex items-center gap-2">
+        <nav className="flex items-center gap-1 sm:gap-2">
+          <Button asChild size="sm" variant="ghost" className="hidden rounded-full sm:inline-flex"><Link to="/demo">Demo</Link></Button>
+          <Button asChild size="sm" variant="ghost" className="hidden rounded-full sm:inline-flex"><a href="#pricing">Pricing</a></Button>
           {user ? (
             <Button asChild size="sm" className="rounded-full"><Link to="/app">Open app</Link></Button>
           ) : (
@@ -70,7 +72,13 @@ export default function LandingPage() {
           <p className="mx-auto max-w-xl text-lg text-muted-foreground">
             Upload your rehearsal music, tap to mark each section, and send your team one link. No more “start it at 1:42.”
           </p>
-          <div className="pt-2">{primaryCta}</div>
+          <div className="flex flex-col items-center justify-center gap-3 pt-2 sm:flex-row">
+            {primaryCta}
+            <Button asChild size="lg" variant="outline" className="rounded-full px-8 text-base">
+              <Link to="/demo"><PlayCircle /> Try the live demo</Link>
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground">No account needed — a sample routine is already marked for you.</p>
         </div>
       </section>
 

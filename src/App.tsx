@@ -10,6 +10,7 @@ import LandingPage from '@/pages/LandingPage';
 
 // The landing page ships alone; everything else loads on demand.
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
+const DemoPage = lazy(() => import('@/pages/DemoPage'));
 const RoutinesPage = lazy(() => import('@/pages/RoutinesPage'));
 const RoutineEditorPage = lazy(() => import('@/pages/RoutineEditorPage'));
 const SharedRoutinePage = lazy(() => import('@/pages/SharedRoutinePage'));
@@ -29,6 +30,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/demo" element={<DemoPage />} />
             <Route path="/r/:shareId" element={<SharedRoutinePage />} />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/terms" element={<TermsPage />} />
