@@ -21,3 +21,5 @@ language sql volatile security definer set search_path = '' as $$
 $$;
 revoke all on function public.record_heartbeat() from public;
 grant execute on function public.record_heartbeat() to anon, authenticated;
+
+notify pgrst, 'reload schema';

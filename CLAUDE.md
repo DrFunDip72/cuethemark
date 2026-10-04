@@ -38,6 +38,19 @@ Two things keep that from happening, and both must stay in place:
 - Upgrading to Supabase Pro ($25/mo) removes the pausing behaviour entirely, at which
   point the cron and heartbeat table can go.
 
+### Gotchas learned the hard way
+
+- **Never apply a migration while the project status is `COMING_UP`.** Restoring a
+  paused project takes a few minutes, and a migration applied during that window
+  reports success but is silently discarded when the restore finishes. Wait for
+  `ACTIVE_HEALTHY`, then verify the objects exist.
+- **After a restore, PostgREST's schema cache can be stale**, so new functions return
+  "Could not find the function ... in the schema cache". Fix with
+  `notify pgrst, 'reload schema';`.
+- Share the **production domain** (`cuethemark.vercel.app`) with reviewers. Deployment
+  Protection (SSO) is on for raw deployment URLs, so a preview link will show a Vercel
+  login wall instead of the app.
+
 ### Checking it works
 
 ```sh
